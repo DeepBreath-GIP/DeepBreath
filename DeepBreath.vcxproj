@@ -167,6 +167,7 @@
     <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui_draw.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c" />
+    <ClCompile Include="src\db_config.cpp" />
     <ClCompile Include="src\rb-gui.cpp" />
     <ClCompile Include="src\rb_aux.cpp" />
   </ItemGroup>
@@ -267,6 +268,7 @@
     <ClInclude Include="dependencies\librealsense\third-party\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="dependencies\librealsense\third-party\stb_image_write.h" />
     <ClInclude Include="dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.h" />
+    <ClInclude Include="include\db_config.hpp" />
     <ClInclude Include="include\example.hpp" />
     <ClInclude Include="include\rb_aux.h" />
     <ClInclude Include="include\utilities.h" />

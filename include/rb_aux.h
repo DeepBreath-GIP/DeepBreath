@@ -1,5 +1,3 @@
-#ifndef RBAUX_H
-#define RBAUX_H
 #pragma once
 
 #include <librealsense2/rs.hpp>
@@ -7,79 +5,10 @@
 #include <CvPlot/cvplot.h>
 //for logging purposes
 #include <fstream>
-
+#include "db_config.hpp"
 
 #define NUM_OF_LAST_FRAMES 256 
-#define CONFIG_FILEPATH "config.txt"
 #define GET_FREQUENCY_BY_FFT true	//if false, use get_frequency_differently
-
-
-enum sticker_color {
-	YELLOW,
-	BLUE,
-	GREEN,
-	RED
-};
-
-enum dimension {
-	D2,
-	D3
-};
-
-enum graph_mode {
-	DISTANCES,
-	LOCATION,
-	FOURIER,
-	NOGRAPH
-};
-
-enum stickers {
-	left,
-	mid1,
-	mid2,
-	mid3,
-	right,
-	sdummy // needed for enum iteration
-};
-
-enum distances {
-	left_mid1,
-	left_mid2,
-	left_mid3,
-	left_right,
-	right_mid1,
-	right_mid2,
-	right_mid3,
-	mid1_mid2,
-	mid1_mid3,
-	mid2_mid3,
-	ddummy // needed for enum iteration
-};
-
-/* 
-	Configuration details extracted from config.txt
-	@ mode: indeicates the kind of graph to be presented.
-		distances - tracking a given set of distances. bpm will be calculated using the average of said set.
-		location - tracking the location of a given set of stickers. (TODO: no bpm calculated for this mode?)
-	@ stickers_included: set of stickers to include. 
-		for mode distances, TODO: any sticker required for an included distance? or it wont be used, tbd 
-		for mode location, all stickers of which the location is requested.
-	@ dists_included: set of distances to be tracked
-		only used in mode distances.
-*/
-class Config {
-public:
-	dimension dimension;
-	graph_mode mode;
-	std::map<stickers, bool> stickers_included;
-	std::map<distances, bool> dists_included;
-	sticker_color color;
-
-	// ctor:
-	Config(const char* config_filepath, std::string* config_err);
-	// set configuration to default. used in case of en illegal config file.
-	void set_default();
-};
 
 /*	BreathingFrameData class
 	Stores the processed data of a frame.
@@ -142,9 +71,9 @@ public:
 	void UpdateStickersLoactions();
 
 	/* Calculates 2D distances between all stickers and their average. */
-	void CalculateDistances2D(Config* user_cfg);
+	void CalculateDistances2D();
 	/* Calculates 3D distances between all stickers and their average. */
-	void CalculateDistances3D(Config* user_cfg);
+	void CalculateDistances3D();
 
 	/* Gets the description of the frame in the following format:
 		TODO: update format */
@@ -159,10 +88,9 @@ public:
 class FrameManager {
 public:
 	clock_t manager_start_time;
-	Config* user_cfg;
 
 	//ctor
-	FrameManager(Config* user_cfg, unsigned int n_frames = NUM_OF_LAST_FRAMES, const char * frame_disk_path = NULL);
+	FrameManager(unsigned int n_frames = NUM_OF_LAST_FRAMES, const char * frame_disk_path = NULL);
 
 	//dtor
 	~FrameManager();
@@ -266,5 +194,3 @@ public:
 	void plot(std::vector<cv::Point2d>& points, const char * lineSpec = NULL);
 
 };
-
-#endif

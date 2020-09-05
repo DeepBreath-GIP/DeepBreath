@@ -5,6 +5,7 @@
 #include <string>
 #include <ctime>
 #include <sstream>
+#include "db_config.hpp"
 
 //#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
@@ -16,11 +17,6 @@
 #define CALC_3D_DIST(name1,name2) { distance3D(name1[0], name1[1], name1[2], name2[0], name2[1], name2[2]) }
 #define COORDINATES_TO_STRING_CM(circle) (std::to_string(circle[0]) + ", " + std::to_string(circle[1]) + ", " + std::to_string(circle[2]))
 #define COORDINATES_TO_STRING_PIXELS(circle) (std::to_string(circle[0][0]) + ", " + std::to_string(circle[0][1]))
-
-//#define NUM_OF_STICKERS 5
-int NUM_OF_STICKERS;
-//#define CALC_2D_BY_CM false	//if false, calculate by pixels
-bool CALC_2D_BY_CM;	//if false, calculate by pixels
 
 /* Compare functions to sort the stickers: */
 
@@ -38,8 +34,8 @@ static struct compareCirclesByX {
 	}
 } compareCirclesByXFunc;
 
-FrameManager::FrameManager(Config* cfg, unsigned int n_frames, const char * frame_disk_path) :
-	_n_frames(n_frames), _frame_disk_path(frame_disk_path), _oldest_frame_index(0), user_cfg(cfg), interval_active(false)
+FrameManager::FrameManager(unsigned int n_frames, const char * frame_disk_path) :
+	_n_frames(n_frames), _frame_disk_path(frame_disk_path), _oldest_frame_index(0), interval_active(false)
 {
 	manager_start_time = clock();
 	_frame_data_arr = new BreathingFrameData*[_n_frames];
@@ -94,7 +90,7 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 	int high_thresh = 255;
 
 	//find required color:
-	switch (user_cfg->color) {
+	switch (DeepBreathConfig::getInstance().color) {
 	case(YELLOW):
 		//RECOMMENDED
 		//hsv opencv official yellow range: (20, 100, 100) to (30, 255, 255)
@@ -161,7 +157,7 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 	}
 
 	//distinguish between stickers:
-	if (breathing_data->circles.size() < NUM_OF_STICKERS) {//not all circles were found
+	if (breathing_data->circles.size() < DeepBreathConfig::getInstance().num_of_stickers) {//not all circles were found
 		cleanup();
 		interval_active = false; //missed frame so calculation has to start all over.
 		return;
@@ -171,14 +167,14 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 	//get 3D cm coordinates
 	get_3d_coordinates(depth_frame, float((*breathing_data->left)[0]), (*breathing_data->left)[1], breathing_data->left_cm);
 	get_3d_coordinates(depth_frame, float((*breathing_data->right)[0]), (*breathing_data->right)[1], breathing_data->right_cm);
-	if (NUM_OF_STICKERS == 5) {
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {
 		get_3d_coordinates(depth_frame, float((*breathing_data->mid1)[0]), (*breathing_data->mid1)[1], breathing_data->mid1_cm);
 	}
 	get_3d_coordinates(depth_frame, float((*breathing_data->mid2)[0]), (*breathing_data->mid2)[1], breathing_data->mid2_cm);
 	get_3d_coordinates(depth_frame, float((*breathing_data->mid3)[0]), (*breathing_data->mid3)[1], breathing_data->mid3_cm);
 	
 	//if user config dimension is 3D, check for 0,-0,0 3d coordinates. dump such frames
-	if (user_cfg->dimension == dimension::D3) {
+	if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
 		if (check_illegal_3D_coordinates(breathing_data)) {
 			frames_dumped_in_row++;
 			logFile << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
@@ -193,10 +189,10 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 		}
 	}
 	//calculate 2D distances:
-	breathing_data->CalculateDistances2D(user_cfg);
+	breathing_data->CalculateDistances2D();
 
 	//calculate 3D distances:
-	breathing_data->CalculateDistances3D(user_cfg);
+	breathing_data->CalculateDistances3D();
 
 	//add color timestamp:
 	breathing_data->color_timestamp = color_frame.get_timestamp();	
@@ -224,13 +220,13 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 	bool is_dup = false;
 	int last_frame_index = (_n_frames + _oldest_frame_index - 1) % _n_frames;
 	if (_frame_data_arr[last_frame_index] != NULL) {
-		if (user_cfg->dimension == dimension::D2) {
+		if (DeepBreathConfig::getInstance().dimension == dimension::D2) {
 			if (_frame_data_arr[last_frame_index]->color_timestamp == breathing_data->color_timestamp
 				&& _frame_data_arr[last_frame_index]->average_2d_dist == breathing_data->average_2d_dist) {
 				is_dup = true;
 			}
 		}
-		if (user_cfg->dimension == dimension::D3) {
+		if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
 			if (_frame_data_arr[last_frame_index]->color_timestamp == breathing_data->color_timestamp
 				&& _frame_data_arr[last_frame_index]->depth_timestamp == breathing_data->depth_timestamp
 				&& _frame_data_arr[last_frame_index]->average_3d_dist == breathing_data->average_3d_dist) {
@@ -279,7 +275,7 @@ void FrameManager::add_frame_data(BreathingFrameData * frame_data)
 
 
 void FrameManager::get_locations(stickers s, std::vector<cv::Point2d> *out) {
-	if (user_cfg->mode != graph_mode::LOCATION) {
+	if (DeepBreathConfig::getInstance().mode != graph_mode::LOCATION) {
 		logFile << "Warning: get_locations was called in incompatible mode! (use L mode),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
@@ -299,7 +295,7 @@ void FrameManager::get_locations(stickers s, std::vector<cv::Point2d> *out) {
 }
 
 void FrameManager::get_dists(std::vector<cv::Point2d>* out) {
-	if (user_cfg->mode == graph_mode::LOCATION) {
+	if (DeepBreathConfig::getInstance().mode == graph_mode::LOCATION) {
 		logFile << "Warning: get_dists was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
@@ -310,10 +306,10 @@ void FrameManager::get_dists(std::vector<cv::Point2d>* out) {
 	for (unsigned int i = 0; i < _n_frames; i++) {
 		int idx = (_oldest_frame_index + i + _n_frames) % _n_frames; //this is right order GIVEN that get_dists is run after add_frame_data (after _oldest_frame_idx++)
 		if (_frame_data_arr[idx] != NULL) {
-			double avg_dist = (user_cfg->dimension == dimension::D2) ?
+			double avg_dist = (DeepBreathConfig::getInstance().dimension == dimension::D2) ?
 				_frame_data_arr[idx]->average_2d_dist :
 				_frame_data_arr[idx]->average_3d_dist;
-			double t = (user_cfg->dimension == dimension::D2) ?
+			double t = (DeepBreathConfig::getInstance().dimension == dimension::D2) ?
 				_frame_data_arr[idx]->system_color_timestamp :
 				_frame_data_arr[idx]->system_depth_timestamp;
 			out->push_back(cv::Point2d(t, avg_dist));
@@ -331,7 +327,8 @@ long double FrameManager::no_graph() {
 		f = (calc_frequency_fft(&points));
 	}
 	else {	// get_frequency_differently
-		bool cm_units = (user_cfg->dimension == dimension::D3) ? true : CALC_2D_BY_CM;
+		bool cm_units = (DeepBreathConfig::getInstance().dimension == dimension::D3) ? 
+			true : DeepBreathConfig::getInstance().calc_2d_by_cm;
 		f = calc_frequency_differently(&points, cm_units);
 	}
 	return f;
@@ -347,7 +344,7 @@ void FrameManager::deactivateInterval() {
 
 void BreathingFrameData::UpdateStickersLoactions()
 {
-	if (circles.size() < NUM_OF_STICKERS) return;
+	if (circles.size() < DeepBreathConfig::getInstance().num_of_stickers) return;
 	if (circles.size() == 4) {
 		// no mid1 sticker
 		//sort vec by y:
@@ -376,19 +373,19 @@ void BreathingFrameData::UpdateStickersLoactions()
 	
 }
 
-void BreathingFrameData::CalculateDistances2D(Config* user_cfg)
+void BreathingFrameData::CalculateDistances2D()
 {
 	if (!left || !right || !mid2 || !mid3) return;
-	if (NUM_OF_STICKERS == 5 && !mid1) return;
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5 && !mid1) return;
 
-	if (CALC_2D_BY_CM) {
+	if (DeepBreathConfig::getInstance().calc_2d_by_cm) {
 		dLM2 = CALC_2D_DIST((&left_cm), (&mid2_cm));
 		dLM3 = CALC_2D_DIST((&left_cm), (&mid3_cm));
 		dLR = CALC_2D_DIST((&left_cm), (&right_cm));
 		dRM2 = CALC_2D_DIST((&right_cm), (&mid2_cm));
 		dRM3 = CALC_2D_DIST((&right_cm), (&mid3_cm)); 
 		dM2M3 = CALC_2D_DIST((&mid2_cm), (&mid3_cm));
-		if (NUM_OF_STICKERS == 5) {		//sticker mid1 exists
+		if (DeepBreathConfig::getInstance().num_of_stickers == 5) {		//sticker mid1 exists
 			dLM1 = CALC_2D_DIST((&left_cm), (&mid1_cm));
 			dRM1 = CALC_2D_DIST((&right_cm), (&mid1_cm));
 			dM1M2 = CALC_2D_DIST((&mid1_cm), (&mid2_cm));
@@ -402,7 +399,7 @@ void BreathingFrameData::CalculateDistances2D(Config* user_cfg)
 		dRM2 = CALC_2D_DIST(right, mid2);
 		dRM3 = CALC_2D_DIST(right, mid3);
 		dM2M3 = CALC_2D_DIST(mid2, mid3);
-		if (NUM_OF_STICKERS == 5) {		//sticker mid1 exists
+		if (DeepBreathConfig::getInstance().num_of_stickers == 5) {		//sticker mid1 exists
 			dLM1 = CALC_2D_DIST(left, mid1);
 			dRM1 = CALC_2D_DIST(right, mid1);
 			dM1M2 = CALC_2D_DIST(mid1, mid2);
@@ -413,7 +410,7 @@ void BreathingFrameData::CalculateDistances2D(Config* user_cfg)
 	//calculate average:
 	average_2d_dist = 0.0;
 	int c = 0;
-	for (std::pair<distances, bool> dist_elem : user_cfg->dists_included) {
+	for (std::pair<distances, bool> dist_elem : DeepBreathConfig::getInstance().dists_included) {
 		distances dist = dist_elem.first;
 		bool is_included = dist_elem.second;
 		if (is_included) { //if distance is included in user_cfg
@@ -426,10 +423,10 @@ void BreathingFrameData::CalculateDistances2D(Config* user_cfg)
 
 
 
-void BreathingFrameData::CalculateDistances3D(Config* user_cfg)
+void BreathingFrameData::CalculateDistances3D()
 {
 	if (!left || !right || !mid2 || !mid3) return;
-	if (NUM_OF_STICKERS == 5 && !mid1) return;
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5 && !mid1) return;
 
 	dLM2_depth = CALC_3D_DIST(left_cm, mid2_cm); 
 	dLM3_depth = CALC_3D_DIST(left_cm, mid3_cm); 
@@ -438,7 +435,7 @@ void BreathingFrameData::CalculateDistances3D(Config* user_cfg)
 	dRM3_depth = CALC_3D_DIST(right_cm, mid3_cm);
 	dM2M3_depth = CALC_3D_DIST(mid2_cm, mid3_cm);
 
-	if (NUM_OF_STICKERS == 5) {		//sticker mid1 exists
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {		//sticker mid1 exists
 		dLM1_depth = CALC_3D_DIST(left_cm, mid1_cm);
 		dRM1_depth = CALC_3D_DIST(right_cm, mid1_cm);
 		dM1M2_depth = CALC_3D_DIST(mid1_cm, mid2_cm);
@@ -448,7 +445,7 @@ void BreathingFrameData::CalculateDistances3D(Config* user_cfg)
 	//calculate average:
 	average_3d_dist = 0.0;
 	int c = 0;
-	for (std::pair<distances, bool> dist_elem : user_cfg->dists_included) {
+	for (std::pair<distances, bool> dist_elem : DeepBreathConfig::getInstance().dists_included) {
 		distances dist = dist_elem.first;
 		bool is_included = dist_elem.second;
 		if (is_included) { //if distance is included in user_cfg
@@ -462,14 +459,14 @@ void BreathingFrameData::CalculateDistances3D(Config* user_cfg)
 
 void BreathingFrameData::GetDescription()
 {
-	const std::string d2method = (CALC_2D_BY_CM) ? "cm" : "pixels";
+	const std::string d2method = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
 
 	logFile << std::to_string(frame_idx) << "," << std::to_string(color_idx) << "," << std::to_string(depth_idx) << "," << std::to_string(color_timestamp) << "," <<
 		std::to_string(depth_timestamp) << "," << std::to_string(system_color_timestamp) << "," << std::to_string(system_depth_timestamp) << "," <<
 		std::to_string(system_timestamp) << "," << std::fixed << std::setprecision(2) << left_cm[0] << " " << std::fixed << std::setprecision(2) << left_cm[1] << " " <<
 		std::fixed << std::setprecision(2) << left_cm[2] << "," << std::fixed << std::setprecision(2) << right_cm[0] << " " << std::fixed << std::setprecision(2) <<
 		right_cm[1] << " " << std::fixed << std::setprecision(2) << right_cm[2] << ",";
-	if (NUM_OF_STICKERS == 5) {
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {
 		logFile << std::fixed << std::setprecision(2) << mid1_cm[0] << " " << std::fixed << std::setprecision(2) << mid1_cm[1] << " " << std::fixed << std::setprecision(2) <<
 			mid1_cm[2] << ",";
 	}
@@ -477,205 +474,30 @@ void BreathingFrameData::GetDescription()
 		mid2_cm[2] << "," << std::fixed << std::setprecision(2) << mid3_cm[0] << " " << std::fixed << std::setprecision(2) << mid3_cm[1] << " " << std::fixed <<
 		std::setprecision(2) << mid3_cm[2] << "," << std::fixed << std::setprecision(2) << (*left)[0] << " " << std::fixed << std::setprecision(2) << (*left)[1] << "," <<
 		std::setprecision(2) << (*right)[0] << " " << std::setprecision(2) << (*right)[1] << ",";
-	if (NUM_OF_STICKERS == 5) logFile << std::fixed << std::setprecision(2) << (*mid1)[0] << " " << std::fixed << std::setprecision(2) << (*mid1)[1] << ",";
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5) logFile << std::fixed << std::setprecision(2) << (*mid1)[0] << " " << std::fixed << std::setprecision(2) << (*mid1)[1] << ",";
 	logFile << std::fixed << std::setprecision(2) << (*mid2)[0] << " " << std::fixed << std::setprecision(2) << (*mid2)[1] << "," << std::fixed << std::setprecision(2) <<
 		(*mid3)[0] << " " << std::fixed << std::setprecision(2) << (*mid3)[1] << ",";
 
-	if (NUM_OF_STICKERS == 5)  logFile << std::fixed << std::setprecision(2) << dLM1 << ",";
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5)  logFile << std::fixed << std::setprecision(2) << dLM1 << ",";
 	logFile << std::fixed << std::setprecision(2) << dLM2 << "," << std::fixed << std::setprecision(2) << dLM3 << "," << std::fixed << std::setprecision(2) << dLR <<
 		",";
-	if (NUM_OF_STICKERS == 5)  logFile << std::fixed << std::setprecision(2) << dRM1 << ",";
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5)  logFile << std::fixed << std::setprecision(2) << dRM1 << ",";
 	logFile << std::fixed << std::setprecision(2) << dRM2 << "," << std::fixed << std::setprecision(2) << dRM3 << ",";
-	if (NUM_OF_STICKERS == 5) {
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {
 		logFile << std::fixed << std::setprecision(2) << dM1M2 << "," << std::fixed << std::setprecision(2) << dM1M3 << ",";
 	}
 	logFile << std::fixed << std::setprecision(2) << dM2M3 << ",";
 
-	if (NUM_OF_STICKERS == 5)  logFile << std::fixed << std::setprecision(2) << dLM1_depth << ",";
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5)  logFile << std::fixed << std::setprecision(2) << dLM1_depth << ",";
 	logFile << std::fixed << std::setprecision(2) << dLM2_depth << "," << std::fixed << std::setprecision(2) << dLM3_depth << "," <<
 		std::fixed << std::setprecision(2) << dLR_depth << ",";
-	if (NUM_OF_STICKERS == 5)  logFile << std::fixed << std::setprecision(2) << dRM1_depth << ",";
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5)  logFile << std::fixed << std::setprecision(2) << dRM1_depth << ",";
 	logFile << std::fixed << std::setprecision(2) << dRM2_depth << "," << std::setprecision(2) << dRM3_depth << ",";
-	if (NUM_OF_STICKERS == 5) {
+	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {
 		logFile << std::fixed << std::setprecision(2) << dM1M2_depth << "," << std::fixed << std::setprecision(2) << dM1M3_depth << ",";
 	}
 	logFile << std::fixed << std::setprecision(2) << dM2M3_depth << "," << std::fixed << std::setprecision(6) << average_2d_dist << "," <<
 		std::fixed << std::setprecision(6) << average_3d_dist << ",";
-}
-
-
-void Config::set_default() {
-	Config::dimension = dimension::D2;
-	Config::mode = graph_mode::DISTANCES;
-	Config::dists_included[distances::left_mid1] = Config::dists_included[distances::left_mid2] = Config::dists_included[distances::left_right] =
-		Config::dists_included[distances::mid1_mid2] = Config::dists_included[distances::mid1_mid3] = Config::dists_included[distances::right_mid1] =
-		Config::dists_included[distances::right_mid2] = false;
-	Config::dists_included[distances::left_mid3] = Config::dists_included[distances::right_mid3] = Config::dists_included[distances::mid2_mid3] = true;
-	NUM_OF_STICKERS = 5;
-	color = sticker_color::YELLOW;
-	CALC_2D_BY_CM = false;
-}
-
-
-Config::Config(const char* config_filepath, std::string* err) {
-	*err = "";
-	std::ifstream config_file;
-	
-	config_file.open(config_filepath);
-	if (!config_file.is_open()) {
-		*err += "Unable to open config file.\nDefault setting used instead.";
-		set_default();
-		return;
-	}
-	int line_num = 1;
-	try {
-		std::string line;
-		std::getline(config_file, line); //first line is a comment
-		line_num++;
-		//get dimension
-		std::getline(config_file, line);
-		if (line.compare("2") == 0) {
-			Config::dimension = dimension::D2;
-		}
-		else {
-			if (line.compare("3") == 0) {
-				Config::dimension = dimension::D3;
-			}
-			else {
-				throw line_num;
-			}
-		}
-		line_num++;
-
-		std::getline(config_file, line); //next line is a comment
-		line_num++;
-		//get mode
-		std::getline(config_file, line);
-		if (line.compare("D") == 0 || line.compare("F") == 0 || line.compare("N") == 0) {
-			line_num++;
-			Config::mode = (line.compare("D") == 0) ? graph_mode::DISTANCES : (line.compare("F") == 0) ? graph_mode::FOURIER : graph_mode::NOGRAPH;
-			std::getline(config_file, line); // new line
-			line_num++;
-			std::getline(config_file, line); // comment
-			line_num++;
-			// get distances to include
-			for (int distInt = distances::left_mid1; distInt != distances::ddummy; distInt++) {
-				distances d = static_cast<distances>(distInt);
-				std::getline(config_file, line);
-				std::string val = line.substr(line.length() - 1, line.length());
-				if (val.compare("y") == 0) Config::dists_included[d] = true;
-				else {
-					if (val.compare("n") == 0) Config::dists_included[d] = false;
-					else throw line_num;
-				}
-				line_num++;
-			}
-
-			// skip locations
-			getline(config_file, line);	// new line
-			line_num++;
-			getline(config_file, line);	// #location:...
-			line_num++;
-			getline(config_file, line);
-			line_num++;
-		}
-		else {
-			if (line.compare("L") != 0) throw line_num;
-			line_num++;
-			Config::mode = graph_mode::LOCATION;
-			std::getline(config_file, line); // new line
-			line_num++;
-			std::getline(config_file, line); // comment
-			line_num++;
-			// skip distances
-			getline(config_file, line);
-			line_num++;
-			while (line.substr(0, 1).compare("#") != 0) {
-				getline(config_file, line);
-				line_num++;
-			}
-			// get included stickers
-			for (int stInt = stickers::left; stInt != stickers::sdummy; stInt++) {
-				stickers s = static_cast<stickers>(stInt);
-				std::getline(config_file, line);
-				std::string val = line.substr(line.length() - 1, line.length());
-				if (val.compare("y") == 0) Config::stickers_included[s] = true;
-				else {
-					if (val.compare("n") == 0) Config::stickers_included[s] = false;
-					else throw line_num;
-				}
-				line_num++;
-			}
-		}
-
-		while (line.substr(0, 1).compare("#") != 0) {
-			getline(config_file, line);
-			line_num++;
-		}
-			
-
-		// get num of stickers
-		getline(config_file, line);
-		if (line.compare("4") == 0) NUM_OF_STICKERS = 4;
-		else {
-			if (line.compare("5") == 0) NUM_OF_STICKERS = 5;
-			else throw line_num;
-		}
-		line_num++;
-
-		while (line.substr(0, 1).compare("#") != 0) {
-			getline(config_file, line);
-			line_num++;
-		}
-			
-		// get sticker color
-		getline(config_file, line);
-		std::string c = line.substr(0, 1);
-		if (c.compare("Y") == 0)
-			color = sticker_color::YELLOW;
-		else if (c.compare("B") == 0)
-			color = sticker_color::BLUE;
-		//else if (c.compare("R") == 0) color = sticker_color::RED;
-		else if (c.compare("G") == 0)
-			color = sticker_color::GREEN;
-		else throw line_num;
-		line_num++;
-
-		while (line.substr(0, 1).compare("#") != 0) {
-			getline(config_file, line);
-			line_num++;
-		}
-
-		// get 2Dmeasure unit
-		getline(config_file, line);
-		if (line.compare("cm") == 0)
-			CALC_2D_BY_CM = true;
-		else if (line.compare("pixel") == 0) CALC_2D_BY_CM = false;
-		else throw line_num;
-		line_num++;
-
-		// check illegal use of sticker mid1
-		// if NUM_OF_STICKERS is 4, there is no mid1 sticker
-		if (NUM_OF_STICKERS == 4) {
-			if (mode == graph_mode::LOCATION && stickers_included[stickers::mid1]) {
-				*err += "Warning: location of mid1 was set to y, while number of stickers is 4. This location will be disregarded.";
-				stickers_included[stickers::mid1] = false;
-			}
-			if (mode != graph_mode::LOCATION) {
-				if (dists_included[distances::left_mid1] || dists_included[distances::mid1_mid2] ||
-					dists_included[distances::mid1_mid3] || dists_included[distances::right_mid1]) {
-					*err += "Warning: distance from mid1 was set to y, while number of stickers is 4. This distance will be disregarded.";
-					dists_included[distances::left_mid1] = dists_included[distances::mid1_mid2] =
-						dists_included[distances::mid1_mid3] = dists_included[distances::right_mid1] = false;
-				}
-			}
-		}
-	}
-	// if an error occured while parsing, config.txt is illegal. use default setting
-	catch (...) {
-		*err += "Error while reading line " + std::to_string(line_num) +" in config.txt.\nDefault setting used instead.";
-		set_default();
-	}
 }
 
 void GraphPlot::_plotFourier(std::vector<cv::Point2d>& points)
@@ -709,7 +531,7 @@ void GraphPlot::_plotDists(std::vector<cv::Point2d>& points)
 		f = (calc_frequency_fft(&points));
 	}
 	else {	// get_frequency_differently
-		bool cm_units = (_dimension == dimension::D3) ? true : CALC_2D_BY_CM;
+		bool cm_units = (_dimension == dimension::D3) ? true : DeepBreathConfig::getInstance().calc_2d_by_cm;
 		f = calc_frequency_differently(&points, cm_units);
 	}
 	if (points.size() < NUM_OF_LAST_FRAMES * 0.5) f = 0;
@@ -733,7 +555,7 @@ void GraphPlot::_plotNoGraph(std::vector<cv::Point2d>& points)
 		f = (calc_frequency_fft(&points));
 	}
 	else {	// get_frequency_differently
-		bool cm_units = (_dimension == dimension::D3) ? true : CALC_2D_BY_CM;
+		bool cm_units = (_dimension == dimension::D3) ? true : DeepBreathConfig::getInstance().calc_2d_by_cm;
 		f = calc_frequency_differently(&points, cm_units);
 	}
 	if (points.size() < NUM_OF_LAST_FRAMES * 0.5) f = 0;

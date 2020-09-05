@@ -126,6 +126,9 @@
     <ClCompile Include="dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c">
       <Filter>Source Files\third party\tinyfiledialogs</Filter>
     </ClCompile>
+    <ClCompile Include="src\db_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\example.hpp">
@@ -424,6 +427,9 @@
     </ClInclude>
     <ClInclude Include="dependencies\librealsense\third-party\stb_image_write.h">
       <Filter>Header Files\librealsense\third party</Filter>
+    </ClInclude>
+    <ClInclude Include="include\db_config.hpp">
+      <Filter>Header Files\include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

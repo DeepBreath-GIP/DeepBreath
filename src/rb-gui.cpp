@@ -15,13 +15,11 @@
 #include "rb_aux.h"
 #include <opencv2/opencv.hpp>
 #include <chrono>
+#include "db_config.hpp"
 
 #define FILE_ON_REPEAT false
 extern void init_logFile(const char* filename, int num_of_stickers, std::string D2units);
 extern std::ofstream logFile;
-extern bool CALC_2D_BY_CM;
-extern int NUM_OF_STICKERS;
-
 
 // copied os.h because project does comile when including it (seems to be due to double inclusion of rendering.h)
 // *****	START of os.h copy	*****
@@ -57,10 +55,10 @@ int main(int argc, char * argv[]) try
 	rs2::align align_to_depth(RS2_STREAM_DEPTH);
 	rs2::align align_to_color(RS2_STREAM_COLOR);
 
-
 	std::string config_err;
-	Config user_cfg(CONFIG_FILEPATH, &config_err);
-	FrameManager frame_manager(&user_cfg);
+
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance(CONFIG_FILEPATH, &config_err);
+	FrameManager frame_manager;
 	GraphPlot graph(user_cfg.mode, user_cfg.dimension, frame_manager.manager_start_time);
 
 	bool show_camera_stream = false;	//booleans to control streaming
@@ -115,8 +113,8 @@ int main(int argc, char * argv[]) try
 					start_time = clock();
 					frame_manager.reset(); // reset FrameManager for additional processing
 					graph.reset(frame_manager.manager_start_time);
-					std::string D2units = (CALC_2D_BY_CM) ? "cm" : "pixels";
-					init_logFile(filename, NUM_OF_STICKERS, D2units);
+					std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+					init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
 
 				}
 				if (!recording) {
@@ -162,8 +160,8 @@ int main(int argc, char * argv[]) try
 						pipe.start(cfg); //File will be opened in read mode at this point
 						frame_manager.reset(); // reset FrameManager for additional processing
 						graph.reset(frame_manager.manager_start_time);
-						std::string D2units = (CALC_2D_BY_CM) ? "cm" : "pixels";
-						init_logFile(filename, NUM_OF_STICKERS, D2units);
+						std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+						init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
 					}
 					else { //user clicked -choose file- ans then clicked -cancel-
 						run_on_existing_file = false;
@@ -318,7 +316,7 @@ int main(int argc, char * argv[]) try
 				std::vector<cv::Point2d> points[5];
 				for (int stInt = stickers::left; stInt != stickers::sdummy; stInt++) {
 					stickers s = static_cast<stickers>(stInt);
-					if (frame_manager.user_cfg->stickers_included[s]) {
+					if (DeepBreathConfig::getInstance().stickers_included.at(s)) {
 						frame_manager.get_locations(s, &points[stInt]);
 						graph.plot(points[stInt], lineSpec[stInt]);
 					}
