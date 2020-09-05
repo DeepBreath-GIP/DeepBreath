@@ -40,7 +40,7 @@ namespace rs2
 
 int main(int argc, char * argv[]) try
 {
-	window app(1280, 768, "RealtimeBreathing");
+	window app(1280, 768, "Deep Breath");
 
 	ImGui_ImplGlfw_Init(app, false);      // imgui library intializition
 	rs2::colorizer colorizer;		// helper to colorize depth images
