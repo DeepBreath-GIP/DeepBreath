@@ -76,13 +76,71 @@ int FrameManager::get_frames_array_size() {
 
 void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame)
 {
+
+	BreathingFrameData * breathing_data = new BreathingFrameData();
+
+	identify_markers(color_frame, depth_frame, breathing_data);
+	
+	//if user config dimension is 3D, check for 0,-0,0 3d coordinates. dump such frames
+	if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
+		if (check_illegal_3D_coordinates(breathing_data)) {
+			frames_dumped_in_row++;
+			logFile << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
+			if (frames_dumped_in_row >= 3) {								//This is required for transition to next columns in the log file! 
+				logFile << '\n';
+				cleanup();
+			}
+			return;
+		}
+		else {
+			frames_dumped_in_row = 0;
+		}
+	}
+	//calculate 2D distances:
+	breathing_data->CalculateDistances2D();
+
+	//calculate 3D distances:
+	breathing_data->CalculateDistances3D();
+
+	//update timestamps of the current frame:
+	update_timestamps(color_frame, depth_frame, breathing_data);
+
+	//check if frame id duplicated
+	bool is_dup = false;
+	int last_frame_index = (_n_frames + _oldest_frame_index - 1) % _n_frames;
+	if (_frame_data_arr[last_frame_index] != NULL) {
+		if (DeepBreathConfig::getInstance().dimension == dimension::D2) {
+			if (_frame_data_arr[last_frame_index]->color_timestamp == breathing_data->color_timestamp
+				&& _frame_data_arr[last_frame_index]->average_2d_dist == breathing_data->average_2d_dist) {
+				is_dup = true;
+			}
+		}
+		if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
+			if (_frame_data_arr[last_frame_index]->color_timestamp == breathing_data->color_timestamp
+				&& _frame_data_arr[last_frame_index]->depth_timestamp == breathing_data->depth_timestamp
+				&& _frame_data_arr[last_frame_index]->average_3d_dist == breathing_data->average_3d_dist) {
+				is_dup = true;
+			}
+		}
+	}
+	if (!is_dup) {
+		//for logging
+		breathing_data->GetDescription();
+		add_frame_data(breathing_data);
+	}
+	else {
+		logFile << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
+	}
+}
+
+void FrameManager::identify_markers(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, BreathingFrameData* breathing_data)
+{
 	// Create bgr mode matrix of color_frame
 	const void * color_frame_data = color_frame.get_data();
 	cv::Mat rgb8_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3, (void *)color_frame_data, cv::Mat::AUTO_STEP);
 	cv::Mat hsv8_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3);
 	cv::cvtColor(rgb8_mat, hsv8_mat, cv::COLOR_RGB2HSV);
-
-	BreathingFrameData * breathing_data = new BreathingFrameData();
 
 	cv::Scalar color_range_low;
 	cv::Scalar color_range_high;
@@ -123,11 +181,11 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 	cvtColor(color_only_mat, color_only_bgr8_mat, cv::COLOR_HSV2BGR);
 	cv::Mat color_only_grayscale_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3);
 	cvtColor(color_only_bgr8_mat, color_only_grayscale_mat, cv::COLOR_BGR2GRAY);
-	
+
 	//create binary image:
 	cv::Mat image_th;
 	cv::Mat bin_mat(color_only_grayscale_mat.size(), color_only_grayscale_mat.type());
-	
+
 	// simple threshold worked better than adaptive
 	cv::threshold(color_only_grayscale_mat, image_th, low_thresh, high_thresh, cv::THRESH_BINARY);
 
@@ -136,7 +194,7 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 	cv::Mat1i stats;
 	cv::Mat1d centroids;
 	cv::connectedComponentsWithStats(image_th, labels, stats, centroids);
-	
+
 	//calc threshold for connected component area (max area/2)
 	int area_threshold = 0;
 	for (int i = 1; i < stats.rows; i++) //label 0 is the background
@@ -163,40 +221,13 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 		return;
 	}
 	breathing_data->UpdateStickersLoactions();
+}
 
-	//get 3D cm coordinates
-	get_3d_coordinates(depth_frame, float((*breathing_data->left)[0]), (*breathing_data->left)[1], breathing_data->left_cm);
-	get_3d_coordinates(depth_frame, float((*breathing_data->right)[0]), (*breathing_data->right)[1], breathing_data->right_cm);
-	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {
-		get_3d_coordinates(depth_frame, float((*breathing_data->mid1)[0]), (*breathing_data->mid1)[1], breathing_data->mid1_cm);
-	}
-	get_3d_coordinates(depth_frame, float((*breathing_data->mid2)[0]), (*breathing_data->mid2)[1], breathing_data->mid2_cm);
-	get_3d_coordinates(depth_frame, float((*breathing_data->mid3)[0]), (*breathing_data->mid3)[1], breathing_data->mid3_cm);
-	
-	//if user config dimension is 3D, check for 0,-0,0 3d coordinates. dump such frames
-	if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
-		if (check_illegal_3D_coordinates(breathing_data)) {
-			frames_dumped_in_row++;
-			logFile << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
-			if (frames_dumped_in_row >= 3) {								//This is required for transition to next columns in the log file! 
-				logFile << '\n';
-				cleanup();
-			}
-			return;
-		}
-		else {
-			frames_dumped_in_row = 0;
-		}
-	}
-	//calculate 2D distances:
-	breathing_data->CalculateDistances2D();
-
-	//calculate 3D distances:
-	breathing_data->CalculateDistances3D();
-
+void FrameManager::update_timestamps(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, BreathingFrameData* breathing_data)
+{
 	//add color timestamp:
-	breathing_data->color_timestamp = color_frame.get_timestamp();	
-	
+	breathing_data->color_timestamp = color_frame.get_timestamp();
+
 	//add depth timestamp:
 	breathing_data->depth_timestamp = depth_frame.get_timestamp();
 
@@ -204,45 +235,20 @@ void FrameManager::process_frame(const rs2::video_frame& color_frame, const rs2:
 	clock_t current_system_time = clock();
 	breathing_data->system_timestamp = (current_system_time - manager_start_time) / double(CLOCKS_PER_SEC); //time in seconds elapsed since frame manager created
 
-	
-	if (!first_timestamp) first_timestamp =
-		(breathing_data->color_timestamp < breathing_data->depth_timestamp) ?
+	if (!first_timestamp) {
+		first_timestamp =
+			(breathing_data->color_timestamp < breathing_data->depth_timestamp) ?
 			breathing_data->color_timestamp :
 			breathing_data->depth_timestamp;
-	breathing_data->frame_idx = frame_idx; 
+	}
+
+	breathing_data->frame_idx = frame_idx;
 	frame_idx++;
 	breathing_data->color_idx = color_frame.get_frame_number();
 	breathing_data->depth_idx = depth_frame.get_frame_number();
 	breathing_data->system_color_timestamp = (breathing_data->color_timestamp - first_timestamp) / double(CLOCKS_PER_SEC); //time elapsed from first timestamp in video - which timestamp?
 	breathing_data->system_depth_timestamp = (breathing_data->depth_timestamp - first_timestamp) / double(CLOCKS_PER_SEC);
 
-	//check if frame id duplicated
-	bool is_dup = false;
-	int last_frame_index = (_n_frames + _oldest_frame_index - 1) % _n_frames;
-	if (_frame_data_arr[last_frame_index] != NULL) {
-		if (DeepBreathConfig::getInstance().dimension == dimension::D2) {
-			if (_frame_data_arr[last_frame_index]->color_timestamp == breathing_data->color_timestamp
-				&& _frame_data_arr[last_frame_index]->average_2d_dist == breathing_data->average_2d_dist) {
-				is_dup = true;
-			}
-		}
-		if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
-			if (_frame_data_arr[last_frame_index]->color_timestamp == breathing_data->color_timestamp
-				&& _frame_data_arr[last_frame_index]->depth_timestamp == breathing_data->depth_timestamp
-				&& _frame_data_arr[last_frame_index]->average_3d_dist == breathing_data->average_3d_dist) {
-				is_dup = true;
-			}
-		}
-	}
-	if (!is_dup) {
-		//for logging
-		breathing_data->GetDescription();
-		add_frame_data(breathing_data);
-	}
-	else {
-		logFile << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
-		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
-	}
 }
 
 void FrameManager::cleanup()

@@ -149,6 +149,12 @@ private:
 	 */
 	void add_frame_data(BreathingFrameData * frame_data);
 
+	/* Identify marker points: stickers or nipples and bellybutton image recognition. */
+	void identify_markers(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, BreathingFrameData* breathing_data);
+
+	/* Update frames timestamps. */
+	void update_timestamps(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, BreathingFrameData* breathing_data);
+
 	int frame_idx = 1;
 	double first_timestamp = NULL;
 	unsigned int _n_frames;
