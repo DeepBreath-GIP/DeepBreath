@@ -40,7 +40,7 @@
      <string>Load File...</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="recod_button">
+   <widget class="QPushButton" name="record_button">
     <property name="enabled">
      <bool>false</bool>
     </property>

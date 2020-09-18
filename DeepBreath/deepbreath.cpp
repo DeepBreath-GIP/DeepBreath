@@ -8,10 +8,16 @@
 DeepBreath::DeepBreath(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::DeepBreath)
+    , is_camera_on(false)
+    , is_recording(false)
+    , is_run_from_file(false)
+    , is_pause(false)
 {
     ui->setupUi(this);
 
     setTransparentBackroundToText();
+    ui->record_button->setVisible(false);
+    ui->pause_button->setVisible(false);
 }
 
 DeepBreath::~DeepBreath()
@@ -308,4 +314,89 @@ void DeepBreath::on_mid1_mid3_checkbox_clicked()
 void DeepBreath::on_mid2_mid3_checkbox_clicked()
 {
     this->update();
+}
+
+void DeepBreath::on_start_camera_button_clicked()
+{
+    if(!is_camera_on) {
+        //if camera is off:
+        // - disable file stream if open
+        // - turn camera on
+        // - change button's title
+        // - show and enable recording
+        //TODO: Turn camera on
+        if(is_run_from_file) {
+            //TODO: Show alert "This will close the file stream. Continue?"
+            //TODO: Close file stream
+            //hide and disable pause button:
+            ui->pause_button->setVisible(false);
+            ui->pause_button->setEnabled(false);
+            is_run_from_file = false;
+        }
+        ui->start_camera_button->setText("Stop Camera");
+        ui->record_button->setVisible(true);
+        ui->record_button->setEnabled(true);
+        is_camera_on = true;
+    }
+    else {
+        //if camera is on:
+        // - turn camera off
+        // - change button's title
+        // - hide and disable recording
+        //TODO: Turn camera off
+        ui->start_camera_button->setText("Start Camera");
+        ui->record_button->setEnabled(false);
+        ui->record_button->setVisible(false);
+        is_camera_on = false;
+    }
+}
+
+void DeepBreath::on_record_button_clicked()
+{
+    if(!is_recording) {
+        //turn recording on and change title
+        ui->record_button->setText("Stop Recording");
+        is_recording = true;
+    }
+    else {
+        //turn recording off and change title
+        ui->record_button->setText("Record");
+        is_recording = false;
+    }
+}
+
+void DeepBreath::on_load_file_button_clicked()
+{
+    if(!is_run_from_file) {
+        //if camera is on, show alert and stop stream
+        if(is_camera_on) {
+            //TODO: Show alert and stop camera stream
+            //trigger stop camera click (and hide record button):
+            ui->start_camera_button->click();
+            if(is_recording) {
+                //trigger stop recording:
+                ui->record_button->click();
+            }
+        }
+        //TODO: Load File
+        //show and enable pause button
+        ui->pause_button->setVisible(true);
+        ui->pause_button->setEnabled(true);
+        is_run_from_file = true;
+    }
+    else {
+        //TODO: Close current file and open new file.
+    }
+}
+
+void DeepBreath::on_pause_button_clicked()
+{
+    if(!is_pause) {
+        ui->pause_button->setText("Continue");
+        is_pause = true;
+    }
+    else {
+        ui->pause_button->setText("Pause");
+        is_pause = false;
+    }
 }

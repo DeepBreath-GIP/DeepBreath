@@ -50,8 +50,21 @@ private slots:
 
     void on_mid2_mid3_checkbox_clicked();
 
+    void on_start_camera_button_clicked();
+
+    void on_record_button_clicked();
+
+    void on_load_file_button_clicked();
+
+    void on_pause_button_clicked();
+
 private:
     Ui::DeepBreath *ui;
+
+    bool is_camera_on;
+    bool is_recording;
+    bool is_run_from_file;
+    bool is_pause;
 
     void setTransparentBackroundToText();
     void drawDistancesLines();
