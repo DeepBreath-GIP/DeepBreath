@@ -2,6 +2,7 @@
 
 #include <map>
 
+//file path should be relative to GUI's root folder
 #define CONFIG_FILEPATH "config.txt"
 
 enum sticker_color {

@@ -1,5 +1,6 @@
 #include "db_config.hpp"
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <cassert>
 
@@ -111,7 +112,6 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 			getline(config_file, line);
 			line_num++;
 		}
-
 
 		// get num of stickers
 		getline(config_file, line);

@@ -8,6 +8,10 @@
 /* DeepBreath Files */
 #include "db_config.hpp"
 
+//NOTE FOR SELF:
+//To Debug on release mode:
+//https://docs.microsoft.com/en-us/cpp/build/how-to-debug-a-release-build?view=vs-2019
+
 DeepBreath::DeepBreath(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::DeepBreath)
@@ -43,6 +47,7 @@ void DeepBreath::initDefaultSelection() {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	assert(user_cfg != nullptr);
 
+	//Set dimension:
 	switch (user_cfg.dimension) {
 	case D2:
 		ui->dimension_2d_radio_button->setChecked(true);
@@ -54,23 +59,44 @@ void DeepBreath::initDefaultSelection() {
 		break;
 	}
 
+	//set mode:
+	int mode_index = -1; //initialize to invalid index by default
 	switch (user_cfg.mode) {
 	case DISTANCES:
-		ui->mode_combo_box->setCurrentIndex(0);
+		mode_index = ui->mode_combo_box->findText("Distances");
 		break;
 	case LOCATION:
-		ui->mode_combo_box->setCurrentIndex(1);
+		mode_index = ui->mode_combo_box->findText("Locations");
 		break;
 	case FOURIER:
-		ui->mode_combo_box->setCurrentIndex(2);
+		mode_index = ui->mode_combo_box->findText("Fourier");
 		break;
 	case VOLUME:
-		ui->mode_combo_box->setCurrentIndex(3);
+		mode_index = ui->mode_combo_box->findText("Volume");
 		break;
 	case NOGRAPH:
-		ui->mode_combo_box->setCurrentIndex(4);
+		mode_index = ui->mode_combo_box->findText("No Graph");
 		break;
 	}
+	ui->mode_combo_box->setCurrentIndex(mode_index);
+
+	//set number of markers:
+	int num_markers_index = -1; //initialize to invalid index by default
+	switch (user_cfg.num_of_stickers) {
+	case 3:
+		num_markers_index = ui->num_markers_combo_box->findText("3");
+		break;
+	case 4:
+		num_markers_index = ui->num_markers_combo_box->findText("4");
+		break;
+	case 5:
+		num_markers_index = ui->num_markers_combo_box->findText("5");
+		break;
+	default: //in case it's anything else - ignore the value and set nothing.
+		//Will be considered as 0.
+		break;
+	}
+	ui->num_markers_combo_box->setCurrentIndex(num_markers_index);
 }
 
 /* Removes backgrounds from texts: */
