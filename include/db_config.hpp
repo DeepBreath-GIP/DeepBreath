@@ -73,6 +73,7 @@ public:
 	std::map<stickers, bool> stickers_included;
 	std::map<distances, bool> dists_included;
 	sticker_color color;
+	bool is_stickers;
 
 	// set configuration to default. used in case of en illegal config file.
 	void set_default();

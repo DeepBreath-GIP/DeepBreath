@@ -199,6 +199,21 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 			throw line_num;
 		line_num++;
 
+		//skip lines to next comment (is use stickers)
+		while (line.substr(0, 1).compare("#") != 0) {
+			getline(config_file, line);
+			line_num++;
+		}
+		//get if use stickers:
+		getline(config_file, line);
+		if (line.compare("y") == 0)
+			is_stickers = true;
+		else if (line.compare("n") == 0)
+			is_stickers = false;
+		else
+			throw line_num;
+		line_num++;
+
 		//TODO: update illegal cases
 		// check illegal use of sticker mid1
 		// if num_of_stickers is 4, there is no mid1 sticker

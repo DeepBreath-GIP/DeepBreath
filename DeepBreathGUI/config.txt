@@ -1,7 +1,7 @@
 #dimension: 2 for 2D or 3 for 3D. recommended: 2
 2
 #mode: D for distances, L for location, F for fourier, V for volume, N for no graph
-V
+D
 
 #distances: set to y to include a certain distance. set to n otherwise. recommended: left-mid3, right-mid3, mid2-mid3
 left-mid1 n
@@ -23,10 +23,13 @@ mid3 y
 right n
 
 #number of stickers: 4 or 5
-3
+4
 
 #color of stickers: Y (yellow), B (blue) or G (green). recommended: Y
 Y
 
 #2D measure units: cm or pixel. recommended: pixel
 pixel
+
+#use stikers:
+y

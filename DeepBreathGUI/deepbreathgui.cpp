@@ -97,6 +97,9 @@ void DeepBreath::initDefaultSelection() {
 		break;
 	}
 	ui->num_markers_combo_box->setCurrentIndex(num_markers_index);
+
+	//set stickers or image recognition:
+	ui->is_stickers_checkbox->setChecked(user_cfg.is_stickers);
 }
 
 /* Removes backgrounds from texts: */
