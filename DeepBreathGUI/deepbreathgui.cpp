@@ -5,6 +5,9 @@
 #include <QPen>
 #include <QLine>
 
+/* DeepBreath Files */
+#include "db_config.hpp"
+
 DeepBreath::DeepBreath(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::DeepBreath)
@@ -18,6 +21,8 @@ DeepBreath::DeepBreath(QWidget *parent)
     setTransparentBackroundToText();
     ui->record_button->setVisible(false);
     ui->pause_button->setVisible(false);
+
+	initDefaultSelection();
 }
 
 DeepBreath::~DeepBreath()
@@ -27,6 +32,45 @@ DeepBreath::~DeepBreath()
 
 void DeepBreath::paintEvent(QPaintEvent* event) {
     drawDistancesLines();
+}
+
+/*	Initiates the UI to default selection as configured in the config file. */
+void DeepBreath::initDefaultSelection() {
+	//create and get instance of the config.
+	//TODO: remove config_err
+	std::string config_err;
+	DeepBreathConfig::createInstance(CONFIG_FILEPATH, &config_err);
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg != nullptr);
+
+	switch (user_cfg.dimension) {
+	case D2:
+		ui->dimension_2d_radio_button->setChecked(true);
+		ui->dimension_3d_radio_button->setChecked(false);
+		break;
+	case D3:
+		ui->dimension_2d_radio_button->setChecked(false);
+		ui->dimension_3d_radio_button->setChecked(true);
+		break;
+	}
+
+	switch (user_cfg.mode) {
+	case DISTANCES:
+		ui->mode_combo_box->setCurrentIndex(0);
+		break;
+	case LOCATION:
+		ui->mode_combo_box->setCurrentIndex(1);
+		break;
+	case FOURIER:
+		ui->mode_combo_box->setCurrentIndex(2);
+		break;
+	case VOLUME:
+		ui->mode_combo_box->setCurrentIndex(3);
+		break;
+	case NOGRAPH:
+		ui->mode_combo_box->setCurrentIndex(4);
+		break;
+	}
 }
 
 /* Removes backgrounds from texts: */

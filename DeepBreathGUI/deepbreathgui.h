@@ -68,6 +68,7 @@ private:
     bool is_run_from_file;
     bool is_pause;
 
+	void initDefaultSelection();
     void setTransparentBackroundToText();
     void drawDistancesLines();
     void setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos, Distance dist);

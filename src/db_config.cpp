@@ -5,14 +5,17 @@
 
 DeepBreathConfig* DeepBreathConfig::_config = nullptr;
 
-const DeepBreathConfig& DeepBreathConfig::getInstance(const char* config_filepath, std::string* config_err) {
-	if (_config == nullptr) {
-		assert(config_filepath != nullptr && config_err != nullptr);
-		_config = new DeepBreathConfig(config_filepath, config_err);
-	}
+void DeepBreathConfig::createInstance(const char * config_filepath, std::string * config_err)
+{
+	assert(config_filepath != nullptr && config_err != nullptr);
+	_config = new DeepBreathConfig(config_filepath, config_err);
+}
+
+const DeepBreathConfig& DeepBreathConfig::getInstance() {
 	return *_config;
 }
 
+//TODO: remove err
 DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err) {
 	*err = "";
 	std::ifstream config_file;

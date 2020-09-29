@@ -57,7 +57,8 @@ int main(int argc, char * argv[]) try
 
 	std::string config_err;
 
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance(CONFIG_FILEPATH, &config_err);
+	DeepBreathConfig::createInstance(CONFIG_FILEPATH, &config_err);
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	FrameManager frame_manager;
 	GraphPlot graph(user_cfg.mode, user_cfg.dimension, frame_manager.manager_start_time);
 

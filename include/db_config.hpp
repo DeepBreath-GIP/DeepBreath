@@ -20,6 +20,7 @@ enum graph_mode {
 	DISTANCES,
 	LOCATION,
 	FOURIER,
+	VOLUME,
 	NOGRAPH
 };
 
@@ -60,7 +61,9 @@ enum distances {
 class DeepBreathConfig {
 public:
 
-	static const DeepBreathConfig& getInstance(const char* config_filepath = nullptr, std::string* config_err = nullptr);
+	//TODO: Remove config_err
+	static void createInstance(const char* config_filepath = nullptr, std::string* config_err = nullptr);
+	static const DeepBreathConfig& getInstance();
 
 	int num_of_stickers;
 	bool calc_2d_by_cm; //if false, calculate by pixels
