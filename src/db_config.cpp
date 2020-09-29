@@ -27,132 +27,179 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 		set_default();
 		return;
 	}
+
 	int line_num = 1;
 	try {
 		std::string line;
-		std::getline(config_file, line); //first line is a comment
+
+		//get dimension:
+		//first line is a comment
+		std::getline(config_file, line);
 		line_num++;
-		//get dimension
+		//dimension line:
 		std::getline(config_file, line);
 		if (line.compare("2") == 0) {
-			DeepBreathConfig::dimension = dimension::D2;
+			this->dimension = dimension::D2;
+		}
+		else if (line.compare("3") == 0) {
+			this->dimension = dimension::D3;
 		}
 		else {
-			if (line.compare("3") == 0) {
-				DeepBreathConfig::dimension = dimension::D3;
-			}
-			else {
-				throw line_num;
-			}
+			throw line_num;
 		}
 		line_num++;
 
-		std::getline(config_file, line); //next line is a comment
-		line_num++;
-		//get mode
+		//get mode:
+		//comment line:
 		std::getline(config_file, line);
-		if (line.compare("D") == 0 || line.compare("F") == 0 || line.compare("N") == 0) {
-			line_num++;
-			DeepBreathConfig::mode = (line.compare("D") == 0) ? graph_mode::DISTANCES : (line.compare("F") == 0) ? graph_mode::FOURIER : graph_mode::NOGRAPH;
-			std::getline(config_file, line); // new line
-			line_num++;
-			std::getline(config_file, line); // comment
-			line_num++;
-			// get distances to include
-			for (int distInt = distances::left_mid1; distInt != distances::ddummy; distInt++) {
-				distances d = static_cast<distances>(distInt);
-				std::getline(config_file, line);
-				std::string val = line.substr(line.length() - 1, line.length());
-				if (val.compare("y") == 0) DeepBreathConfig::dists_included[d] = true;
-				else {
-					if (val.compare("n") == 0) DeepBreathConfig::dists_included[d] = false;
-					else throw line_num;
-				}
-				line_num++;
-			}
-
-			// skip locations
-			getline(config_file, line);	// new line
-			line_num++;
-			getline(config_file, line);	// #location:...
-			line_num++;
-			getline(config_file, line);
+		line_num++;
+		//mode line:
+		std::getline(config_file, line);
+		if (line.compare("D") == 0) {
+			this->mode = graph_mode::DISTANCES;
+		}
+		else if (line.compare("F") == 0) {
+			this->mode = graph_mode::FOURIER;
+		}
+		else if (line.compare("V") == 0) {
+			this->mode = graph_mode::VOLUME;
 			line_num++;
 		}
+		else if (line.compare("L") == 0) {
+			this->mode = graph_mode::LOCATION;
+		}
+		else if (line.compare("N") == 0) {
+			this->mode = graph_mode::NOGRAPH;
+		}
 		else {
-			if (line.compare("L") != 0) throw line_num;
-			line_num++;
-			DeepBreathConfig::mode = graph_mode::LOCATION;
-			std::getline(config_file, line); // new line
-			line_num++;
-			std::getline(config_file, line); // comment
-			line_num++;
-			// skip distances
+			throw line_num;
+		}
+		line_num++;
+
+		std::getline(config_file, line); //empty line
+		line_num++;
+
+		std::getline(config_file, line); //distances comment line
+		line_num++;
+
+		//get distances:
+		//skip distances for Locations
+		if (this->mode == graph_mode::LOCATION) {
 			getline(config_file, line);
 			line_num++;
 			while (line.substr(0, 1).compare("#") != 0) {
 				getline(config_file, line);
 				line_num++;
 			}
-			// get included stickers
-			for (int stInt = stickers::left; stInt != stickers::sdummy; stInt++) {
-				stickers s = static_cast<stickers>(stInt);
+		}
+		else { //include for other modes
+			// get distances to include
+			for (int distInt = distances::left_mid1; distInt != distances::ddummy; distInt++) {
+				distances d = static_cast<distances>(distInt);
 				std::getline(config_file, line);
 				std::string val = line.substr(line.length() - 1, line.length());
-				if (val.compare("y") == 0) DeepBreathConfig::stickers_included[s] = true;
-				else {
-					if (val.compare("n") == 0) DeepBreathConfig::stickers_included[s] = false;
-					else throw line_num;
+				if (val.compare("y") == 0) {
+					this->dists_included[d] = true;
 				}
+				else if (val.compare("n") == 0) {
+					this->dists_included[d] = false;
+				}
+				else
+					throw line_num;
 				line_num++;
 			}
 		}
 
-		while (line.substr(0, 1).compare("#") != 0) {
-			getline(config_file, line);
+		//get locations:
+		getline(config_file, line);	// new line
+		line_num++;
+		getline(config_file, line);	//locations comment
+		line_num++;
+		//for Distances, Fourier, Volume, No Graph: Skip locations
+		if (this->mode == graph_mode::DISTANCES
+			|| this->mode == graph_mode::FOURIER
+			|| this->mode == graph_mode::VOLUME
+			|| this->mode == graph_mode::NOGRAPH) {
+
+			getline(config_file, line); //first location line
+			line_num++;
+			while (line.substr(0, 1).compare("#") != 0) {
+				getline(config_file, line);
+				line_num++;
+			} //stops by the first next comment line (number of stickers)
+		}
+		else {
+			//get included locations:
+			//(at this point, current line is the location comment, so first iteration will get first location)
+			for (int stInt = stickers::left; stInt != stickers::sdummy; stInt++) {
+				stickers s = static_cast<stickers>(stInt);
+				std::getline(config_file, line);
+				std::string val = line.substr(line.length() - 1, line.length());
+				if (val.compare("y") == 0) {
+					this->stickers_included[s] = true;
+				}
+				else if (val.compare("n") == 0) {
+					this->stickers_included[s] = false;
+				}
+				else
+					throw line_num;
+				line_num++;
+			}
+
+			getline(config_file, line); //empty line
 			line_num++;
 		}
 
 		// get num of stickers
 		getline(config_file, line);
-		if (line.compare("4") == 0) num_of_stickers = 4;
-		else {
-			if (line.compare("5") == 0) num_of_stickers = 5;
-			else throw line_num;
+		if (line.compare("3") == 0) {
+			num_of_stickers = 3;
 		}
+		else if (line.compare("4") == 0) {
+			num_of_stickers = 4;
+		}
+		else if (line.compare("5") == 0) {
+			num_of_stickers = 5;
+		}
+		else
+			throw line_num;
 		line_num++;
 
+		//skip lines to next comment (color of stickers)
 		while (line.substr(0, 1).compare("#") != 0) {
 			getline(config_file, line);
 			line_num++;
 		}
 
-		// get sticker color
+		//get sticker color
 		getline(config_file, line);
 		std::string c = line.substr(0, 1);
 		if (c.compare("Y") == 0)
 			color = sticker_color::YELLOW;
 		else if (c.compare("B") == 0)
 			color = sticker_color::BLUE;
-		//else if (c.compare("R") == 0) color = sticker_color::RED;
 		else if (c.compare("G") == 0)
 			color = sticker_color::GREEN;
 		else throw line_num;
 		line_num++;
 
+		//skip lines to next comment (units of 2D measure)
 		while (line.substr(0, 1).compare("#") != 0) {
 			getline(config_file, line);
 			line_num++;
 		}
 
-		// get 2Dmeasure unit
+		//get 2D measure unit
 		getline(config_file, line);
 		if (line.compare("cm") == 0)
 			calc_2d_by_cm = true;
-		else if (line.compare("pixel") == 0) calc_2d_by_cm = false;
-		else throw line_num;
+		else if (line.compare("pixel") == 0)
+			calc_2d_by_cm = false;
+		else
+			throw line_num;
 		line_num++;
 
+		//TODO: update illegal cases
 		// check illegal use of sticker mid1
 		// if num_of_stickers is 4, there is no mid1 sticker
 		if (num_of_stickers == 4) {
