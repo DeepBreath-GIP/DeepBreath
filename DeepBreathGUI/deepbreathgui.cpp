@@ -99,7 +99,24 @@ void DeepBreath::initDefaultSelection() {
 	ui->num_markers_combo_box->setCurrentIndex(num_markers_index);
 
 	//set stickers or image recognition:
-	ui->is_stickers_checkbox->setChecked(user_cfg.is_stickers);
+	if (user_cfg.is_stickers) {
+		ui->is_stickers_checkbox->click(); //initialized unchecked, so triggering a click will check it
+
+		//get sticker color:
+		switch (user_cfg.color) {
+		case YELLOW:
+			ui->y_color_radio_button->click();
+			break;
+		case BLUE:
+			ui->b_color_radio_button->click();
+			break;
+		case GREEN:
+			ui->g_color_radio_button->click();
+			break;
+		}
+	}
+
+
 }
 
 /* Removes backgrounds from texts: */
@@ -582,5 +599,19 @@ void DeepBreath::on_mode_combo_box_currentIndexChanged(int index)
             enableDistances(true);
             enableLocations(false);
             break;
+    }
+}
+
+void DeepBreath::on_is_stickers_checkbox_clicked()
+{
+    if(ui->is_stickers_checkbox->isChecked()) {
+        ui->b_color_radio_button->setEnabled(true);
+        ui->g_color_radio_button->setEnabled(true);
+        ui->y_color_radio_button->setEnabled(true);
+    }
+    else {
+        ui->b_color_radio_button->setEnabled(false);
+        ui->g_color_radio_button->setEnabled(false);
+        ui->y_color_radio_button->setEnabled(false);
     }
 }

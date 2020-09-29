@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QMainWindow>
@@ -66,6 +67,8 @@ public:
     QCheckBox *right_mid3_checkbox;
     QMenuBar *menubar;
     QStatusBar *statusbar;
+    QButtonGroup *color_button_group;
+    QButtonGroup *dimension_button_group;
 
     void setupUi(QMainWindow *DeepBreath)
     {
@@ -89,9 +92,13 @@ public:
         pause_button->setEnabled(false);
         pause_button->setGeometry(QRect(10, 120, 93, 28));
         dimension_2d_radio_button = new QRadioButton(centralwidget);
+        dimension_button_group = new QButtonGroup(DeepBreath);
+        dimension_button_group->setObjectName(QString::fromUtf8("dimension_button_group"));
+        dimension_button_group->addButton(dimension_2d_radio_button);
         dimension_2d_radio_button->setObjectName(QString::fromUtf8("dimension_2d_radio_button"));
         dimension_2d_radio_button->setGeometry(QRect(230, 10, 51, 20));
         dimension_3d_radio_button = new QRadioButton(centralwidget);
+        dimension_button_group->addButton(dimension_3d_radio_button);
         dimension_3d_radio_button->setObjectName(QString::fromUtf8("dimension_3d_radio_button"));
         dimension_3d_radio_button->setGeometry(QRect(290, 10, 51, 20));
         dimension_text = new QPlainTextEdit(centralwidget);
@@ -157,14 +164,19 @@ public:
         is_stickers_checkbox->setObjectName(QString::fromUtf8("is_stickers_checkbox"));
         is_stickers_checkbox->setGeometry(QRect(140, 100, 101, 20));
         y_color_radio_button = new QRadioButton(centralwidget);
+        color_button_group = new QButtonGroup(DeepBreath);
+        color_button_group->setObjectName(QString::fromUtf8("color_button_group"));
+        color_button_group->addButton(y_color_radio_button);
         y_color_radio_button->setObjectName(QString::fromUtf8("y_color_radio_button"));
         y_color_radio_button->setEnabled(false);
         y_color_radio_button->setGeometry(QRect(220, 100, 41, 20));
         g_color_radio_button = new QRadioButton(centralwidget);
+        color_button_group->addButton(g_color_radio_button);
         g_color_radio_button->setObjectName(QString::fromUtf8("g_color_radio_button"));
         g_color_radio_button->setEnabled(false);
         g_color_radio_button->setGeometry(QRect(260, 100, 41, 20));
         b_color_radio_button = new QRadioButton(centralwidget);
+        color_button_group->addButton(b_color_radio_button);
         b_color_radio_button->setObjectName(QString::fromUtf8("b_color_radio_button"));
         b_color_radio_button->setEnabled(false);
         b_color_radio_button->setGeometry(QRect(300, 100, 41, 20));

@@ -84,6 +84,9 @@
     <property name="text">
      <string>2D</string>
     </property>
+    <attribute name="buttonGroup">
+     <string notr="true">dimension_button_group</string>
+    </attribute>
    </widget>
    <widget class="QRadioButton" name="dimension_3d_radio_button">
     <property name="geometry">
@@ -97,6 +100,9 @@
     <property name="text">
      <string>3D</string>
     </property>
+    <attribute name="buttonGroup">
+     <string notr="true">dimension_button_group</string>
+    </attribute>
    </widget>
    <widget class="QPlainTextEdit" name="dimension_text">
     <property name="geometry">
@@ -357,6 +363,9 @@
     <property name="text">
      <string>Y</string>
     </property>
+    <attribute name="buttonGroup">
+     <string notr="true">color_button_group</string>
+    </attribute>
    </widget>
    <widget class="QRadioButton" name="g_color_radio_button">
     <property name="enabled">
@@ -373,6 +382,9 @@
     <property name="text">
      <string>G</string>
     </property>
+    <attribute name="buttonGroup">
+     <string notr="true">color_button_group</string>
+    </attribute>
    </widget>
    <widget class="QRadioButton" name="b_color_radio_button">
     <property name="enabled">
@@ -389,6 +401,9 @@
     <property name="text">
      <string>B</string>
     </property>
+    <attribute name="buttonGroup">
+     <string notr="true">color_button_group</string>
+    </attribute>
    </widget>
    <widget class="QPlainTextEdit" name="distances_text">
     <property name="geometry">
@@ -667,4 +682,8 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="color_button_group"/>
+  <buttongroup name="dimension_button_group"/>
+ </buttongroups>
 </ui>

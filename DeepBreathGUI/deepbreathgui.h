@@ -60,6 +60,8 @@ private slots:
 
     void on_mode_combo_box_currentIndexChanged(int index);
 
+    void on_is_stickers_checkbox_clicked();
+
 private:
     Ui::DeepBreath *ui;
 
