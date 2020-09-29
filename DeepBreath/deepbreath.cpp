@@ -41,6 +41,8 @@ void DeepBreath::setTransparentBackroundToText() {
     ui->mid1_text->viewport()->setAutoFillBackground(false);
     ui->mid2_text->viewport()->setAutoFillBackground(false);
     ui->mid3_text->viewport()->setAutoFillBackground(false);
+
+    enableLocations(false);
 }
 
 /* Draw Lines of distances to choose */
@@ -266,6 +268,63 @@ void DeepBreath::setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& 
     }
 }
 
+/* Enable or disable distances selection */
+void DeepBreath::enableDistances(bool is_enabled) {
+    ui->left_right_checkbox->setEnabled(is_enabled);
+    ui->left_mid1_checkbox->setEnabled(is_enabled);
+    ui->left_mid2_checkbox->setEnabled(is_enabled);
+    ui->left_mid3_checkbox->setEnabled(is_enabled);
+    ui->right_mid1_checkbox->setEnabled(is_enabled);
+    ui->right_mid2_checkbox->setEnabled(is_enabled);
+    ui->right_mid3_checkbox->setEnabled(is_enabled);
+    ui->mid1_mid2_checkbox->setEnabled(is_enabled);
+    ui->mid2_mid3_checkbox->setEnabled(is_enabled);
+    ui->mid1_mid3_checkbox->setEnabled(is_enabled);
+
+    ui->left_text->setEnabled(is_enabled);
+    ui->right_text->setEnabled(is_enabled);
+    ui->mid1_text->setEnabled(is_enabled);
+    ui->mid2_text->setEnabled(is_enabled);
+    ui->mid3_text->setEnabled(is_enabled);
+
+    ui->distances_text->setEnabled(is_enabled);
+}
+
+/* Enable or disable locations selection */
+void DeepBreath::enableLocations(bool is_enabled) {
+    //set enabled:
+    ui->left_loc_checkbox->setEnabled(is_enabled);
+    ui->right_loc_checkbox->setEnabled(is_enabled);
+    ui->mid1_loc_checkbox->setEnabled(is_enabled);
+    ui->mid2_loc_checkbox->setEnabled(is_enabled);
+    ui->mid3_loc_checkbox->setEnabled(is_enabled);
+
+    ui->locations_text->setEnabled(is_enabled);
+}
+
+/* Enable or disable menu */
+void DeepBreath::enableMenu(bool is_enabled) {
+    ui->dimension_text->setEnabled(is_enabled);
+    ui->dimension_2d_radio_button->setEnabled(is_enabled);
+    ui->dimension_3d_radio_button->setEnabled(is_enabled);
+
+    ui->mode_text->setEnabled(is_enabled);
+    ui->mode_combo_box->setEnabled(is_enabled);
+
+    ui->num_markers_text->setEnabled(is_enabled);
+    ui->num_markers_combo_box->setEnabled(is_enabled);
+
+    ui->is_stickers_checkbox->setEnabled(is_enabled);
+    ui->b_color_radio_button->setEnabled(is_enabled);
+    ui->g_color_radio_button->setEnabled(is_enabled);
+    ui->y_color_radio_button->setEnabled(is_enabled);
+}
+
+/* ==================== *
+    CLICK HANDLERS:
+ * ==================== */
+
+/*  DISTANCES CHECKBOXES   */
 void DeepBreath::on_left_mid1_checkbox_clicked()
 {
    this->update();
@@ -316,6 +375,9 @@ void DeepBreath::on_mid2_mid3_checkbox_clicked()
     this->update();
 }
 
+
+/*  STREAM SOURCE BUTTONS   */
+
 void DeepBreath::on_start_camera_button_clicked()
 {
     if(!is_camera_on) {
@@ -328,6 +390,10 @@ void DeepBreath::on_start_camera_button_clicked()
         if(is_run_from_file) {
             //TODO: Show alert "This will close the file stream. Continue?"
             //TODO: Close file stream
+
+            //turn streaming off and change title
+            ui->load_file_button->setText("Load File...");
+
             //hide and disable pause button:
             ui->pause_button->setVisible(false);
             ui->pause_button->setEnabled(false);
@@ -336,6 +402,9 @@ void DeepBreath::on_start_camera_button_clicked()
         ui->start_camera_button->setText("Stop Camera");
         ui->record_button->setVisible(true);
         ui->record_button->setEnabled(true);
+
+        //diable change of menu:
+        enableMenu(false);
         is_camera_on = true;
     }
     else {
@@ -347,6 +416,9 @@ void DeepBreath::on_start_camera_button_clicked()
         ui->start_camera_button->setText("Start Camera");
         ui->record_button->setEnabled(false);
         ui->record_button->setVisible(false);
+
+        //enable change of menu:
+        enableMenu(true);
         is_camera_on = false;
     }
 }
@@ -382,10 +454,20 @@ void DeepBreath::on_load_file_button_clicked()
         //show and enable pause button
         ui->pause_button->setVisible(true);
         ui->pause_button->setEnabled(true);
+
+        //turn streaming off and change title
+        ui->load_file_button->setText("Stop");
+
+        //diable change of menu:
+        enableMenu(false);
         is_run_from_file = true;
     }
     else {
-        //TODO: Close current file and open new file.
+        //turn streaming off and change title
+        ui->load_file_button->setText("Load File...");
+        //enable change of menu:
+        enableMenu(true);
+        is_run_from_file = false;
     }
 }
 
@@ -398,5 +480,34 @@ void DeepBreath::on_pause_button_clicked()
     else {
         ui->pause_button->setText("Pause");
         is_pause = false;
+    }
+}
+
+void DeepBreath::on_mode_combo_box_currentIndexChanged(int index)
+{
+    switch(index) {
+        case 0: //Distances
+            enableDistances(true);
+            enableLocations(false);
+            break;
+        case 1: //Locations
+            enableDistances(false);
+            enableLocations(true);
+            break;
+        case 2: //Fourier
+            enableDistances(true);
+            enableLocations(false);
+            break;
+        case 3: //Volume
+            enableDistances(false);
+            enableLocations(false);
+            ui->dimension_3d_radio_button->setChecked(true);
+            ui->dimension_2d_radio_button->setEnabled(false);
+            ui->is_stickers_checkbox->setEnabled(false);
+            break;
+        case 4: //No Graph
+            enableDistances(true);
+            enableLocations(false);
+            break;
     }
 }

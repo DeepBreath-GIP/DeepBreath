@@ -58,6 +58,8 @@ private slots:
 
     void on_pause_button_clicked();
 
+    void on_mode_combo_box_currentIndexChanged(int index);
+
 private:
     Ui::DeepBreath *ui;
 
@@ -69,5 +71,8 @@ private:
     void setTransparentBackroundToText();
     void drawDistancesLines();
     void setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos, Distance dist);
+    void enableDistances(bool is_enabled);
+    void enableLocations(bool is_enabled);
+    void enableMenu(bool is_enabled);
 };
 #endif // DEEPBREATH_H
