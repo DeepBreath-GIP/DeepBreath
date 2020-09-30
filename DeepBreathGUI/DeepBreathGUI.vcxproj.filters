@@ -38,6 +38,45 @@
     <Filter Include="Header Files\include">
       <UniqueIdentifier>{4c5cb985-642f-4503-a802-e2a085d871de}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\librealsense">
+      <UniqueIdentifier>{7fff8f3b-f201-49dd-b206-a7d943e2fefc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\include">
+      <UniqueIdentifier>{29a16c4b-7914-48cc-8a3b-df90f646f4c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\include\librealsense2">
+      <UniqueIdentifier>{d1b77001-d843-456f-be57-55b2c65419a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\include\librealsense2\hpp">
+      <UniqueIdentifier>{5c10237b-a741-46ee-ab32-1bae82d759ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\include\librealsense2\h">
+      <UniqueIdentifier>{63308e9b-5d63-447e-9bd2-be40dea9079d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\include\librealsense2-gl">
+      <UniqueIdentifier>{3d585d4a-b7de-4f55-803c-ee63b183bfa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\third party">
+      <UniqueIdentifier>{76e59975-e2f3-4e39-a643-91b898809b43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\third party\Imgui">
+      <UniqueIdentifier>{7fed51bc-b31d-4586-814c-cd7be97ca0ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\third party\glfw">
+      <UniqueIdentifier>{758bcc0c-7d40-4084-8c65-83f13ed015a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\third party\glfw\include">
+      <UniqueIdentifier>{d35be385-499b-4814-a04c-6e58882e9348}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\third party\glad">
+      <UniqueIdentifier>{f991a641-f103-4aa5-99cd-8982da6d9e55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\third party\tinyfiledialogs">
+      <UniqueIdentifier>{ae4f2e10-dd55-4c9b-a791-ab7c0eb0a423}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\librealsense\common">
+      <UniqueIdentifier>{34272a21-f368-4aca-b8ef-a1d8ef97bae7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="deepbreathgui.cpp">
@@ -47,6 +86,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\db_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="db_camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -70,6 +112,123 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\db_config.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rs.h">
+      <Filter>Header Files\librealsense\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rs.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rsutil.h">
+      <Filter>Header Files\librealsense\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rs_advanced_mode.h">
+      <Filter>Header Files\librealsense\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rs_advanced_mode.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_context.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_device.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_export.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_frame.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_internal.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_options.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_pipeline.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_processing.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_record_playback.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_sensor.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_types.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_advanced_mode_command.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_config.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_context.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_device.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_frame.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_internal.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_option.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_pipeline.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_processing.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_record_playback.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_sensor.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_types.h">
+      <Filter>Header Files\librealsense\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2-gl\rs_processing_gl.h">
+      <Filter>Header Files\librealsense\include\librealsense2-gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2-gl\rs_processing_gl.hpp">
+      <Filter>Header Files\librealsense\include\librealsense2-gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\third-party\stb_image_write.h">
+      <Filter>Header Files\librealsense\third party</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\third-party\imgui\imgui.h">
+      <Filter>Header Files\librealsense\third party\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\third-party\imgui\imgui_impl_glfw.h">
+      <Filter>Header Files\librealsense\third party\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\third-party\glfw\include\GLFW\glfw3.h">
+      <Filter>Header Files\librealsense\third party\glfw\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\third-party\glad\glad\glad.h">
+      <Filter>Header Files\librealsense\third party\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.h">
+      <Filter>Header Files\librealsense\third party\tinyfiledialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\librealsense\common\os.h">
+      <Filter>Header Files\librealsense\common</Filter>
+    </ClInclude>
+    <ClInclude Include="db_camera.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\utilities.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
   </ItemGroup>

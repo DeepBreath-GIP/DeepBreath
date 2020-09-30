@@ -240,13 +240,19 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 }
 
 void DeepBreathConfig::set_default() {
-	DeepBreathConfig::dimension = dimension::D2;
-	DeepBreathConfig::mode = graph_mode::DISTANCES;
-	DeepBreathConfig::dists_included[distances::left_mid1] = DeepBreathConfig::dists_included[distances::left_mid2] = DeepBreathConfig::dists_included[distances::left_right] =
-		DeepBreathConfig::dists_included[distances::mid1_mid2] = DeepBreathConfig::dists_included[distances::mid1_mid3] = DeepBreathConfig::dists_included[distances::right_mid1] =
-		DeepBreathConfig::dists_included[distances::right_mid2] = false;
-	DeepBreathConfig::dists_included[distances::left_mid3] = DeepBreathConfig::dists_included[distances::right_mid3] = DeepBreathConfig::dists_included[distances::mid2_mid3] = true;
-	num_of_stickers = 5;
-	color = sticker_color::YELLOW;
-	calc_2d_by_cm = false;
+	this->dimension = dimension::D2;
+	this->mode = graph_mode::DISTANCES;
+	for (int distInt = distances::left_mid1; distInt != distances::ddummy; distInt++) {
+		distances d = static_cast<distances>(distInt);
+		this->dists_included[d] = false;
+	}
+	this->dists_included[distances::left_mid3] = true;
+	this->dists_included[distances::right_mid3] = true;
+	this->dists_included[distances::left_mid2] = true;
+	this->dists_included[distances::right_mid2] = true;
+	this->dists_included[distances::mid2_mid3] = true;
+	this->num_of_stickers = 4;
+	this->color = sticker_color::YELLOW;
+	this->calc_2d_by_cm = false;
+	this->is_stickers = true;
 }

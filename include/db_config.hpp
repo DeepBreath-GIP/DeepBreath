@@ -50,7 +50,7 @@ enum distances {
 
 /*
 	Configuration details extracted from config.txt
-	@ mode: indeicates the kind of graph to be presented.
+	@ mode: indicates the kind of graph to be presented.
 		distances - tracking a given set of distances. bpm will be calculated using the average of said set.
 		location - tracking the location of a given set of stickers. (TODO: no bpm calculated for this mode?)
 	@ stickers_included: set of stickers to include.

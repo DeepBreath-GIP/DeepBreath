@@ -64,6 +64,7 @@
     <TargetName>DeepBreathGUI</TargetName>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
+    <LibraryPath>$(OPEN_CV)\build\lib\Release\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtInstall>msvc2019_64</QtInstall>
@@ -78,7 +79,7 @@
   </ImportGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;.;release;/include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;.;release;/include;..\include;..\dependencies\librealsense\include;$(OPEN_CV)\build\install\include\;..\dependencies\librealsense\include\librealsense2\hpp;..\dependencies\librealsense\include\librealsense2\h;..\dependencies\librealsense\common;..\dependencies\librealsense\third-party\tinyfiledialogs;..\dependencies\librealsense\third-party;..\dependencies\librealsense\third-party\glad;..\dependencies\librealsense\third-party\imgui;..\dependencies\librealsense\third-party\glfw\include;..\dependencies;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>release\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -87,18 +88,18 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>release\</ObjectFileName>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;NDEBUG;QT_NO_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN64;QT_NO_FOREACH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>
       </ProgramDataBaseFileName>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shell32.lib;..\dependencies\realsense2-gl.lib;..\dependencies\uvc_fw.lib;..\dependencies\realsense2.lib;..\dependencies\uvc_fw.res;..\dependencies\glfw3.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\openssl\lib;C:\Utils\my_sql\mysql-5.7.25-winx64\lib;C:\Utils\postgresql\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -189,6 +190,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\db_config.cpp" />
+    <ClCompile Include="db_camera.cpp" />
     <ClCompile Include="deepbreathgui.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -219,7 +221,46 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\dependencies\librealsense\common\os.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2-gl\rs_processing_gl.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2-gl\rs_processing_gl.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_context.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_device.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_export.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_frame.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_internal.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_options.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_pipeline.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_processing.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_record_playback.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_sensor.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\hpp\rs_types.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_advanced_mode_command.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_config.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_context.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_device.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_frame.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_internal.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_option.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_pipeline.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_processing.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_record_playback.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_sensor.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\h\rs_types.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rs.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rs.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rsutil.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rs_advanced_mode.h" />
+    <ClInclude Include="..\dependencies\librealsense\include\librealsense2\rs_advanced_mode.hpp" />
+    <ClInclude Include="..\dependencies\librealsense\third-party\glad\glad\glad.h" />
+    <ClInclude Include="..\dependencies\librealsense\third-party\glfw\include\GLFW\glfw3.h" />
+    <ClInclude Include="..\dependencies\librealsense\third-party\imgui\imgui.h" />
+    <ClInclude Include="..\dependencies\librealsense\third-party\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\dependencies\librealsense\third-party\stb_image_write.h" />
+    <ClInclude Include="..\dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="..\include\db_config.hpp" />
+    <ClInclude Include="..\include\utilities.h" />
+    <ClInclude Include="db_camera.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

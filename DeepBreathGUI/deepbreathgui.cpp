@@ -1,3 +1,10 @@
+
+/* Deep Breath App */
+
+/* By Nili Furman (Based on Realtime Breathing), supervised by Alon Zrivin and Yaron Honen from GIP Lab
+   of the Technion - Israel Institute of Technology
+   For the use of Ichilov hospital in Israel. */
+
 #include "deepbreathgui.h"
 #include "ui_deepbreathgui.h"
 #include <Qt>
@@ -7,6 +14,27 @@
 
 /* DeepBreath Files */
 #include "db_config.hpp"
+#include "db_camera.hpp"
+//#include "utilities.h"
+
+#define FILE_ON_REPEAT false
+//extern void init_logFile(const char* filename, int num_of_stickers, std::string D2units);
+//extern std::ofstream logFile;
+
+// copied os.h because project does comile when including it (seems to be due to double inclusion of rendering.h)
+// *****	START of os.h copy	*****
+
+namespace rs2
+{
+	// Wrapper for cross-platform dialog control
+	enum file_dialog_mode {
+		open_file = (1 << 0),
+		save_file = (1 << 1),
+	};
+	const char* file_dialog_open(file_dialog_mode flags, const char* filters, const char* default_path, const char* default_name);
+}
+
+// *****	END of os.h copy	*****
 
 //NOTE FOR SELF:
 //To Debug on release mode:
@@ -417,51 +445,91 @@ void DeepBreath::enableMenu(bool is_enabled) {
 /*  DISTANCES CHECKBOXES   */
 void DeepBreath::on_left_mid1_checkbox_clicked()
 {
-   this->update();
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::left_mid1;
+	user_cfg.dists_included[dist] = true;
+
+	this->update();
 }
 
 void DeepBreath::on_left_right_checkbox_clicked()
 {
-    this->update();
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::left_right;
+	user_cfg.dists_included[dist] = ui->left_mid1_checkbox->isChecked();
+
+	this->update();
 }
 
 void DeepBreath::on_right_mid1_checkbox_clicked()
 {
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::right_mid1;
+	user_cfg.dists_included[dist] = ui->right_mid1_checkbox->isChecked();
+
     this->update();
 }
 
 void DeepBreath::on_left_mid2_checkbox_clicked()
 {
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::left_mid2;
+	user_cfg.dists_included[dist] = ui->left_mid2_checkbox->isChecked();
+
     this->update();
 }
 
 void DeepBreath::on_mid1_mid2_checkbox_clicked()
 {
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::left_mid1;
+	user_cfg.dists_included[dist] = ui->mid1_mid2_checkbox->isChecked();
+
     this->update();
 }
 
 void DeepBreath::on_right_mid2_checkbox_clicked()
 {
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::right_mid2;
+	user_cfg.dists_included[dist] = ui->right_mid2_checkbox->isChecked();
+
     this->update();
 }
 
 void DeepBreath::on_right_mid3_checkbox_clicked()
 {
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::right_mid3;
+	user_cfg.dists_included[dist] = ui->right_mid3_checkbox->isChecked();
+
     this->update();
 }
 
 void DeepBreath::on_left_mid3_checkbox_clicked()
 {
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::left_mid3;
+	user_cfg.dists_included[dist] = ui->left_mid3_checkbox->isChecked();
+
     this->update();
 }
 
 void DeepBreath::on_mid1_mid3_checkbox_clicked()
 {
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::mid1_mid3;
+	user_cfg.dists_included[dist] = ui->mid1_mid3_checkbox->isChecked();
+
     this->update();
 }
 
 void DeepBreath::on_mid2_mid3_checkbox_clicked()
 {
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	distances dist = distances::mid2_mid3;
+	user_cfg.dists_included[dist] = ui->mid2_mid3_checkbox->isChecked();
+
     this->update();
 }
 
@@ -470,6 +538,8 @@ void DeepBreath::on_mid2_mid3_checkbox_clicked()
 
 void DeepBreath::on_start_camera_button_clicked()
 {
+	//DeepBreathCamera camera = DeepBreathCamera::getInstance();
+
     if(!is_camera_on) {
         //if camera is off:
         // - disable file stream if open
@@ -480,6 +550,10 @@ void DeepBreath::on_start_camera_button_clicked()
         if(is_run_from_file) {
             //TODO: Show alert "This will close the file stream. Continue?"
             //TODO: Close file stream
+		/*	camera.cfg.disable_all_streams();
+			camera.cfg = rs2::config();
+			camera.pipe.stop();*/
+			//TODO: Close log file
 
             //turn streaming off and change title
             ui->load_file_button->setText("Load File...");
@@ -495,6 +569,20 @@ void DeepBreath::on_start_camera_button_clicked()
 
         //diable change of menu:
         enableMenu(false);
+		enableDistances(false);
+		enableLocations(false);
+
+		//start stream:
+		//camera.cfg.enable_stream(RS2_STREAM_DEPTH);
+		//camera.cfg.enable_stream(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
+		//camera.pipe.start(camera.cfg);
+		//start_time = clock(); //TODO: put in class
+		//TODO:
+		//frame_manager.reset(); // reset FrameManager for additional processing
+		//graph.reset(frame_manager.manager_start_time);
+		//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+		//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+
         is_camera_on = true;
     }
     else {
@@ -509,6 +597,8 @@ void DeepBreath::on_start_camera_button_clicked()
 
         //enable change of menu:
         enableMenu(true);
+		enableDistances(true);
+		enableLocations(true);
         is_camera_on = false;
     }
 }
@@ -550,14 +640,18 @@ void DeepBreath::on_load_file_button_clicked()
 
         //diable change of menu:
         enableMenu(false);
+		enableDistances(false);
+		enableLocations(false);
         is_run_from_file = true;
     }
     else {
         //turn streaming off and change title
         ui->load_file_button->setText("Load File...");
         //enable change of menu:
-        enableMenu(true);
-        is_run_from_file = false;
+		enableMenu(true);
+		enableDistances(true);
+		enableLocations(true);
+		is_run_from_file = false;
     }
 }
 
