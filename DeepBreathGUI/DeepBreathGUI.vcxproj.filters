@@ -77,6 +77,24 @@
     <Filter Include="Header Files\librealsense\common">
       <UniqueIdentifier>{34272a21-f368-4aca-b8ef-a1d8ef97bae7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\rs">
+      <UniqueIdentifier>{19d9a1a1-ddf3-4a12-9340-687e4e5add61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\third party">
+      <UniqueIdentifier>{8a452407-ca46-4d6e-87cc-5886fa0fd5bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\third party\Imgui">
+      <UniqueIdentifier>{1ca2f1ea-5241-4a0c-aaea-ca5e9bb2331f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\third party\glfw">
+      <UniqueIdentifier>{5f09a48e-846f-44e6-962d-9dad59089f82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\third party\glad">
+      <UniqueIdentifier>{db32c710-10b9-4f49-bbb6-1657aeeeba62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\third party\tinyfiledialogs">
+      <UniqueIdentifier>{eeaef630-ae96-46e9-a395-e3eee2859131}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="deepbreathgui.cpp">
@@ -90,6 +108,24 @@
     </ClCompile>
     <ClCompile Include="db_camera.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\librealsense\common\os.cpp">
+      <Filter>Source Files\rs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\librealsense\third-party\imgui\imgui.cpp">
+      <Filter>Source Files\third party\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\librealsense\third-party\imgui\imgui_draw.cpp">
+      <Filter>Source Files\third party\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\librealsense\third-party\imgui\imgui_impl_glfw.cpp">
+      <Filter>Source Files\third party\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\librealsense\third-party\glad\glad.c">
+      <Filter>Source Files\third party\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c">
+      <Filter>Source Files\third party\tinyfiledialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

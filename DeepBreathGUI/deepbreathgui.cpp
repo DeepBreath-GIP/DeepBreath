@@ -538,7 +538,7 @@ void DeepBreath::on_mid2_mid3_checkbox_clicked()
 
 void DeepBreath::on_start_camera_button_clicked()
 {
-	//DeepBreathCamera camera = DeepBreathCamera::getInstance();
+	DeepBreathCamera camera = DeepBreathCamera::getInstance();
 
     if(!is_camera_on) {
         //if camera is off:
@@ -546,13 +546,12 @@ void DeepBreath::on_start_camera_button_clicked()
         // - turn camera on
         // - change button's title
         // - show and enable recording
-        //TODO: Turn camera on
         if(is_run_from_file) {
             //TODO: Show alert "This will close the file stream. Continue?"
-            //TODO: Close file stream
-		/*	camera.cfg.disable_all_streams();
+            //Close file stream (currently set in cfg)
+			camera.cfg.disable_all_streams();
 			camera.cfg = rs2::config();
-			camera.pipe.stop();*/
+			camera.pipe.stop();
 			//TODO: Close log file
 
             //turn streaming off and change title
@@ -573,9 +572,9 @@ void DeepBreath::on_start_camera_button_clicked()
 		enableLocations(false);
 
 		//start stream:
-		//camera.cfg.enable_stream(RS2_STREAM_DEPTH);
-		//camera.cfg.enable_stream(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
-		//camera.pipe.start(camera.cfg);
+		camera.cfg.enable_stream(RS2_STREAM_DEPTH);
+		camera.cfg.enable_stream(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
+		camera.pipe.start(camera.cfg);
 		//start_time = clock(); //TODO: put in class
 		//TODO:
 		//frame_manager.reset(); // reset FrameManager for additional processing
@@ -590,7 +589,12 @@ void DeepBreath::on_start_camera_button_clicked()
         // - turn camera off
         // - change button's title
         // - hide and disable recording
-        //TODO: Turn camera off
+        //Turn camera off:
+		camera.cfg.disable_stream(RS2_STREAM_DEPTH);
+		camera.cfg.disable_stream(RS2_STREAM_COLOR);
+		camera.pipe.stop();
+		//TODO: close log file
+
         ui->start_camera_button->setText("Start Camera");
         ui->record_button->setEnabled(false);
         ui->record_button->setVisible(false);
@@ -619,6 +623,8 @@ void DeepBreath::on_record_button_clicked()
 
 void DeepBreath::on_load_file_button_clicked()
 {
+	DeepBreathCamera camera = DeepBreathCamera::getInstance();
+
     if(!is_run_from_file) {
         //if camera is on, show alert and stop stream
         if(is_camera_on) {
@@ -631,6 +637,17 @@ void DeepBreath::on_load_file_button_clicked()
             }
         }
         //TODO: Load File
+		camera.filename = rs2::file_dialog_open(rs2::file_dialog_mode::open_file, "ROS-bag\0*.bag\0", NULL, NULL);
+		if (camera.filename) {
+			camera.cfg.enable_device_from_file(camera.filename, FILE_ON_REPEAT);
+			//start_time = clock();
+			camera.pipe.start(camera.cfg); //File will be opened in read mode at this point
+			//frame_manager.reset(); // reset FrameManager for additional processing
+			//graph.reset(frame_manager.manager_start_time);
+			//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+			//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+		}
+
         //show and enable pause button
         ui->pause_button->setVisible(true);
         ui->pause_button->setEnabled(true);
@@ -647,6 +664,11 @@ void DeepBreath::on_load_file_button_clicked()
     else {
         //turn streaming off and change title
         ui->load_file_button->setText("Load File...");
+
+		//show and enable pause button
+		ui->pause_button->setVisible(false);
+		ui->pause_button->setEnabled(false);
+
         //enable change of menu:
 		enableMenu(true);
 		enableDistances(true);

@@ -88,7 +88,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>release\</ObjectFileName>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN64;QT_NO_FOREACH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_WIN32;WIN64;QT_NO_FOREACH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>
       </ProgramDataBaseFileName>
@@ -189,6 +189,12 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\dependencies\librealsense\common\os.cpp" />
+    <ClCompile Include="..\dependencies\librealsense\third-party\glad\glad.c" />
+    <ClCompile Include="..\dependencies\librealsense\third-party\imgui\imgui.cpp" />
+    <ClCompile Include="..\dependencies\librealsense\third-party\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\dependencies\librealsense\third-party\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="..\src\db_config.cpp" />
     <ClCompile Include="db_camera.cpp" />
     <ClCompile Include="deepbreathgui.cpp" />

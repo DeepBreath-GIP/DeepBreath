@@ -13,6 +13,7 @@
 		one will be used to align to depth viewport and the other to color.
 		creating align object is an expensive operation, should only be done once - in the constructor
 	@ fs: frameset object updated by polling for frames.
+	@ filename: will hold the name of an existing file chosen bu user to analyze.
 */
 class DeepBreathCamera {
 
@@ -26,6 +27,8 @@ public:
 	rs2::align depth_align;
 	rs2::align color_align;
 	rs2::frameset fs;
+
+	const char* filename;
 
 protected:
 
