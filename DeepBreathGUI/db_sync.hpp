@@ -8,6 +8,7 @@
 	Synchronization object for frame polling.
 	@ poll_frame_cond - condition variable used for thread awakening
 	@ m_poll_frame - mutex to perform the modification while the lock is held
+	@ is_poll_frame - boolean (atomic) to indicate when to stop polling
 */
 class DeepBreathSync {
 

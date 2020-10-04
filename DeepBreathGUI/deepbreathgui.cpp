@@ -697,6 +697,11 @@ void DeepBreath::on_load_file_button_clicked()
 				enableMenu(false);
 				enableDistances(false);
 				enableLocations(false);
+
+				//update condition variable to start polling:
+				DeepBreathSync::is_poll_frame = true;
+				DeepBreathSync::cv_poll_frame.notify_one();
+
 				is_run_from_file = true;
 
 			}
@@ -725,6 +730,10 @@ void DeepBreath::on_load_file_button_clicked()
 		enableMenu(true);
 		enableDistances(true);
 		enableLocations(true);
+
+		//stop frame polling:
+		DeepBreathSync::is_poll_frame = false;
+
 		is_run_from_file = false;
     }
 }
