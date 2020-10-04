@@ -2,6 +2,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <atomic>
 
 /*
 	Synchronization object for frame polling.
@@ -12,7 +13,8 @@ class DeepBreathSync {
 
 public:
 
-	static std::condition_variable poll_frame_cond;
+	static std::condition_variable cv_poll_frame;
 	static std::mutex m_poll_frame;
+	static std::atomic<bool> is_poll_frame;
 
 };

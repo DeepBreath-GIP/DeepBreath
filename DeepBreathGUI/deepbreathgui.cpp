@@ -16,6 +16,7 @@
 /* DeepBreath Files */
 #include "db_config.hpp"
 #include "db_camera.hpp"
+#include "db_sync.hpp"
 //#include "utilities.h"
 
 #define FILE_ON_REPEAT false
@@ -583,15 +584,20 @@ void DeepBreath::on_start_camera_button_clicked()
 		enableLocations(false);
 
 		//start stream:
-		camera.cfg.enable_stream(RS2_STREAM_DEPTH);
-		camera.cfg.enable_stream(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
-		camera.pipe.start(camera.cfg);
+		//camera.cfg.enable_stream(RS2_STREAM_DEPTH);
+		//camera.cfg.enable_stream(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
+		//camera.pipe.start(camera.cfg);
+
 		//start_time = clock(); //TODO: put in class
 		//TODO:
 		//frame_manager.reset(); // reset FrameManager for additional processing
 		//graph.reset(frame_manager.manager_start_time);
 		//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
 		//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+
+		//update condition variable to start polling:
+		DeepBreathSync::is_poll_frame = true;
+		DeepBreathSync::cv_poll_frame.notify_one();
 
         is_camera_on = true;
     }
@@ -601,14 +607,17 @@ void DeepBreath::on_start_camera_button_clicked()
         // - change button's title
         // - hide and disable recording
         //Turn camera off:
-		camera.cfg.disable_stream(RS2_STREAM_DEPTH);
-		camera.cfg.disable_stream(RS2_STREAM_COLOR);
-		camera.pipe.stop();
+		//camera.cfg.disable_stream(RS2_STREAM_DEPTH);
+		//camera.cfg.disable_stream(RS2_STREAM_COLOR);
+		//camera.pipe.stop();
 		//TODO: close log file
 
         ui->start_camera_button->setText("Start Camera");
         ui->record_button->setEnabled(false);
         ui->record_button->setVisible(false);
+
+		//stop frame polling:
+		DeepBreathSync::is_poll_frame = false;
 
         //enable change of menu:
         enableMenu(true);
