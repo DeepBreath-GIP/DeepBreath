@@ -127,6 +127,9 @@
     <ClCompile Include="..\dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c">
       <Filter>Source Files\third party\tinyfiledialogs</Filter>
     </ClCompile>
+    <ClCompile Include="db_sync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="deepbreathgui.h">
@@ -266,6 +269,9 @@
     </ClInclude>
     <ClInclude Include="..\include\utilities.h">
       <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="db_sync.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

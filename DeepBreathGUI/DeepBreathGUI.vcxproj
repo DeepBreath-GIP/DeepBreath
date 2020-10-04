@@ -197,6 +197,7 @@
     <ClCompile Include="..\dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="..\src\db_config.cpp" />
     <ClCompile Include="db_camera.cpp" />
+    <ClCompile Include="db_sync.cpp" />
     <ClCompile Include="deepbreathgui.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -267,6 +268,7 @@
     <ClInclude Include="..\include\db_config.hpp" />
     <ClInclude Include="..\include\utilities.h" />
     <ClInclude Include="db_camera.hpp" />
+    <ClInclude Include="db_sync.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
