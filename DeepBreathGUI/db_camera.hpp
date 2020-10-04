@@ -2,6 +2,8 @@
 
 #include <librealsense2/rs.hpp>
 #include <chrono>
+#include <map>
+//#include "example.hpp"
 
 /*
 	Realsense camera objects used by app.
@@ -9,6 +11,7 @@
 	@ colorizer: helper to colorize depth images.
 	@ pipe: pipeline to easily configure and start the camera.
 	@ cfg:
+	@ 
 	@ depth_align, color_align: define two align objects.
 		one will be used to align to depth viewport and the other to color.
 		creating align object is an expensive operation, should only be done once - in the constructor

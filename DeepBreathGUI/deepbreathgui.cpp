@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QPen>
 #include <QLine>
+#include <QMessageBox>
 
 /* DeepBreath Files */
 #include "db_config.hpp"
@@ -548,19 +549,29 @@ void DeepBreath::on_start_camera_button_clicked()
         // - show and enable recording
         if(is_run_from_file) {
             //TODO: Show alert "This will close the file stream. Continue?"
-            //Close file stream (currently set in cfg)
-			camera.cfg.disable_all_streams();
-			camera.cfg = rs2::config();
-			camera.pipe.stop();
-			//TODO: Close log file
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(this, "Start Camera", "This action will stop the file stream. Continue?",
+				QMessageBox::Ok | QMessageBox::Cancel);
 
-            //turn streaming off and change title
-            ui->load_file_button->setText("Load File...");
+			if (reply == QMessageBox::Ok) {
+				//Close file stream (currently set in cfg)
+				camera.cfg.disable_all_streams();
+				camera.cfg = rs2::config();
+				camera.pipe.stop();
+				//TODO: Close log file
 
-            //hide and disable pause button:
-            ui->pause_button->setVisible(false);
-            ui->pause_button->setEnabled(false);
-            is_run_from_file = false;
+				//turn streaming off and change title
+				ui->load_file_button->setText("Load File...");
+
+				//hide and disable pause button:
+				ui->pause_button->setVisible(false);
+				ui->pause_button->setEnabled(false);
+				is_run_from_file = false;
+			}
+			if (reply == QMessageBox::Cancel)
+			{
+				return;
+			}
         }
         ui->start_camera_button->setText("Stop Camera");
         ui->record_button->setVisible(true);
@@ -609,13 +620,25 @@ void DeepBreath::on_start_camera_button_clicked()
 
 void DeepBreath::on_record_button_clicked()
 {
+	DeepBreathCamera camera = DeepBreathCamera::getInstance();
+
     if(!is_recording) {
         //turn recording on and change title
+		camera.pipe.stop(); // Stop the pipeline with the default configuration
+		const char* out_filename = rs2::file_dialog_open(rs2::file_dialog_mode::save_file, "ROS-bag\0*.bag\0", NULL, NULL);
+		camera.cfg.enable_record_to_file(out_filename);
+		camera.pipe.start(camera.cfg); //File will be opened at this point
+
         ui->record_button->setText("Stop Recording");
         is_recording = true;
     }
     else {
         //turn recording off and change title
+		camera.cfg.disable_all_streams();
+		camera.cfg = rs2::config();
+		camera.pipe.stop(); // Stop the pipeline that holds the file and the recorder
+		camera.pipe.start(camera.cfg);
+
         ui->record_button->setText("Record");
         is_recording = false;
     }
@@ -628,42 +651,62 @@ void DeepBreath::on_load_file_button_clicked()
     if(!is_run_from_file) {
         //if camera is on, show alert and stop stream
         if(is_camera_on) {
-            //TODO: Show alert and stop camera stream
-            //trigger stop camera click (and hide record button):
-            ui->start_camera_button->click();
-            if(is_recording) {
-                //trigger stop recording:
-                ui->record_button->click();
-            }
+            //Show alert and stop camera stream if user clicked OK
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(this, "Load File", "This action will stop the camera stream. Continue?",
+				QMessageBox::Ok | QMessageBox::Cancel);
+
+			if (reply == QMessageBox::Ok) {
+				if (is_recording) {
+					//trigger stop recording:
+					ui->record_button->click();
+				}
+
+				//trigger stop camera click (and hide record button):
+				ui->start_camera_button->click();
+
+				//Load File
+				camera.filename = rs2::file_dialog_open(rs2::file_dialog_mode::open_file, "ROS-bag\0*.bag\0", NULL, NULL);
+				if (camera.filename) {
+					camera.cfg.enable_device_from_file(camera.filename, FILE_ON_REPEAT);
+					//start_time = clock();
+					camera.pipe.start(camera.cfg); //File will be opened in read mode at this point
+					//frame_manager.reset(); // reset FrameManager for additional processing
+					//graph.reset(frame_manager.manager_start_time);
+					//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+					//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+				}
+
+				//show and enable pause button
+				ui->pause_button->setVisible(true);
+				ui->pause_button->setEnabled(true);
+
+				//turn streaming off and change title
+				ui->load_file_button->setText("Stop");
+
+				//diable change of menu:
+				enableMenu(false);
+				enableDistances(false);
+				enableLocations(false);
+				is_run_from_file = true;
+
+			}
+			if (reply == QMessageBox::Cancel)
+			{
+				return;
+			}
         }
-        //TODO: Load File
-		camera.filename = rs2::file_dialog_open(rs2::file_dialog_mode::open_file, "ROS-bag\0*.bag\0", NULL, NULL);
-		if (camera.filename) {
-			camera.cfg.enable_device_from_file(camera.filename, FILE_ON_REPEAT);
-			//start_time = clock();
-			camera.pipe.start(camera.cfg); //File will be opened in read mode at this point
-			//frame_manager.reset(); // reset FrameManager for additional processing
-			//graph.reset(frame_manager.manager_start_time);
-			//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
-			//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
-		}
-
-        //show and enable pause button
-        ui->pause_button->setVisible(true);
-        ui->pause_button->setEnabled(true);
-
-        //turn streaming off and change title
-        ui->load_file_button->setText("Stop");
-
-        //diable change of menu:
-        enableMenu(false);
-		enableDistances(false);
-		enableLocations(false);
-        is_run_from_file = true;
     }
     else {
         //turn streaming off and change title
         ui->load_file_button->setText("Load File...");
+
+		camera.cfg.disable_all_streams();
+		camera.cfg = rs2::config();
+		camera.pipe.stop();
+		//reset filename argument:
+		camera.filename = nullptr;
+		//logFile.close();
 
 		//show and enable pause button
 		ui->pause_button->setVisible(false);
@@ -679,12 +722,39 @@ void DeepBreath::on_load_file_button_clicked()
 
 void DeepBreath::on_pause_button_clicked()
 {
+	DeepBreathCamera camera = DeepBreathCamera::getInstance();
+
     if(!is_pause) {
         ui->pause_button->setText("Continue");
+
+		rs2::device device = camera.pipe.get_active_profile().get_device();
+		rs2::playback playback = device.as<rs2::playback>();
+		playback.pause();
+
+		//freez the last frame while pausing:
+		if (camera.fs.size() > 0) {
+
+			auto d = camera.fs.get_depth_frame();
+			auto c = camera.fs.get_color_frame();
+
+			std::map<int, rs2::frame> freeze_frames;
+			freeze_frames[0] = camera.colorizer.process(c);
+			freeze_frames[1] = camera.colorizer.process(d);
+
+			// present last collected frame
+			/*app.show(freeze_frames);*/
+		}
+
         is_pause = true;
     }
     else {
         ui->pause_button->setText("Pause");
+
+		is_pause = false;
+		rs2::device device = camera.pipe.get_active_profile().get_device();
+		rs2::playback playback = device.as<rs2::playback>();
+		playback.resume();
+
         is_pause = false;
     }
 }
