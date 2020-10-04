@@ -99,7 +99,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>shell32.lib;..\dependencies\realsense2-gl.lib;..\dependencies\uvc_fw.lib;..\dependencies\realsense2.lib;..\dependencies\uvc_fw.res;..\dependencies\glfw3.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shell32.lib;..\dependencies\realsense2-gl.lib;..\dependencies\uvc_fw.lib;..\dependencies\realsense2.lib;..\dependencies\uvc_fw.res;..\dependencies\glfw3.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(OPEN_CV)\build\install\x64\vc15\lib\opencv_world420.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\openssl\lib;C:\Utils\my_sql\mysql-5.7.25-winx64\lib;C:\Utils\postgresql\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -197,6 +197,8 @@
     <ClCompile Include="..\dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="..\src\db_config.cpp" />
     <ClCompile Include="db_camera.cpp" />
+    <ClCompile Include="db_frame_data.cpp" />
+    <ClCompile Include="db_frame_manager.cpp" />
     <ClCompile Include="db_sync.cpp" />
     <ClCompile Include="deepbreathgui.cpp" />
     <ClCompile Include="main.cpp" />
@@ -268,7 +270,9 @@
     <ClInclude Include="..\include\db_config.hpp" />
     <ClInclude Include="..\include\utilities.h" />
     <ClInclude Include="db_camera.hpp" />
+    <ClInclude Include="db_frame_data.hpp" />
     <ClInclude Include="db_sync.hpp" />
+    <ClInclude Include="db_frame_manager.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

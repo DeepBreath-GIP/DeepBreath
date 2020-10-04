@@ -20,14 +20,16 @@ enum Distance {
     MID2_MID3
 };
 
-class DeepBreath : public QMainWindow
+class QDeepBreath : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    DeepBreath(QWidget *parent = nullptr);
-    ~DeepBreath();
+    QDeepBreath(QWidget *parent = nullptr);
+    ~QDeepBreath();
     void paintEvent(QPaintEvent* event);
+
+	void renderStreamWidgets(const void * frame_data, int width, int height);
 
 private slots:
     void on_left_mid1_checkbox_clicked();

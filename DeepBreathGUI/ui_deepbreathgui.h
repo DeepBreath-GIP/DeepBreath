@@ -21,6 +21,7 @@
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QLabel>
 
 QT_BEGIN_NAMESPACE
 
@@ -65,7 +66,7 @@ public:
     QCheckBox *mid1_mid3_checkbox;
     QCheckBox *left_mid3_checkbox;
     QCheckBox *right_mid3_checkbox;
-    QWidget *color_stream_widget;
+    QLabel *color_stream_widget;
     QWidget *depth_stream_widget;
     QWidget *volume_stream_widget;
     QWidget *graph_widget;
@@ -250,7 +251,7 @@ public:
         right_mid3_checkbox = new QCheckBox(centralwidget);
         right_mid3_checkbox->setObjectName(QString::fromUtf8("right_mid3_checkbox"));
         right_mid3_checkbox->setGeometry(QRect(220, 330, 16, 20));
-        color_stream_widget = new QWidget(centralwidget);
+        color_stream_widget = new QLabel(centralwidget);
         color_stream_widget->setObjectName(QString::fromUtf8("color_stream_widget"));
         color_stream_widget->setGeometry(QRect(420, 20, 401, 301));
         depth_stream_widget = new QWidget(centralwidget);

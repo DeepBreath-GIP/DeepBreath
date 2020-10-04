@@ -2,6 +2,7 @@
 #define UTILITIES_H
 #pragma once
 #include <librealsense2/rsutil.h>
+#include "db_frame_data.hpp"
 
 #define PI 3.14159265358979323846
 
@@ -53,14 +54,6 @@ void linespace(double a, double b, int n, std::vector<double>* out) {
 	out->push_back(b);
 }
 
-static float distance2D(float x, float y, float a, float b) {
-	return sqrt(pow(x - a, 2) + pow(y - b, 2));
-}
-
-static float distance3D(float x, float y, float z, float a, float b, float c) {
-	return sqrt(pow(x - a, 2) + pow(y - b, 2) + pow(z - c, 2));
-}
-
 void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
 	float pixel[2] = { x, y };
 	float point[3]; // From point (in 3D)
@@ -77,7 +70,7 @@ void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, c
 
 }
 
-bool check_illegal_3D_coordinates(const BreathingFrameData* breathing_data) {
+bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_data) {
 	bool illegal_3d_coordinates = false;
 	//check for 0,-0,0 3d coordinates.
 	for (std::pair<stickers, cv::Vec3f*> sticker_elem : breathing_data->stickers_map_cm) {

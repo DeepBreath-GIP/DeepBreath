@@ -42,7 +42,7 @@ namespace rs2
 //To Debug on release mode:
 //https://docs.microsoft.com/en-us/cpp/build/how-to-debug-a-release-build?view=vs-2019
 
-DeepBreath::DeepBreath(QWidget *parent)
+QDeepBreath::QDeepBreath(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::DeepBreath)
     , is_camera_on(false)
@@ -59,17 +59,22 @@ DeepBreath::DeepBreath(QWidget *parent)
 	initDefaultSelection();
 }
 
-DeepBreath::~DeepBreath()
+QDeepBreath::~QDeepBreath()
 {
     delete ui;
 }
 
-void DeepBreath::paintEvent(QPaintEvent* event) {
+void QDeepBreath::paintEvent(QPaintEvent* event) {
     drawDistancesLines();
 }
 
+void QDeepBreath::renderStreamWidgets(const void * frame_data, int width, int height) {
+	QImage frame_data_img((uchar *)frame_data, width, height, QImage::Format_RGB888);
+	ui->color_stream_widget->setPixmap(QPixmap::fromImage(frame_data_img));
+}
+
 /*	Initiates the UI to default selection as configured in the config file. */
-void DeepBreath::initDefaultSelection() {
+void QDeepBreath::initDefaultSelection() {
 	//create and get instance of the config.
 	//TODO: remove config_err
 	std::string config_err;
@@ -150,7 +155,7 @@ void DeepBreath::initDefaultSelection() {
 }
 
 /* Removes backgrounds from texts: */
-void DeepBreath::setTransparentBackroundToText() {
+void QDeepBreath::setTransparentBackroundToText() {
     ui->dimension_text->viewport()->setAutoFillBackground(false);
     ui->distances_text->viewport()->setAutoFillBackground(false);
     ui->locations_text->viewport()->setAutoFillBackground(false);
@@ -166,7 +171,7 @@ void DeepBreath::setTransparentBackroundToText() {
 }
 
 /* Draw Lines of distances to choose */
-void DeepBreath::drawDistancesLines() {
+void QDeepBreath::drawDistancesLines() {
     QPainter painter(this);
 
     qreal gray_width(2);
@@ -321,7 +326,7 @@ void DeepBreath::drawDistancesLines() {
 
 }
 
-void DeepBreath::setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos,
+void QDeepBreath::setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos,
                                            Distance dist) {
     switch (dist) {
         case LEFT_RIGHT:
@@ -389,7 +394,7 @@ void DeepBreath::setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& 
 }
 
 /* Enable or disable distances selection */
-void DeepBreath::enableDistances(bool is_enabled) {
+void QDeepBreath::enableDistances(bool is_enabled) {
     ui->left_right_checkbox->setEnabled(is_enabled);
     ui->left_mid1_checkbox->setEnabled(is_enabled);
     ui->left_mid2_checkbox->setEnabled(is_enabled);
@@ -411,7 +416,7 @@ void DeepBreath::enableDistances(bool is_enabled) {
 }
 
 /* Enable or disable locations selection */
-void DeepBreath::enableLocations(bool is_enabled) {
+void QDeepBreath::enableLocations(bool is_enabled) {
     //set enabled:
     ui->left_loc_checkbox->setEnabled(is_enabled);
     ui->right_loc_checkbox->setEnabled(is_enabled);
@@ -423,7 +428,7 @@ void DeepBreath::enableLocations(bool is_enabled) {
 }
 
 /* Enable or disable menu */
-void DeepBreath::enableMenu(bool is_enabled) {
+void QDeepBreath::enableMenu(bool is_enabled) {
     ui->dimension_text->setEnabled(is_enabled);
     ui->dimension_2d_radio_button->setEnabled(is_enabled);
     ui->dimension_3d_radio_button->setEnabled(is_enabled);
@@ -445,7 +450,7 @@ void DeepBreath::enableMenu(bool is_enabled) {
  * ==================== */
 
 /*  DISTANCES CHECKBOXES   */
-void DeepBreath::on_left_mid1_checkbox_clicked()
+void QDeepBreath::on_left_mid1_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid1;
@@ -454,7 +459,7 @@ void DeepBreath::on_left_mid1_checkbox_clicked()
 	this->update();
 }
 
-void DeepBreath::on_left_right_checkbox_clicked()
+void QDeepBreath::on_left_right_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_right;
@@ -463,7 +468,7 @@ void DeepBreath::on_left_right_checkbox_clicked()
 	this->update();
 }
 
-void DeepBreath::on_right_mid1_checkbox_clicked()
+void QDeepBreath::on_right_mid1_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::right_mid1;
@@ -472,7 +477,7 @@ void DeepBreath::on_right_mid1_checkbox_clicked()
     this->update();
 }
 
-void DeepBreath::on_left_mid2_checkbox_clicked()
+void QDeepBreath::on_left_mid2_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid2;
@@ -481,7 +486,7 @@ void DeepBreath::on_left_mid2_checkbox_clicked()
     this->update();
 }
 
-void DeepBreath::on_mid1_mid2_checkbox_clicked()
+void QDeepBreath::on_mid1_mid2_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid1;
@@ -490,7 +495,7 @@ void DeepBreath::on_mid1_mid2_checkbox_clicked()
     this->update();
 }
 
-void DeepBreath::on_right_mid2_checkbox_clicked()
+void QDeepBreath::on_right_mid2_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::right_mid2;
@@ -499,7 +504,7 @@ void DeepBreath::on_right_mid2_checkbox_clicked()
     this->update();
 }
 
-void DeepBreath::on_right_mid3_checkbox_clicked()
+void QDeepBreath::on_right_mid3_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::right_mid3;
@@ -508,7 +513,7 @@ void DeepBreath::on_right_mid3_checkbox_clicked()
     this->update();
 }
 
-void DeepBreath::on_left_mid3_checkbox_clicked()
+void QDeepBreath::on_left_mid3_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid3;
@@ -517,7 +522,7 @@ void DeepBreath::on_left_mid3_checkbox_clicked()
     this->update();
 }
 
-void DeepBreath::on_mid1_mid3_checkbox_clicked()
+void QDeepBreath::on_mid1_mid3_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::mid1_mid3;
@@ -526,7 +531,7 @@ void DeepBreath::on_mid1_mid3_checkbox_clicked()
     this->update();
 }
 
-void DeepBreath::on_mid2_mid3_checkbox_clicked()
+void QDeepBreath::on_mid2_mid3_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::mid2_mid3;
@@ -538,7 +543,7 @@ void DeepBreath::on_mid2_mid3_checkbox_clicked()
 
 /*  STREAM SOURCE BUTTONS   */
 
-void DeepBreath::on_start_camera_button_clicked()
+void QDeepBreath::on_start_camera_button_clicked()
 {
 	DeepBreathCamera camera = DeepBreathCamera::getInstance();
 
@@ -627,7 +632,7 @@ void DeepBreath::on_start_camera_button_clicked()
     }
 }
 
-void DeepBreath::on_record_button_clicked()
+void QDeepBreath::on_record_button_clicked()
 {
 	DeepBreathCamera camera = DeepBreathCamera::getInstance();
 
@@ -653,7 +658,7 @@ void DeepBreath::on_record_button_clicked()
     }
 }
 
-void DeepBreath::on_load_file_button_clicked()
+void QDeepBreath::on_load_file_button_clicked()
 {
 	DeepBreathCamera camera = DeepBreathCamera::getInstance();
 
@@ -673,43 +678,44 @@ void DeepBreath::on_load_file_button_clicked()
 
 				//trigger stop camera click (and hide record button):
 				ui->start_camera_button->click();
-
-				//Load File
-				camera.filename = rs2::file_dialog_open(rs2::file_dialog_mode::open_file, "ROS-bag\0*.bag\0", NULL, NULL);
-				if (camera.filename) {
-					camera.cfg.enable_device_from_file(camera.filename, FILE_ON_REPEAT);
-					//start_time = clock();
-					camera.pipe.start(camera.cfg); //File will be opened in read mode at this point
-					//frame_manager.reset(); // reset FrameManager for additional processing
-					//graph.reset(frame_manager.manager_start_time);
-					//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
-					//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
-				}
-
-				//show and enable pause button
-				ui->pause_button->setVisible(true);
-				ui->pause_button->setEnabled(true);
-
-				//turn streaming off and change title
-				ui->load_file_button->setText("Stop");
-
-				//diable change of menu:
-				enableMenu(false);
-				enableDistances(false);
-				enableLocations(false);
-
-				//update condition variable to start polling:
-				DeepBreathSync::is_poll_frame = true;
-				DeepBreathSync::cv_poll_frame.notify_one();
-
-				is_run_from_file = true;
-
 			}
 			if (reply == QMessageBox::Cancel)
 			{
 				return;
 			}
         }
+
+		//Load File
+		camera.filename = rs2::file_dialog_open(rs2::file_dialog_mode::open_file, "ROS-bag\0*.bag\0", NULL, NULL);
+		if (camera.filename) {
+			camera.cfg.enable_device_from_file(camera.filename, FILE_ON_REPEAT);
+			//start_time = clock();
+			camera.pipe.start(camera.cfg); //File will be opened in read mode at this point
+			//frame_manager.reset(); // reset FrameManager for additional processing
+			//graph.reset(frame_manager.manager_start_time);
+			//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+			//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+		}
+
+		//show and enable pause button
+		ui->pause_button->setVisible(true);
+		ui->pause_button->setEnabled(true);
+
+		//turn streaming off and change title
+		ui->load_file_button->setText("Stop");
+
+		//diable change of menu:
+		enableMenu(false);
+		enableDistances(false);
+		enableLocations(false);
+
+		//update condition variable to start polling:
+		DeepBreathSync::is_poll_frame = true;
+		DeepBreathSync::cv_poll_frame.notify_one();
+
+		is_run_from_file = true;
+
+
     }
     else {
         //turn streaming off and change title
@@ -738,7 +744,7 @@ void DeepBreath::on_load_file_button_clicked()
     }
 }
 
-void DeepBreath::on_pause_button_clicked()
+void QDeepBreath::on_pause_button_clicked()
 {
 	DeepBreathCamera camera = DeepBreathCamera::getInstance();
 
@@ -777,7 +783,7 @@ void DeepBreath::on_pause_button_clicked()
     }
 }
 
-void DeepBreath::on_mode_combo_box_currentIndexChanged(int index)
+void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
 {
     switch(index) {
         case 0: //Distances
@@ -806,7 +812,7 @@ void DeepBreath::on_mode_combo_box_currentIndexChanged(int index)
     }
 }
 
-void DeepBreath::on_is_stickers_checkbox_clicked()
+void QDeepBreath::on_is_stickers_checkbox_clicked()
 {
     if(ui->is_stickers_checkbox->isChecked()) {
         ui->b_color_radio_button->setEnabled(true);

@@ -130,6 +130,12 @@
     <ClCompile Include="db_sync.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="db_frame_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="db_frame_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="deepbreathgui.h">
@@ -271,6 +277,12 @@
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="db_sync.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="db_frame_manager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="db_frame_data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
