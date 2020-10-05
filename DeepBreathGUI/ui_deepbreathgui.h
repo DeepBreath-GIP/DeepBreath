@@ -21,7 +21,6 @@
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
-#include <QOpenGLWidget>
 #include "CustomOpenGLWidget.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -67,7 +66,7 @@ public:
     QCheckBox *mid1_mid3_checkbox;
     QCheckBox *left_mid3_checkbox;
     QCheckBox *right_mid3_checkbox;
-	CustomOpenGLWidget *color_stream_widget;
+    CustomOpenGLWidget *color_stream_widget;
 	CustomOpenGLWidget *depth_stream_widget;
 	CustomOpenGLWidget *volume_stream_widget;
 	CustomOpenGLWidget *graph_widget;

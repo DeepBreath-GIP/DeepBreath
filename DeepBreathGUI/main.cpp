@@ -42,14 +42,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			render_frames[depth.get_profile().unique_id()] = camera.colorizer.process(depth);
 			//}
 
-
-
-			for (auto& frame : render_frames)
-			{
-				const void * frame_data = frame.second.get_data();
-				db_ref->renderStreamWidgets(frame_data, color.get_width(), color.get_height());
-				break;
-			}
+			db_ref->renderStreamWidgets(render_frames, color.get_width(), color.get_height());
 
 		}
 	}

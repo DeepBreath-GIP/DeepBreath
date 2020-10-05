@@ -68,9 +68,24 @@ void QDeepBreath::paintEvent(QPaintEvent* event) {
     drawDistancesLines();
 }
 
-void QDeepBreath::renderStreamWidgets(const void * frame_data, int width, int height) {
-	QImage frame_data_img((uchar *)frame_data, width, height, QImage::Format_RGB888);
-	ui->color_stream_widget->display(frame_data_img);
+void QDeepBreath::renderStreamWidgets(std::map<int, rs2::frame>& render_frames, int width, int height) {
+
+	CustomOpenGLWidget** streams_widgets = new CustomOpenGLWidget*[3];
+	streams_widgets[0] = (CustomOpenGLWidget*)(ui->color_stream_widget);
+	streams_widgets[1] = (CustomOpenGLWidget*)(ui->depth_stream_widget);
+	streams_widgets[2] = (CustomOpenGLWidget*)(ui->volume_stream_widget);
+
+	int i = 0;
+
+	for (auto& frame : render_frames)
+	{
+		if (i >= 3)
+			break;
+		const void * frame_data = frame.second.get_data();
+		QImage frame_data_img((uchar *)frame_data, width, height, QImage::Format_RGB888);
+		streams_widgets[i]->display(frame_data_img);
+		i++;
+	}
 }
 
 

@@ -2,6 +2,9 @@
 #define DEEPBREATH_H
 
 #include <QMainWindow>
+#include <map>
+#include "db_camera.hpp"
+#include "CustomOpenGLWidget.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class DeepBreath; }
@@ -29,7 +32,7 @@ public:
     ~QDeepBreath();
     void paintEvent(QPaintEvent* event);
 
-	void renderStreamWidgets(const void * frame_data, int width, int height);
+	void renderStreamWidgets(std::map<int, rs2::frame>& render_frames, const int width, const int height);
 
 private slots:
     void on_left_mid1_checkbox_clicked();
