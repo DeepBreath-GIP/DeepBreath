@@ -35,6 +35,9 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			//using a map as in rs-multicam to allow future changes in number of cameras displayed.
 			std::map<int, rs2::frame> render_frames;
 
+			//TODO:
+			//frame_manager.process_frame(color, depth);
+
 			// convert the newly-arrived frames to render-firendly format
 			//for (const auto& frame : fs) //iterate over all available frames. (commented out to ignore IR emitter frames.)
 			//{

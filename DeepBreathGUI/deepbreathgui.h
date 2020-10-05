@@ -32,6 +32,14 @@ public:
     ~QDeepBreath();
     void paintEvent(QPaintEvent* event);
 
+	/*
+		Render the frames (up to 3: color, depth and IR) to theCustom GL Widgets for the streaming.
+		parameters:
+		@render_frames - map of frames to render.
+		@width - width of the rendered frame.
+		@height - height of the rendered frame.
+		It is recommended to use width & height of the color frame (bigger) to upscale other frames.
+	*/
 	void renderStreamWidgets(std::map<int, rs2::frame>& render_frames, const int width, const int height);
 
 private slots:
@@ -70,15 +78,26 @@ private slots:
 private:
     Ui::DeepBreath *ui;
 
-    bool is_camera_on;
-    bool is_recording;
-    bool is_run_from_file;
-    bool is_pause;
+	/* Booleans for click handling: */
+    bool is_camera_on;			//camera is on/off
+    bool is_recording;			//recording is on/off - activated only when camera is on.
+    bool is_run_from_file;		//indicator whether the stream is from file. camera is off when true.
+    bool is_pause;				//pause/continue the file stream, active only when file stream is on.
 
+	/* Initialize default settings as they appear in the config file: */
 	void initDefaultSelection();
+
+	/* Sets transparent backrounds to certain objects: */
     void setTransparentBackroundToText();
+
+	/* Draws the lines on the distances according to their checked state:
+		NOTE: Renders only upon paintEvent trigger (See paintEvent) */
     void drawDistancesLines();
+
+	/* Helper for the distances line drawing: */
     void setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos, Distance dist);
+
+	/* Enablers/Diablers of ui objects: */
     void enableDistances(bool is_enabled);
     void enableLocations(bool is_enabled);
     void enableMenu(bool is_enabled);
