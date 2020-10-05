@@ -269,6 +269,7 @@
     <ClInclude Include="..\dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="..\include\db_config.hpp" />
     <ClInclude Include="..\include\utilities.h" />
+    <ClInclude Include="CustomOpenGLWidget.hpp" />
     <ClInclude Include="db_camera.hpp" />
     <ClInclude Include="db_frame_data.hpp" />
     <ClInclude Include="db_sync.hpp" />

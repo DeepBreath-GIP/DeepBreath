@@ -21,7 +21,8 @@
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QLabel>
+#include <QOpenGLWidget>
+#include "CustomOpenGLWidget.hpp"
 
 QT_BEGIN_NAMESPACE
 
@@ -66,10 +67,10 @@ public:
     QCheckBox *mid1_mid3_checkbox;
     QCheckBox *left_mid3_checkbox;
     QCheckBox *right_mid3_checkbox;
-    QLabel *color_stream_widget;
-    QWidget *depth_stream_widget;
-    QWidget *volume_stream_widget;
-    QWidget *graph_widget;
+	CustomOpenGLWidget *color_stream_widget;
+	CustomOpenGLWidget *depth_stream_widget;
+	CustomOpenGLWidget *volume_stream_widget;
+	CustomOpenGLWidget *graph_widget;
     QMenuBar *menubar;
     QStatusBar *statusbar;
     QButtonGroup *dimension_button_group;
@@ -251,16 +252,16 @@ public:
         right_mid3_checkbox = new QCheckBox(centralwidget);
         right_mid3_checkbox->setObjectName(QString::fromUtf8("right_mid3_checkbox"));
         right_mid3_checkbox->setGeometry(QRect(220, 330, 16, 20));
-        color_stream_widget = new QLabel(centralwidget);
+        color_stream_widget = new CustomOpenGLWidget(centralwidget);
         color_stream_widget->setObjectName(QString::fromUtf8("color_stream_widget"));
         color_stream_widget->setGeometry(QRect(420, 20, 401, 301));
-        depth_stream_widget = new QWidget(centralwidget);
+        depth_stream_widget = new CustomOpenGLWidget(centralwidget);
         depth_stream_widget->setObjectName(QString::fromUtf8("depth_stream_widget"));
         depth_stream_widget->setGeometry(QRect(850, 20, 401, 301));
-        volume_stream_widget = new QWidget(centralwidget);
+        volume_stream_widget = new CustomOpenGLWidget(centralwidget);
         volume_stream_widget->setObjectName(QString::fromUtf8("volume_stream_widget"));
         volume_stream_widget->setGeometry(QRect(420, 350, 401, 301));
-        graph_widget = new QWidget(centralwidget);
+        graph_widget = new CustomOpenGLWidget(centralwidget);
         graph_widget->setObjectName(QString::fromUtf8("graph_widget"));
         graph_widget->setGeometry(QRect(850, 350, 401, 301));
         DeepBreath->setCentralWidget(centralwidget);

@@ -70,8 +70,9 @@ void QDeepBreath::paintEvent(QPaintEvent* event) {
 
 void QDeepBreath::renderStreamWidgets(const void * frame_data, int width, int height) {
 	QImage frame_data_img((uchar *)frame_data, width, height, QImage::Format_RGB888);
-	ui->color_stream_widget->setPixmap(QPixmap::fromImage(frame_data_img));
+	ui->color_stream_widget->display(frame_data_img);
 }
+
 
 /*	Initiates the UI to default selection as configured in the config file. */
 void QDeepBreath::initDefaultSelection() {

@@ -285,5 +285,8 @@
     <ClInclude Include="db_frame_data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CustomOpenGLWidget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
