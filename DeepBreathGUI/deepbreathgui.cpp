@@ -17,6 +17,7 @@
 #include "db_config.hpp"
 #include "db_camera.hpp"
 #include "db_sync.hpp"
+#include "db_frame_manager.hpp"
 //#include "utilities.h"
 
 #define FILE_ON_REPEAT false
@@ -79,7 +80,7 @@ void QDeepBreath::renderStreamWidgets(std::map<int, rs2::frame>& render_frames, 
 
 	for (auto& frame : render_frames)
 	{
-		if (i >= 3)
+		if (i >= 2)	//render only color and depth from map
 			break;
 		const void * frame_data = frame.second.get_data();
 		QImage frame_data_img((uchar *)frame_data, width, height, QImage::Format_RGB888);
@@ -110,11 +111,13 @@ void QDeepBreath::initDefaultSelection() {
 		break;
 	}
 
-	//set mode:
+	//set mode
+	//and set marks according to it:
 	int mode_index = -1; //initialize to invalid index by default
 	switch (user_cfg.mode) {
 	case DISTANCES:
 		mode_index = ui->mode_combo_box->findText("Distances");
+		selectDefaultDistances();
 		break;
 	case LOCATION:
 		mode_index = ui->mode_combo_box->findText("Locations");
@@ -167,6 +170,51 @@ void QDeepBreath::initDefaultSelection() {
 		}
 	}
 
+}
+
+void QDeepBreath::selectDefaultDistances() {
+
+	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+
+	ui->left_mid1_checkbox->setChecked(user_cfg.dists_included[distances::left_mid1]);
+	ui->left_mid2_checkbox->setChecked(user_cfg.dists_included[distances::left_mid2]);
+	ui->left_mid3_checkbox->setChecked(user_cfg.dists_included[distances::left_mid3]);
+	ui->right_mid1_checkbox->setChecked(user_cfg.dists_included[distances::right_mid1]);
+	ui->right_mid2_checkbox->setChecked(user_cfg.dists_included[distances::right_mid2]);
+	ui->right_mid3_checkbox->setChecked(user_cfg.dists_included[distances::right_mid3]);
+	ui->mid1_mid2_checkbox->setChecked(user_cfg.dists_included[distances::mid1_mid2]);
+	ui->mid1_mid3_checkbox->setChecked(user_cfg.dists_included[distances::mid1_mid3]);
+	ui->mid2_mid3_checkbox->setChecked(user_cfg.dists_included[distances::mid2_mid3]);
+	ui->left_right_checkbox->setChecked(user_cfg.dists_included[distances::left_right]);
+
+	if (user_cfg.num_of_stickers == 3) {
+		ui->left_mid1_checkbox->setChecked(false);
+		ui->left_mid2_checkbox->setChecked(false);
+		ui->right_mid1_checkbox->setChecked(false);
+		ui->right_mid2_checkbox->setChecked(false);
+		ui->mid1_mid2_checkbox->setChecked(false);
+		ui->mid1_mid3_checkbox->setChecked(false);
+		ui->mid2_mid3_checkbox->setChecked(false);
+
+		ui->left_mid1_checkbox->setEnabled(false);
+		ui->left_mid2_checkbox->setEnabled(false);
+		ui->right_mid1_checkbox->setEnabled(false);
+		ui->right_mid2_checkbox->setEnabled(false);
+		ui->mid1_mid2_checkbox->setEnabled(false);
+		ui->mid1_mid3_checkbox->setEnabled(false);
+		ui->mid2_mid3_checkbox->setEnabled(false);
+	}
+	else if (user_cfg.num_of_stickers == 4) {
+		ui->left_mid1_checkbox->setChecked(false);
+		ui->right_mid1_checkbox->setChecked(false);
+		ui->mid1_mid2_checkbox->setChecked(false);
+		ui->mid1_mid3_checkbox->setChecked(false);
+
+		ui->left_mid1_checkbox->setEnabled(false);
+		ui->right_mid1_checkbox->setEnabled(false);
+		ui->mid1_mid2_checkbox->setEnabled(false);
+		ui->mid1_mid3_checkbox->setEnabled(false);
+	}
 
 }
 
@@ -205,34 +253,34 @@ void QDeepBreath::drawDistancesLines() {
     int x2_pos = 0;
     int y2_pos = 0;
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, LEFT_MID1);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, left_mid1);
     QLine left_mid1(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, RIGHT_MID1);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, right_mid1);
     QLine right_mid1(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, LEFT_MID2);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, left_mid2);
     QLine left_mid2(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, RIGHT_MID2);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, right_mid2);
     QLine right_mid2(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, LEFT_MID3);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, left_mid3);
     QLine left_mid3(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, RIGHT_MID3);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, right_mid3);
     QLine right_mid3(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, LEFT_RIGHT);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, left_right);
     QLine left_right(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, MID1_MID2);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, mid1_mid2);
     QLine mid1_mid2(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, MID2_MID3);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, mid2_mid3);
     QLine mid2_mid3(x1_pos, y1_pos, x2_pos, y2_pos);
 
-    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, MID1_MID3);
+    setXYPosOfDistance(x1_pos, y1_pos, x2_pos, y2_pos, mid1_mid3);
     QLine mid1_mid3(x1_pos, y1_pos, x2_pos, y2_pos);
 
     //delete old lines:
@@ -343,63 +391,63 @@ void QDeepBreath::drawDistancesLines() {
 }
 
 void QDeepBreath::setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos,
-                                           Distance dist) {
+                                           distances dist) {
     switch (dist) {
-        case LEFT_RIGHT:
+        case left_right:
             x1_pos = ui->left_text->x() + ui->left_text->width() / 2;
             y1_pos = ui->left_text->y();
             x2_pos = ui->right_text->x() + ui->right_text->width() / 2;
             y2_pos = ui->right_text->y();
             break;
-        case LEFT_MID1:
+        case left_mid1:
             x1_pos = ui->left_text->x() + ui->left_text->width();
             y1_pos = ui->left_text->y() + ui->left_text->height() / 2;
             x2_pos = ui->mid1_text->x();
             y2_pos = ui->mid1_text->y() + ui->mid1_text->height() / 2;
             break;
-        case LEFT_MID2:
+        case left_mid2:
             x1_pos = ui->left_text->x() + ui->left_text->width();
             y1_pos = ui->left_text->y() + ui->left_text->height();
             x2_pos = ui->mid2_text->x();
             y2_pos = ui->mid2_text->y() + ui->mid1_text->height() / 2;
             break;
-        case LEFT_MID3:
+        case left_mid3:
             x1_pos = ui->left_text->x() + ui->left_text->width() / 2;
             y1_pos = ui->left_text->y() + ui->left_text->height();
             x2_pos = ui->mid3_text->x();
             y2_pos = ui->mid3_text->y() + ui->mid3_text->height() / 2;
             break;
-        case RIGHT_MID1:
+        case right_mid1:
             x1_pos = ui->mid1_text->x() + ui->mid1_text->width();
             y1_pos = ui->mid1_text->y() + ui->mid1_text->height() / 2;
             x2_pos = ui->right_text->x();
             y2_pos = ui->right_text->y() + ui->right_text->height() / 2;
             break;
-        case RIGHT_MID2:
+        case right_mid2:
             x1_pos = ui->mid2_text->x() + ui->mid2_text->width();
             y1_pos = ui->mid2_text->y() + ui->mid2_text->height() / 2;
             x2_pos = ui->right_text->x();
             y2_pos = ui->right_text->y() + ui->right_text->height();
             break;
-        case RIGHT_MID3:
+        case right_mid3:
             x1_pos = ui->right_text->x() + ui->left_text->width() / 2;
             y1_pos = ui->right_text->y() + ui->left_text->height();
             x2_pos = ui->mid3_text->x() + ui->mid3_text->width();
             y2_pos = ui->mid3_text->y() + ui->mid3_text->height() / 2;
             break;
-        case MID1_MID2:
+        case mid1_mid2:
             x1_pos = ui->mid1_text->x() + ui->mid1_text->width() / 2;
             y1_pos = ui->mid1_text->y() + ui->mid1_text->height();
             x2_pos = ui->mid2_text->x() + ui->mid2_text->width() / 2;
             y2_pos = ui->mid2_text->y();
             break;
-        case MID2_MID3:
+        case mid2_mid3:
             x1_pos = ui->mid2_text->x() + ui->mid2_text->width() / 2;
             y1_pos = ui->mid2_text->y() + ui->mid2_text->height();
             x2_pos = ui->mid3_text->x() + ui->mid3_text->width() / 2;
             y2_pos = ui->mid3_text->y();
             break;
-        case MID1_MID3:
+        case mid1_mid3:
             x1_pos = ui->mid1_text->x() + ui->mid1_text->width() / 4;
             y1_pos = ui->mid1_text->y() + ui->mid1_text->height();
             x2_pos = ui->mid3_text->x() + ui->mid3_text->width() / 4;
@@ -470,7 +518,7 @@ void QDeepBreath::on_left_mid1_checkbox_clicked()
 {
 	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid1;
-	user_cfg.dists_included[dist] = true;
+	user_cfg.dists_included[dist] = ui->left_mid1_checkbox->isChecked();
 
 	this->update();
 }
@@ -562,6 +610,7 @@ void QDeepBreath::on_mid2_mid3_checkbox_clicked()
 void QDeepBreath::on_start_camera_button_clicked()
 {
 	DeepBreathCamera camera = DeepBreathCamera::getInstance();
+	//DeepBreathFrameManager frame_manager = DeepBreathFrameManager::getInstance();
 
     if(!is_camera_on) {
         //if camera is off:
@@ -677,6 +726,7 @@ void QDeepBreath::on_record_button_clicked()
 void QDeepBreath::on_load_file_button_clicked()
 {
 	DeepBreathCamera camera = DeepBreathCamera::getInstance();
+	//DeepBreathFrameManager frame_manager = DeepBreathFrameManager::getInstance();
 
     if(!is_run_from_file) {
         //if camera is on, show alert and stop stream
@@ -707,6 +757,7 @@ void QDeepBreath::on_load_file_button_clicked()
 			camera.cfg.enable_device_from_file(camera.filename, FILE_ON_REPEAT);
 			//start_time = clock();
 			camera.pipe.start(camera.cfg); //File will be opened in read mode at this point
+
 			//frame_manager.reset(); // reset FrameManager for additional processing
 			//graph.reset(frame_manager.manager_start_time);
 			//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
@@ -781,19 +832,22 @@ void QDeepBreath::on_pause_button_clicked()
 			freeze_frames[0] = camera.colorizer.process(c);
 			freeze_frames[1] = camera.colorizer.process(d);
 
-			// present last collected frame
-			/*app.show(freeze_frames);*/
 		}
+
+		DeepBreathSync::is_poll_frame = false;
 
         is_pause = true;
     }
-    else {
+    else { //currently paused, text is "Continue"
         ui->pause_button->setText("Pause");
 
-		is_pause = false;
 		rs2::device device = camera.pipe.get_active_profile().get_device();
 		rs2::playback playback = device.as<rs2::playback>();
 		playback.resume();
+
+		//update condition variable to start polling:
+		DeepBreathSync::is_poll_frame = true;
+		DeepBreathSync::cv_poll_frame.notify_one();
 
         is_pause = false;
     }

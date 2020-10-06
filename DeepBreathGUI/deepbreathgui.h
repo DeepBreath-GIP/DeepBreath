@@ -10,19 +10,6 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class DeepBreath; }
 QT_END_NAMESPACE
 
-enum Distance {
-    LEFT_RIGHT,
-    LEFT_MID1,
-    LEFT_MID2,
-    LEFT_MID3,
-    RIGHT_MID1,
-    RIGHT_MID2,
-    RIGHT_MID3,
-    MID1_MID2,
-    MID1_MID3,
-    MID2_MID3
-};
-
 class QDeepBreath : public QMainWindow
 {
     Q_OBJECT
@@ -87,6 +74,9 @@ private:
 	/* Initialize default settings as they appear in the config file: */
 	void initDefaultSelection();
 
+	/* Mark distances selected in config file: */
+	void selectDefaultDistances();
+
 	/* Sets transparent backrounds to certain objects: */
     void setTransparentBackroundToText();
 
@@ -95,7 +85,7 @@ private:
     void drawDistancesLines();
 
 	/* Helper for the distances line drawing: */
-    void setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos, Distance dist);
+    void setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos, distances dist);
 
 	/* Enablers/Diablers of ui objects: */
     void enableDistances(bool is_enabled);
