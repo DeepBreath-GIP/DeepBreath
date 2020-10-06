@@ -5,6 +5,7 @@
 #include "deepbreathgui.h"
 #include "db_camera.hpp"
 #include "db_sync.hpp"
+#include "db_frame_manager.hpp"
 
 /*
 	Frames polling thread function.
@@ -12,7 +13,7 @@
 */ 
 void poll_frames_thread(QDeepBreath* db_ref) {
 
-	while (true) {
+	while (DeepBreathSync::is_active) {
 		// Wait until main() sends data
 		std::unique_lock<std::mutex> lk(DeepBreathSync::m_poll_frame);
 		DeepBreathSync::cv_poll_frame.wait(lk);
@@ -36,6 +37,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			std::map<int, rs2::frame> render_frames;
 
 			//TODO:
+			//DeepBreathFrameManager frame_manager = DeepBreathFrameManager::getInstance();
 			//frame_manager.process_frame(color, depth);
 
 			// convert the newly-arrived frames to render-firendly format
@@ -57,10 +59,22 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QDeepBreath w;
 
+	DeepBreathCamera camera = DeepBreathCamera::getInstance();
+	DeepBreathFrameManager frame_manager = DeepBreathFrameManager::getInstance();
+
 	//initiate frame polling thread:
 	std::thread worker(poll_frames_thread, &w);
 
     w.show();
 
-    return a.exec();
+	a.exec();
+
+	// Disable polling thread
+	DeepBreathSync::is_poll_frame = false;
+	DeepBreathSync::is_active = false;
+	DeepBreathSync::cv_poll_frame.notify_one();
+
+	worker.join();
+
+	return 0;
 }
