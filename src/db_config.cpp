@@ -84,15 +84,15 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 
 		//get distances:
 		//skip distances for Locations
-		if (this->mode == graph_mode::LOCATION) {
-			getline(config_file, line);
-			line_num++;
-			while (line.substr(0, 1).compare("#") != 0) {
-				getline(config_file, line);
-				line_num++;
-			}
-		}
-		else { //include for other modes
+		//if (this->mode == graph_mode::LOCATION) {
+		//	getline(config_file, line);
+		//	line_num++;
+		//	while (line.substr(0, 1).compare("#") != 0) {
+		//		getline(config_file, line);
+		//		line_num++;
+		//	}
+		//}
+		//else { //include for other modes
 			// get distances to include
 			for (int distInt = distances::left_mid1; distInt != distances::ddummy; distInt++) {
 				distances d = static_cast<distances>(distInt);
@@ -108,7 +108,7 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 					throw line_num;
 				line_num++;
 			}
-		}
+		//}
 
 		//get locations:
 		getline(config_file, line);	// new line
@@ -116,19 +116,19 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 		getline(config_file, line);	//locations comment
 		line_num++;
 		//for Distances, Fourier, Volume, No Graph: Skip locations
-		if (this->mode == graph_mode::DISTANCES
-			|| this->mode == graph_mode::FOURIER
-			|| this->mode == graph_mode::VOLUME
-			|| this->mode == graph_mode::NOGRAPH) {
+		//if (this->mode == graph_mode::DISTANCES
+		//	|| this->mode == graph_mode::FOURIER
+		//	|| this->mode == graph_mode::VOLUME
+		//	|| this->mode == graph_mode::NOGRAPH) {
 
-			getline(config_file, line); //first location line
-			line_num++;
-			while (line.substr(0, 1).compare("#") != 0) {
-				getline(config_file, line);
-				line_num++;
-			} //stops by the first next comment line (number of stickers)
-		}
-		else {
+		//	getline(config_file, line); //first location line
+		//	line_num++;
+		//	while (line.substr(0, 1).compare("#") != 0) {
+		//		getline(config_file, line);
+		//		line_num++;
+		//	} //stops by the first next comment line (number of stickers)
+		//}
+		//else {
 			//get included locations:
 			//(at this point, current line is the location comment, so first iteration will get first location)
 			for (int stInt = stickers::left; stInt != stickers::sdummy; stInt++) {
@@ -148,7 +148,7 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 
 			getline(config_file, line); //empty line
 			line_num++;
-		}
+		//}
 
 		// get num of stickers
 		getline(config_file, line);

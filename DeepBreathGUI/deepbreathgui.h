@@ -75,11 +75,14 @@ private:
 	/* Initialize default settings as they appear in the config file: */
 	void initDefaultSelection();
 
-	/* Mark distances selected in config file: */
+	/* Mark distances selected in config: */
 	void setConfigDistances();
 
-	/* Mark locations selected in config file: */
+	/* Mark locations selected in config: */
 	void setConfigLocations();
+
+	/* Select the dimension in config: */
+	void setConfigDimension();
 
 	/* Sets transparent backrounds to certain objects: */
     void setTransparentBackroundToText();

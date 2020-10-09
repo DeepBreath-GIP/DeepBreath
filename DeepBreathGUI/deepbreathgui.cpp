@@ -120,6 +120,7 @@ void QDeepBreath::initDefaultSelection() {
 		break;
 	case LOCATION:
 		mode_index = ui->mode_combo_box->findText("Locations");
+		setConfigLocations();
 		break;
 	case FOURIER:
 		mode_index = ui->mode_combo_box->findText("Fourier");
@@ -216,6 +217,45 @@ void QDeepBreath::setConfigDistances() {
 	}
 
 }
+
+void QDeepBreath::setConfigLocations() {
+
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	ui->left_loc_checkbox->setChecked(user_cfg.stickers_included[stickers::left]);
+	ui->right_loc_checkbox->setChecked(user_cfg.stickers_included[stickers::right]);
+	ui->mid1_loc_checkbox->setChecked(user_cfg.stickers_included[stickers::mid1]);
+	ui->mid2_loc_checkbox->setChecked(user_cfg.stickers_included[stickers::mid2]);
+	ui->mid3_loc_checkbox->setChecked(user_cfg.stickers_included[stickers::mid3]);
+
+	if (user_cfg.num_of_stickers == 3) {
+		ui->mid1_loc_checkbox->setChecked(false);
+		ui->mid2_loc_checkbox->setChecked(false);
+
+		ui->mid1_loc_checkbox->setEnabled(false);
+		ui->mid2_loc_checkbox->setEnabled(false);
+	}
+	else if (user_cfg.num_of_stickers == 4) {
+		ui->mid1_loc_checkbox->setChecked(false);
+
+		ui->mid1_loc_checkbox->setEnabled(false);
+	}
+
+}
+
+void QDeepBreath::setConfigDimension() {
+
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	if (user_cfg.dimension == dimension::D2) {
+		ui->dimension_2d_radio_button->click();
+	}
+	else {
+		ui->dimension_3d_radio_button->click();
+	}
+
+}
+
 
 /* Removes backgrounds from texts: */
 void QDeepBreath::setTransparentBackroundToText() {
@@ -507,6 +547,19 @@ void QDeepBreath::enableLocations(bool is_enabled) {
     ui->mid3_loc_checkbox->setEnabled(is_enabled);
 
     ui->locations_text->setEnabled(is_enabled);
+
+	if (is_enabled) { //set according to config:
+		setConfigLocations();
+	}
+	else { //clear checks:
+		ui->left_loc_checkbox->setChecked(is_enabled);
+		ui->right_loc_checkbox->setChecked(is_enabled);
+		ui->mid1_loc_checkbox->setChecked(is_enabled);
+		ui->mid2_loc_checkbox->setChecked(is_enabled);
+		ui->mid3_loc_checkbox->setChecked(is_enabled);
+	}
+
+	this->update();
 }
 
 /* Enable or disable menu */
@@ -876,27 +929,38 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
     switch(index) {
         case 0: //Distances
             enableDistances(true);
-            enableLocations(false);
 			setConfigDistances();
+            enableLocations(false);
+			ui->dimension_2d_radio_button->setEnabled(true);
+			setConfigDimension();
             break;
         case 1: //Locations
             enableDistances(false);
             enableLocations(true);
+			setConfigLocations();
+			ui->dimension_2d_radio_button->setEnabled(true);
+			setConfigDimension();
             break;
         case 2: //Fourier
             enableDistances(true);
+			setConfigDistances();
             enableLocations(false);
+			ui->dimension_2d_radio_button->setEnabled(true);
             break;
         case 3: //Volume
             enableDistances(false);
             enableLocations(false);
+			//only 3D allowed:
             ui->dimension_3d_radio_button->setChecked(true);
             ui->dimension_2d_radio_button->setEnabled(false);
-            ui->is_stickers_checkbox->setEnabled(false);
+            //ui->is_stickers_checkbox->setEnabled(false);
             break;
         case 4: //No Graph
             enableDistances(true);
+			setConfigDistances();
             enableLocations(false);
+			ui->dimension_2d_radio_button->setEnabled(true);
+			setConfigDimension();
             break;
     }
 }
