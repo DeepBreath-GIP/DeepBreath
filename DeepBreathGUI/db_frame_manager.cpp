@@ -117,91 +117,102 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 
 void DeepBreathFrameManager::identify_markers(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data)
 {
-	// Create bgr mode matrix of color_frame
-	const void * color_frame_data = color_frame.get_data();
-	cv::Mat rgb8_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3, (void *)color_frame_data, cv::Mat::AUTO_STEP);
-	cv::Mat hsv8_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3);
-	cv::cvtColor(rgb8_mat, hsv8_mat, cv::COLOR_RGB2HSV);
 
-	cv::Scalar color_range_low;
-	cv::Scalar color_range_high;
-	int low_thresh = 100;
-	int high_thresh = 255;
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	if (user_cfg.is_stickers) { //use stickers and identify them
 
-	//find required color:
-	switch (DeepBreathConfig::getInstance().color) {
-	case(YELLOW):
-		//RECOMMENDED
-		//hsv opencv official yellow range: (20, 100, 100) to (30, 255, 255)
-		color_range_low = cv::Scalar(20, 50, 50);
-		color_range_high = cv::Scalar(40, 255, 255);
-		break;
-	case(BLUE):
-		color_range_low = cv::Scalar(90, 20, 10);
-		color_range_high = cv::Scalar(135, 255, 255);
-		low_thresh = 10;
-		break;
-	case(GREEN):
-		color_range_low = cv::Scalar(35, 30, 30);
-		color_range_high = cv::Scalar(85, 255, 255);
-		low_thresh = 20;
-		break;
-	case(RED): //Red implementation missing: there are two foreign ranges of red, requires a slight change in implementation
-	//	color_range_low = cv::Scalar();
-	//	color_range_high = cv::Scalar();
-		break;
-	}
+			// Create bgr mode matrix of color_frame
+		const void * color_frame_data = color_frame.get_data();
+		cv::Mat rgb8_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3, (void *)color_frame_data, cv::Mat::AUTO_STEP);
+		cv::Mat hsv8_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3);
+		cv::cvtColor(rgb8_mat, hsv8_mat, cv::COLOR_RGB2HSV);
 
-	cv::Mat color_only_mask(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC1);
-	inRange(hsv8_mat, color_range_low, color_range_high, color_only_mask);
-	cv::Mat color_only_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3, cv::Scalar(0, 0, 0));
-	hsv8_mat.copyTo(color_only_mat, color_only_mask);
+		cv::Scalar color_range_low;
+		cv::Scalar color_range_high;
+		int low_thresh = 100;
+		int high_thresh = 255;
 
-	//Pick up the grayscale
-	cv::Mat color_only_bgr8_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3);
-	cvtColor(color_only_mat, color_only_bgr8_mat, cv::COLOR_HSV2BGR);
-	cv::Mat color_only_grayscale_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3);
-	cvtColor(color_only_bgr8_mat, color_only_grayscale_mat, cv::COLOR_BGR2GRAY);
-
-	//create binary image:
-	cv::Mat image_th;
-	cv::Mat bin_mat(color_only_grayscale_mat.size(), color_only_grayscale_mat.type());
-
-	// simple threshold worked better than adaptive
-	cv::threshold(color_only_grayscale_mat, image_th, low_thresh, high_thresh, cv::THRESH_BINARY);
-
-	//connected components:
-	cv::Mat1i labels;
-	cv::Mat1i stats;
-	cv::Mat1d centroids;
-	cv::connectedComponentsWithStats(image_th, labels, stats, centroids);
-
-	//calc threshold for connected component area (max area/2)
-	int area_threshold = 0;
-	for (int i = 1; i < stats.rows; i++) //label 0 is the background
-	{
-		if (stats[i][cv::CC_STAT_AREA] > area_threshold) {
-			area_threshold = stats[i][cv::CC_STAT_AREA];
+		//find required color:
+		switch (DeepBreathConfig::getInstance().color) {
+		case(YELLOW):
+			//RECOMMENDED
+			//hsv opencv official yellow range: (20, 100, 100) to (30, 255, 255)
+			color_range_low = cv::Scalar(20, 50, 50);
+			color_range_high = cv::Scalar(40, 255, 255);
+			break;
+		case(BLUE):
+			color_range_low = cv::Scalar(90, 20, 10);
+			color_range_high = cv::Scalar(135, 255, 255);
+			low_thresh = 10;
+			break;
+		case(GREEN):
+			color_range_low = cv::Scalar(35, 30, 30);
+			color_range_high = cv::Scalar(85, 255, 255);
+			low_thresh = 20;
+			break;
+		case(RED): //Red implementation missing: there are two foreign ranges of red, requires a slight change in implementation
+		//	color_range_low = cv::Scalar();
+		//	color_range_high = cv::Scalar();
+			break;
 		}
-	}
-	area_threshold = area_threshold / 2;
 
-	//get centers:
-	for (int i = 1; i < centroids.rows; i++) //label 0 is the background
-	{
-		if (stats[i][cv::CC_STAT_AREA] > area_threshold) {
-			breathing_data->circles.push_back(cv::Vec3f(centroids(i, 0), centroids(i, 1)));
-			circle(rgb8_mat, cv::Point(centroids(i, 0), centroids(i, 1)), 3, cv::Scalar(0, 255, 0));
+		cv::Mat color_only_mask(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC1);
+		inRange(hsv8_mat, color_range_low, color_range_high, color_only_mask);
+		cv::Mat color_only_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3, cv::Scalar(0, 0, 0));
+		hsv8_mat.copyTo(color_only_mat, color_only_mask);
+
+		//Pick up the grayscale
+		cv::Mat color_only_bgr8_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3);
+		cvtColor(color_only_mat, color_only_bgr8_mat, cv::COLOR_HSV2BGR);
+		cv::Mat color_only_grayscale_mat(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3);
+		cvtColor(color_only_bgr8_mat, color_only_grayscale_mat, cv::COLOR_BGR2GRAY);
+
+		//create binary image:
+		cv::Mat image_th;
+		cv::Mat bin_mat(color_only_grayscale_mat.size(), color_only_grayscale_mat.type());
+
+		// simple threshold worked better than adaptive
+		cv::threshold(color_only_grayscale_mat, image_th, low_thresh, high_thresh, cv::THRESH_BINARY);
+
+		//connected components:
+		cv::Mat1i labels;
+		cv::Mat1i stats;
+		cv::Mat1d centroids;
+		cv::connectedComponentsWithStats(image_th, labels, stats, centroids);
+
+		//calc threshold for connected component area (max area/2)
+		int area_threshold = 0;
+		for (int i = 1; i < stats.rows; i++) //label 0 is the background
+		{
+			if (stats[i][cv::CC_STAT_AREA] > area_threshold) {
+				area_threshold = stats[i][cv::CC_STAT_AREA];
+			}
 		}
+		area_threshold = area_threshold / 2;
+
+		//get centers:
+		for (int i = 1; i < centroids.rows; i++) //label 0 is the background
+		{
+			if (stats[i][cv::CC_STAT_AREA] > area_threshold) {
+				breathing_data->circles.push_back(cv::Vec3f(centroids(i, 0), centroids(i, 1)));
+				circle(rgb8_mat, cv::Point(centroids(i, 0), centroids(i, 1)), 3, cv::Scalar(0, 255, 0));
+			}
+		}
+
+		//distinguish between stickers:
+		if (breathing_data->circles.size() < DeepBreathConfig::getInstance().num_of_stickers) {//not all circles were found
+			cleanup();
+			interval_active = false; //missed frame so calculation has to start all over.
+			return;
+		}
+		breathing_data->UpdateStickersLoactions();
+
+	}
+	else { //use AI to identify nipples and bellybutton
+
 	}
 
-	//distinguish between stickers:
-	if (breathing_data->circles.size() < DeepBreathConfig::getInstance().num_of_stickers) {//not all circles were found
-		cleanup();
-		interval_active = false; //missed frame so calculation has to start all over.
-		return;
-	}
-	breathing_data->UpdateStickersLoactions();
+
 }
 
 void DeepBreathFrameManager::update_timestamps(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data)

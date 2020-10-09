@@ -116,7 +116,7 @@ void QDeepBreath::initDefaultSelection() {
 	switch (user_cfg.mode) {
 	case DISTANCES:
 		mode_index = ui->mode_combo_box->findText("Distances");
-		selectDefaultDistances();
+		setConfigDistances();
 		break;
 	case LOCATION:
 		mode_index = ui->mode_combo_box->findText("Locations");
@@ -171,7 +171,7 @@ void QDeepBreath::initDefaultSelection() {
 
 }
 
-void QDeepBreath::selectDefaultDistances() {
+void QDeepBreath::setConfigDistances() {
 
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
@@ -476,6 +476,25 @@ void QDeepBreath::enableDistances(bool is_enabled) {
     ui->mid3_text->setEnabled(is_enabled);
 
     ui->distances_text->setEnabled(is_enabled);
+
+	if (is_enabled) { //set according to config:
+		setConfigDistances();
+	}
+	else { //clear checks:
+		ui->left_right_checkbox->setChecked(is_enabled);
+		ui->left_mid1_checkbox->setChecked(is_enabled);
+		ui->left_mid2_checkbox->setChecked(is_enabled);
+		ui->left_mid3_checkbox->setChecked(is_enabled);
+		ui->right_mid1_checkbox->setChecked(is_enabled);
+		ui->right_mid2_checkbox->setChecked(is_enabled);
+		ui->right_mid3_checkbox->setChecked(is_enabled);
+		ui->mid1_mid2_checkbox->setChecked(is_enabled);
+		ui->mid2_mid3_checkbox->setChecked(is_enabled);
+		ui->mid1_mid3_checkbox->setChecked(is_enabled);
+	}
+
+	this->update();
+
 }
 
 /* Enable or disable locations selection */
@@ -858,6 +877,7 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
         case 0: //Distances
             enableDistances(true);
             enableLocations(false);
+			setConfigDistances();
             break;
         case 1: //Locations
             enableDistances(false);

@@ -36,7 +36,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			//using a map as in rs-multicam to allow future changes in number of cameras displayed.
 			std::map<int, rs2::frame> render_frames;
 
-			//TODO:
+			//process frame with the frame manager:
 			DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
 			frame_manager.process_frame(color, depth);
 
@@ -47,6 +47,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			render_frames[depth.get_profile().unique_id()] = camera.colorizer.process(depth);
 			//}
 
+			//render frames to the gl objects:
 			db_ref->renderStreamWidgets(render_frames, color.get_width(), color.get_height());
 
 		}

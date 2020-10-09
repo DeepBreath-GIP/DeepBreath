@@ -76,7 +76,10 @@ private:
 	void initDefaultSelection();
 
 	/* Mark distances selected in config file: */
-	void selectDefaultDistances();
+	void setConfigDistances();
+
+	/* Mark locations selected in config file: */
+	void setConfigLocations();
 
 	/* Sets transparent backrounds to certain objects: */
     void setTransparentBackroundToText();
