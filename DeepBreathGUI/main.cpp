@@ -37,7 +37,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			std::map<int, rs2::frame> render_frames;
 
 			//TODO:
-			//DeepBreathFrameManager frame_manager = DeepBreathFrameManager::getInstance();
+			DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
 			//frame_manager.process_frame(color, depth);
 
 			// convert the newly-arrived frames to render-firendly format
@@ -59,8 +59,9 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QDeepBreath w;
 
-	DeepBreathCamera camera = DeepBreathCamera::getInstance();
-	DeepBreathFrameManager frame_manager = DeepBreathFrameManager::getInstance();
+	//first initiation:
+	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
+	DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
 
 	//initiate frame polling thread:
 	std::thread worker(poll_frames_thread, &w);

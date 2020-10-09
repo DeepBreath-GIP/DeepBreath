@@ -14,7 +14,6 @@
 #include <QMessageBox>
 
 /* DeepBreath Files */
-#include "db_config.hpp"
 #include "db_camera.hpp"
 #include "db_sync.hpp"
 #include "db_frame_manager.hpp"
@@ -96,7 +95,7 @@ void QDeepBreath::initDefaultSelection() {
 	//TODO: remove config_err
 	std::string config_err;
 	DeepBreathConfig::createInstance(CONFIG_FILEPATH, &config_err);
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	assert(user_cfg != nullptr);
 
 	//Set dimension:
@@ -174,7 +173,7 @@ void QDeepBreath::initDefaultSelection() {
 
 void QDeepBreath::selectDefaultDistances() {
 
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
 	ui->left_mid1_checkbox->setChecked(user_cfg.dists_included[distances::left_mid1]);
 	ui->left_mid2_checkbox->setChecked(user_cfg.dists_included[distances::left_mid2]);
@@ -516,7 +515,7 @@ void QDeepBreath::enableMenu(bool is_enabled) {
 /*  DISTANCES CHECKBOXES   */
 void QDeepBreath::on_left_mid1_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid1;
 	user_cfg.dists_included[dist] = ui->left_mid1_checkbox->isChecked();
 
@@ -525,7 +524,7 @@ void QDeepBreath::on_left_mid1_checkbox_clicked()
 
 void QDeepBreath::on_left_right_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_right;
 	user_cfg.dists_included[dist] = ui->left_mid1_checkbox->isChecked();
 
@@ -534,7 +533,7 @@ void QDeepBreath::on_left_right_checkbox_clicked()
 
 void QDeepBreath::on_right_mid1_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::right_mid1;
 	user_cfg.dists_included[dist] = ui->right_mid1_checkbox->isChecked();
 
@@ -543,7 +542,7 @@ void QDeepBreath::on_right_mid1_checkbox_clicked()
 
 void QDeepBreath::on_left_mid2_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid2;
 	user_cfg.dists_included[dist] = ui->left_mid2_checkbox->isChecked();
 
@@ -552,7 +551,7 @@ void QDeepBreath::on_left_mid2_checkbox_clicked()
 
 void QDeepBreath::on_mid1_mid2_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid1;
 	user_cfg.dists_included[dist] = ui->mid1_mid2_checkbox->isChecked();
 
@@ -561,7 +560,7 @@ void QDeepBreath::on_mid1_mid2_checkbox_clicked()
 
 void QDeepBreath::on_right_mid2_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::right_mid2;
 	user_cfg.dists_included[dist] = ui->right_mid2_checkbox->isChecked();
 
@@ -570,7 +569,7 @@ void QDeepBreath::on_right_mid2_checkbox_clicked()
 
 void QDeepBreath::on_right_mid3_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::right_mid3;
 	user_cfg.dists_included[dist] = ui->right_mid3_checkbox->isChecked();
 
@@ -579,7 +578,7 @@ void QDeepBreath::on_right_mid3_checkbox_clicked()
 
 void QDeepBreath::on_left_mid3_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_mid3;
 	user_cfg.dists_included[dist] = ui->left_mid3_checkbox->isChecked();
 
@@ -588,7 +587,7 @@ void QDeepBreath::on_left_mid3_checkbox_clicked()
 
 void QDeepBreath::on_mid1_mid3_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::mid1_mid3;
 	user_cfg.dists_included[dist] = ui->mid1_mid3_checkbox->isChecked();
 
@@ -597,7 +596,7 @@ void QDeepBreath::on_mid1_mid3_checkbox_clicked()
 
 void QDeepBreath::on_mid2_mid3_checkbox_clicked()
 {
-	DeepBreathConfig user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::mid2_mid3;
 	user_cfg.dists_included[dist] = ui->mid2_mid3_checkbox->isChecked();
 
@@ -609,8 +608,8 @@ void QDeepBreath::on_mid2_mid3_checkbox_clicked()
 
 void QDeepBreath::on_start_camera_button_clicked()
 {
-	DeepBreathCamera camera = DeepBreathCamera::getInstance();
-	//DeepBreathFrameManager frame_manager = DeepBreathFrameManager::getInstance();
+	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
+	DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
 
     if(!is_camera_on) {
         //if camera is off:
@@ -699,7 +698,7 @@ void QDeepBreath::on_start_camera_button_clicked()
 
 void QDeepBreath::on_record_button_clicked()
 {
-	DeepBreathCamera camera = DeepBreathCamera::getInstance();
+	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
 
     if(!is_recording) {
         //turn recording on and change title
@@ -725,8 +724,8 @@ void QDeepBreath::on_record_button_clicked()
 
 void QDeepBreath::on_load_file_button_clicked()
 {
-	DeepBreathCamera camera = DeepBreathCamera::getInstance();
-	//DeepBreathFrameManager frame_manager = DeepBreathFrameManager::getInstance();
+	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
+	DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
 
     if(!is_run_from_file) {
         //if camera is on, show alert and stop stream
@@ -813,7 +812,7 @@ void QDeepBreath::on_load_file_button_clicked()
 
 void QDeepBreath::on_pause_button_clicked()
 {
-	DeepBreathCamera camera = DeepBreathCamera::getInstance();
+	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
 
     if(!is_pause) {
         ui->pause_button->setText("Continue");

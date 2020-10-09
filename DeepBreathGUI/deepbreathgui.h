@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <map>
+#include "db_config.hpp"
 #include "db_camera.hpp"
 #include "CustomOpenGLWidget.hpp"
 

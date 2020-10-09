@@ -22,7 +22,7 @@ class DeepBreathCamera {
 
 public:
 
-	static const DeepBreathCamera& getInstance();
+	static DeepBreathCamera& getInstance();
 
 	rs2::colorizer colorizer;
 	rs2::pipeline pipe;

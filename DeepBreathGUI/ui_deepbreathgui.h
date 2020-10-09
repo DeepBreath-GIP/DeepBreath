@@ -67,9 +67,9 @@ public:
     QCheckBox *left_mid3_checkbox;
     QCheckBox *right_mid3_checkbox;
     CustomOpenGLWidget *color_stream_widget;
-	CustomOpenGLWidget *depth_stream_widget;
-	CustomOpenGLWidget *volume_stream_widget;
-	CustomOpenGLWidget *graph_widget;
+    CustomOpenGLWidget *depth_stream_widget;
+    CustomOpenGLWidget *volume_stream_widget;
+    CustomOpenGLWidget *graph_widget;
     QMenuBar *menubar;
     QStatusBar *statusbar;
     QButtonGroup *dimension_button_group;

@@ -3,7 +3,7 @@
 
 DeepBreathCamera* DeepBreathCamera::_camera = nullptr;
 
-const DeepBreathCamera & DeepBreathCamera::getInstance()
+DeepBreathCamera & DeepBreathCamera::getInstance()
 {
 	if (_camera == nullptr) {
 		_camera = new DeepBreathCamera();

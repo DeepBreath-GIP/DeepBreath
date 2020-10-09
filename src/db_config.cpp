@@ -12,7 +12,7 @@ void DeepBreathConfig::createInstance(const char * config_filepath, std::string 
 	_config = new DeepBreathConfig(config_filepath, config_err);
 }
 
-const DeepBreathConfig& DeepBreathConfig::getInstance() {
+DeepBreathConfig& DeepBreathConfig::getInstance() {
 	return *_config;
 }
 
