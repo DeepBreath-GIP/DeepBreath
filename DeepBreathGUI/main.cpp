@@ -38,7 +38,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 
 			//TODO:
 			DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
-			//frame_manager.process_frame(color, depth);
+			frame_manager.process_frame(color, depth);
 
 			// convert the newly-arrived frames to render-firendly format
 			//for (const auto& frame : fs) //iterate over all available frames. (commented out to ignore IR emitter frames.)
