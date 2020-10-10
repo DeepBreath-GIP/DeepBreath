@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "db_frame_data.hpp"
+#include "db_log.hpp"
 
 #define CALC_2D_DIST(name1,name2) { distance2D((*(name1))[0], (*(name1))[1], (*(name2))[0], (*(name2))[1]) }
 #define CALC_3D_DIST(name1,name2) { distance3D(name1[0], name1[1], name1[2], name2[0], name2[1], name2[2]) }
@@ -194,46 +195,107 @@ void DeepBreathFrameData::CalculateDistances3D()
 	average_3d_dist = average_3d_dist / (1.0 * count);
 }
 
-// TODO: Enable this after refactoring logging
-//void DeepBreathFrameData::GetDescription()
-//{
-//	const std::string d2method = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
-//
-//	logFile << std::to_string(frame_idx) << "," << std::to_string(color_idx) << "," << std::to_string(depth_idx) << "," << std::to_string(color_timestamp) << "," <<
-//		std::to_string(depth_timestamp) << "," << std::to_string(system_color_timestamp) << "," << std::to_string(system_depth_timestamp) << "," <<
-//		std::to_string(system_timestamp) << "," << std::fixed << std::setprecision(2) << left_cm[0] << " " << std::fixed << std::setprecision(2) << left_cm[1] << " " <<
-//		std::fixed << std::setprecision(2) << left_cm[2] << "," << std::fixed << std::setprecision(2) << right_cm[0] << " " << std::fixed << std::setprecision(2) <<
-//		right_cm[1] << " " << std::fixed << std::setprecision(2) << right_cm[2] << ",";
-//	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {
-//		logFile << std::fixed << std::setprecision(2) << mid1_cm[0] << " " << std::fixed << std::setprecision(2) << mid1_cm[1] << " " << std::fixed << std::setprecision(2) <<
-//			mid1_cm[2] << ",";
-//	}
-//	logFile << std::fixed << std::setprecision(2) << mid2_cm[0] << " " << std::fixed << std::setprecision(2) << mid2_cm[1] << " " << std::fixed << std::setprecision(2) <<
-//		mid2_cm[2] << "," << std::fixed << std::setprecision(2) << mid3_cm[0] << " " << std::fixed << std::setprecision(2) << mid3_cm[1] << " " << std::fixed <<
-//		std::setprecision(2) << mid3_cm[2] << "," << std::fixed << std::setprecision(2) << (*left)[0] << " " << std::fixed << std::setprecision(2) << (*left)[1] << "," <<
-//		std::setprecision(2) << (*right)[0] << " " << std::setprecision(2) << (*right)[1] << ",";
-//	if (DeepBreathConfig::getInstance().num_of_stickers == 5) logFile << std::fixed << std::setprecision(2) << (*mid1)[0] << " " << std::fixed << std::setprecision(2) << (*mid1)[1] << ",";
-//	logFile << std::fixed << std::setprecision(2) << (*mid2)[0] << " " << std::fixed << std::setprecision(2) << (*mid2)[1] << "," << std::fixed << std::setprecision(2) <<
-//		(*mid3)[0] << " " << std::fixed << std::setprecision(2) << (*mid3)[1] << ",";
-//
-//	if (DeepBreathConfig::getInstance().num_of_stickers == 5)  logFile << std::fixed << std::setprecision(2) << dLM1 << ",";
-//	logFile << std::fixed << std::setprecision(2) << dLM2 << "," << std::fixed << std::setprecision(2) << dLM3 << "," << std::fixed << std::setprecision(2) << dLR <<
-//		",";
-//	if (DeepBreathConfig::getInstance().num_of_stickers == 5)  logFile << std::fixed << std::setprecision(2) << dRM1 << ",";
-//	logFile << std::fixed << std::setprecision(2) << dRM2 << "," << std::fixed << std::setprecision(2) << dRM3 << ",";
-//	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {
-//		logFile << std::fixed << std::setprecision(2) << dM1M2 << "," << std::fixed << std::setprecision(2) << dM1M3 << ",";
-//	}
-//	logFile << std::fixed << std::setprecision(2) << dM2M3 << ",";
-//
-//	if (DeepBreathConfig::getInstance().num_of_stickers == 5)  logFile << std::fixed << std::setprecision(2) << dLM1_depth << ",";
-//	logFile << std::fixed << std::setprecision(2) << dLM2_depth << "," << std::fixed << std::setprecision(2) << dLM3_depth << "," <<
-//		std::fixed << std::setprecision(2) << dLR_depth << ",";
-//	if (DeepBreathConfig::getInstance().num_of_stickers == 5)  logFile << std::fixed << std::setprecision(2) << dRM1_depth << ",";
-//	logFile << std::fixed << std::setprecision(2) << dRM2_depth << "," << std::setprecision(2) << dRM3_depth << ",";
-//	if (DeepBreathConfig::getInstance().num_of_stickers == 5) {
-//		logFile << std::fixed << std::setprecision(2) << dM1M2_depth << "," << std::fixed << std::setprecision(2) << dM1M3_depth << ",";
-//	}
-//	logFile << std::fixed << std::setprecision(2) << dM2M3_depth << "," << std::fixed << std::setprecision(6) << average_2d_dist << "," <<
-//		std::fixed << std::setprecision(6) << average_3d_dist << ",";
-//}
+void DeepBreathFrameData::GetDescription()
+{
+	DeepBreathLog& log = DeepBreathLog::getInstance();
+	assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+
+	const std::string d2method = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+
+	log.log_file << std::to_string(frame_idx) << ","
+		<< std::to_string(color_idx) << "," << std::to_string(depth_idx)
+		<< "," << std::to_string(color_timestamp) << "," << std::to_string(depth_timestamp) << ","
+		<< std::to_string(system_color_timestamp) << "," << std::to_string(system_depth_timestamp) << ","
+		<< std::to_string(system_timestamp) << ","
+		<< std::fixed << std::setprecision(2) << left_cm[0] << " "
+		<< std::fixed << std::setprecision(2) << left_cm[1] << " "
+		<< std::fixed << std::setprecision(2) << left_cm[2] << ","
+		<< std::fixed << std::setprecision(2) << right_cm[0] << " "
+		<< std::fixed << std::setprecision(2) << right_cm[1] << " "
+		<< std::fixed << std::setprecision(2) << right_cm[2] << ",";
+
+	int num_of_markers = DeepBreathConfig::getInstance().num_of_stickers;
+
+	if (num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << mid1_cm[0] << " "
+			<< std::fixed << std::setprecision(2) << mid1_cm[1] << " "
+			<< std::fixed << std::setprecision(2) << mid1_cm[2] << ",";
+	}
+	if (num_of_markers == 4 || num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << mid2_cm[0] << " "
+			<< std::fixed << std::setprecision(2) << mid2_cm[1] << " "
+			<< std::fixed << std::setprecision(2) << mid2_cm[2] << ",";
+	}
+	//any case, log mid 3:
+	log.log_file << std::fixed << std::setprecision(2) << mid3_cm[0] << " "
+		<< std::fixed << std::setprecision(2) << mid3_cm[1] << " "
+		<< std::fixed << std::setprecision(2) << mid3_cm[2] << ","
+		<< std::fixed << std::setprecision(2) << (*left)[0] << " "
+		<< std::fixed << std::setprecision(2) << (*left)[1] << ","
+		<< std::setprecision(2) << (*right)[0] << " " << std::setprecision(2) << (*right)[1] << ",";
+
+	if (num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << (*mid1)[0] << " "
+			<< std::fixed << std::setprecision(2) << (*mid1)[1] << ",";
+	}
+	if (num_of_markers == 4 || num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << (*mid2)[0] << " "
+			<< std::fixed << std::setprecision(2) << (*mid2)[1] << ",";
+	}
+	log.log_file << std::fixed << std::setprecision(2) << (*mid3)[0] << " "
+		<< std::fixed << std::setprecision(2) << (*mid3)[1] << ",";
+
+	if (num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dLM1 << ",";
+	}
+	if (num_of_markers == 4 || num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dLM2 << ",";
+	}
+	log.log_file << std::fixed << std::setprecision(2) << dLM3 << ","
+		<< std::fixed << std::setprecision(2) << dLR << ",";
+
+	if (num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dRM1 << ",";
+	}
+	if (num_of_markers == 4 || num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dRM2 << ",";
+	}
+	log.log_file << std::fixed << std::setprecision(2) << dRM3 << ",";
+
+	if (num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dM1M2 << ","
+			<< std::fixed << std::setprecision(2) << dM1M3 << ",";
+	}
+	if (num_of_markers == 4 || num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dM2M3 << ",";
+	}
+
+	if (num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dLM1_depth << ",";
+	}
+	if (num_of_markers == 4 || num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dLM2_depth << ",";
+	}
+	log.log_file << std::fixed << std::setprecision(2) << dLM3_depth << ",";
+
+
+	log.log_file << std::fixed << std::setprecision(2) << dLR_depth << ",";
+
+	if (num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dRM1_depth << ",";
+	}
+	if (num_of_markers == 4 || num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dRM2_depth << ",";
+	}
+	log.log_file << std::setprecision(2) << dRM3_depth << ",";
+
+	if (num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dM1M2_depth << ","
+			<< std::fixed << std::setprecision(2) << dM1M3_depth << ",";
+	}
+	if (num_of_markers == 4 || num_of_markers == 5) {
+		log.log_file << std::fixed << std::setprecision(2) << dM2M3_depth << ",";
+	}
+	log.log_file << std::fixed << std::setprecision(6) << average_2d_dist << ","
+		<< std::fixed << std::setprecision(6) << average_3d_dist << ",";
+}

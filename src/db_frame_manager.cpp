@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "db_frame_manager.hpp"
+#include "db_log.hpp"
 #include "utilities.h"
 
 DeepBreathFrameManager* DeepBreathFrameManager::_frame_manager = nullptr;
@@ -57,7 +58,8 @@ int DeepBreathFrameManager::get_frames_array_size() {
 
 void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame)
 {
-
+	DeepBreathLog& log = DeepBreathLog::getInstance();
+	assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
 	DeepBreathFrameData * breathing_data = new DeepBreathFrameData();
 
 	identify_markers(color_frame, depth_frame, breathing_data);
@@ -66,9 +68,9 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 	if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
 		if (check_illegal_3D_coordinates(breathing_data)) {
 			frames_dumped_in_row++;
-			logFile << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
+			log.log_file << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
 			if (frames_dumped_in_row >= 3) {								//This is required for transition to next columns in the log file! 
-				logFile << '\n';
+				log.log_file << '\n';
 				cleanup();
 			}
 			return;
@@ -106,11 +108,11 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 	}
 	if (!is_dup) {
 		//for logging
-		//breathing_data->GetDescription(); //TODO: uncomment when ready
+		breathing_data->GetDescription();
 		add_frame_data(breathing_data);
 	}
 	else {
-		logFile << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		log.log_file << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 	}
 }
@@ -254,7 +256,10 @@ void DeepBreathFrameManager::cleanup()
 			_frame_data_arr[i] = nullptr;
 		}
 	}
-	logFile << "frames array cleanup...\n,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+
+	DeepBreathLog& log = DeepBreathLog::getInstance();
+	assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+	log.log_file << "frames array cleanup...\n,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 	//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 	frames_dumped_in_row = 0;
 }
@@ -274,7 +279,9 @@ void DeepBreathFrameManager::add_frame_data(DeepBreathFrameData * frame_data)
 
 void DeepBreathFrameManager::get_locations(stickers s, std::vector<cv::Point2d> *out) {
 	if (DeepBreathConfig::getInstance().mode != graph_mode::LOCATION) {
-		logFile << "Warning: get_locations was called in incompatible mode! (use L mode),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		DeepBreathLog& log = DeepBreathLog::getInstance();
+		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		log.log_file << "Warning: get_locations was called in incompatible mode! (use L mode),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
 	}
@@ -294,7 +301,9 @@ void DeepBreathFrameManager::get_locations(stickers s, std::vector<cv::Point2d> 
 
 void DeepBreathFrameManager::get_dists(std::vector<cv::Point2d>* out) {
 	if (DeepBreathConfig::getInstance().mode == graph_mode::LOCATION) {
-		logFile << "Warning: get_dists was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		DeepBreathLog& log = DeepBreathLog::getInstance();
+		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		log.log_file << "Warning: get_dists was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
 	}

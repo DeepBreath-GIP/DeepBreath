@@ -706,6 +706,7 @@ void QDeepBreath::on_start_camera_button_clicked()
 
 				//Close log file
 				DeepBreathLog& log = DeepBreathLog::getInstance();
+				assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
 				log.log_file.close();
 
 				//turn streaming off and change title
@@ -771,6 +772,7 @@ void QDeepBreath::on_start_camera_button_clicked()
 
 		//Close log file
 		DeepBreathLog& log = DeepBreathLog::getInstance();
+		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
 		log.log_file.close();
 
         ui->start_camera_button->setText("Start Camera");
@@ -892,6 +894,7 @@ void QDeepBreath::on_load_file_button_clicked()
 
 		//Close log file
 		DeepBreathLog& log = DeepBreathLog::getInstance();
+		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
 		log.log_file.close();
 
 		//show and enable pause button
