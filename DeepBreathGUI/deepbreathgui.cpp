@@ -17,7 +17,7 @@
 #include "db_camera.hpp"
 #include "db_sync.hpp"
 #include "db_frame_manager.hpp"
-//#include "utilities.h"
+#include "db_log.hpp"
 
 #define FILE_ON_REPEAT false
 //extern void init_logFile(const char* filename, int num_of_stickers, std::string D2units);
@@ -700,7 +700,13 @@ void QDeepBreath::on_start_camera_button_clicked()
 				camera.cfg.disable_all_streams();
 				camera.cfg = rs2::config();
 				camera.pipe.stop();
-				//TODO: Close log file
+
+				//reset filename, so that if "load file" is clicked again, a new explorer window will appear
+				camera.filename = nullptr;
+
+				//Close log file
+				DeepBreathLog& log = DeepBreathLog::getInstance();
+				log.log_file.close();
 
 				//turn streaming off and change title
 				ui->load_file_button->setText("Load File...");
@@ -725,16 +731,20 @@ void QDeepBreath::on_start_camera_button_clicked()
 		enableLocations(false);
 
 		//start stream:
-		//camera.cfg.enable_stream(RS2_STREAM_DEPTH);
-		//camera.cfg.enable_stream(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
-		//camera.pipe.start(camera.cfg);
+		camera.cfg.enable_stream(RS2_STREAM_DEPTH);
+		camera.cfg.enable_stream(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
+		camera.pipe.start(camera.cfg);
 
 		//start_time = clock(); //TODO: put in class
 		//TODO:
-		//frame_manager.reset(); // reset FrameManager for additional processing
+		frame_manager.reset(); // reset FrameManager for additional processing
+
+		//TODO:
 		//graph.reset(frame_manager.manager_start_time);
-		//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
-		//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+
+		//create logging:
+		std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+		DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
 
 		//update condition variable to start polling:
 		DeepBreathSync::is_poll_frame = true;
@@ -747,18 +757,25 @@ void QDeepBreath::on_start_camera_button_clicked()
         // - turn camera off
         // - change button's title
         // - hide and disable recording
+
+		//stop frame polling:
+		DeepBreathSync::is_poll_frame = false;
+
         //Turn camera off:
-		//camera.cfg.disable_stream(RS2_STREAM_DEPTH);
-		//camera.cfg.disable_stream(RS2_STREAM_COLOR);
-		//camera.pipe.stop();
-		//TODO: close log file
+		camera.cfg.disable_stream(RS2_STREAM_DEPTH);
+		camera.cfg.disable_stream(RS2_STREAM_COLOR);
+		camera.pipe.stop();
+
+		//reset filename, so that if "load file" is clicked again, a new explorer window will appear
+		camera.filename = nullptr;
+
+		//Close log file
+		DeepBreathLog& log = DeepBreathLog::getInstance();
+		log.log_file.close();
 
         ui->start_camera_button->setText("Start Camera");
         ui->record_button->setEnabled(false);
         ui->record_button->setVisible(false);
-
-		//stop frame polling:
-		DeepBreathSync::is_poll_frame = false;
 
         //enable change of menu:
         enableMenu(true);
@@ -829,10 +846,14 @@ void QDeepBreath::on_load_file_button_clicked()
 			//start_time = clock();
 			camera.pipe.start(camera.cfg); //File will be opened in read mode at this point
 
-			//frame_manager.reset(); // reset FrameManager for additional processing
+			frame_manager.reset(); // reset FrameManager for additional processing
+
+			//TODO:
 			//graph.reset(frame_manager.manager_start_time);
-			//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
-			//init_logFile(filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+
+			//create logging:
+			std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+			DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
 		}
 
 		//show and enable pause button
@@ -865,9 +886,13 @@ void QDeepBreath::on_load_file_button_clicked()
 		camera.cfg.disable_all_streams();
 		camera.cfg = rs2::config();
 		camera.pipe.stop();
+
 		//reset filename argument:
 		camera.filename = nullptr;
-		//logFile.close();
+
+		//Close log file
+		DeepBreathLog& log = DeepBreathLog::getInstance();
+		log.log_file.close();
 
 		//show and enable pause button
 		ui->pause_button->setVisible(false);

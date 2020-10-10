@@ -199,6 +199,7 @@
     <ClCompile Include="db_camera.cpp" />
     <ClCompile Include="db_frame_data.cpp" />
     <ClCompile Include="db_frame_manager.cpp" />
+    <ClCompile Include="db_log.cpp" />
     <ClCompile Include="db_sync.cpp" />
     <ClCompile Include="deepbreathgui.cpp" />
     <ClCompile Include="main.cpp" />
@@ -272,6 +273,7 @@
     <ClInclude Include="CustomOpenGLWidget.hpp" />
     <ClInclude Include="db_camera.hpp" />
     <ClInclude Include="db_frame_data.hpp" />
+    <ClInclude Include="db_log.hpp" />
     <ClInclude Include="db_sync.hpp" />
     <ClInclude Include="db_frame_manager.hpp" />
   </ItemGroup>
