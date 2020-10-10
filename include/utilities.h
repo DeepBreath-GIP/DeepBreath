@@ -3,46 +3,9 @@
 #pragma once
 #include <librealsense2/rsutil.h>
 #include "db_frame_data.hpp"
+#include "db_log.hpp"
 
 #define PI 3.14159265358979323846
-
-#define LOG_TITLES_4_STICKERS(D2units)"Frame_index,Color idx,Depth idx,Color timestamp,Depth timestamp,System color timestamp,System depth timestamp\
-,System timestamp,left (x y z) cm,right (x y z) cm,mid2  (x y z) cm,mid3  (x y z) cm,left (x y)" + D2units + ",right (x y) " + D2units + ",mid2 (x y) " + D2units + \
-",mid3 (x y) " + D2units + ",left - mid2 2D distance " + D2units + ",left - mid3 2D distance " + D2units + ",left - right 2D distance " + D2units + \
-",right - mid2 2D distance " + D2units + ",right - mid3 2D distance " + D2units + ",mid2 - mid3 2D distance " + D2units + ",left - mid2 3D distance (cm)\
-,left - mid3 3D distance (cm),left - right 3D distance (cm),right - mid2 3D distance (cm),right - mid3 3D distance (cm),mid2 - mid3 3D distance (cm)\
-,2D average distance,3D average distance,FPS,realSamplesNum,frequency,BPM\n"
-
-#define LOG_TITLES_5_STICKERS(D2units) "Frame_index,Color idx,Depth idx,Color timestamp,Depth timestamp,System color timestamp,System depth timestamp\
-,System timestamp,left (x y z) cm,right (x y z) cm,mid1(x y z) cm,mid2  (x y z) cm,mid3  (x y z) cm,left (x y)" + D2units + ",right (x y) " + D2units + \
-",mid1 (x y) " + D2units + ",mid2 (x y) " + D2units + ",mid3 (x y) " + D2units + ",left - mid1 2D distance " + D2units + ",left - mid2 2D distance " + D2units + \
-",left - mid3 2D distance " + D2units + ",left - right 2D distance " + D2units + ",right - mid1 2D distance " + D2units + ",right - mid2 2D distance " + \
-D2units + ",right - mid3 2D distance " + D2units + ",mid1 - mid2 2D distance " + D2units + ",mid1 - mid3 2D distance " + D2units + ",mid2 - mid3 2D distance " + \
- D2units + ",left - mid1 3D distance (cm),left - mid2 3D distance (cm),left - mid3 3D distance (cm),left - right 3D distance (cm),right - mid1 3D distance (cm),\
-right - mid2 3D distance (cm),right - mid3 3D distance (cm),mid1 - mid2 3D distance (cm),mid1 - mid3 3D distance (cm),mid2 - mid3 3D distance (cm),2D average \
-distance,3D average distance,FPS,realSamplesNum,frequency,BPM\n"
-
-
-// for logging
-std::ofstream logFile;
-
-void init_logFile(const char* filename, int num_of_stickers, std::string D2units) {
-	std::string name_prefix;
-	if (filename) {
-		//std::string file_name = filename;
-		name_prefix = "file_log"; //file_name.substr(file_name.find("\\"), file_name.find("\."));
-	}
-	else {
-		name_prefix = "live_camera_log";
-	}
-	auto t = std::time(nullptr);
-	auto tm = *std::localtime(&t);
-	std::ostringstream oss;
-	oss << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
-	std::string log_name = name_prefix + "_" + oss.str() + ".csv";
-	logFile.open(log_name);
-	(num_of_stickers == 4) ? logFile << LOG_TITLES_4_STICKERS(D2units) : logFile << LOG_TITLES_5_STICKERS(D2units);
-}
 
 // fill out with n values, evenly spaced between a and b, including a and b
 void linespace(double a, double b, int n, std::vector<double>* out) {
@@ -193,8 +156,12 @@ void HPF(double* in, double dt, double fc, double* out, int size) {
 * the avg distance is calculated only for distances set to true in user_cfg.dists_included
 */
 long double calc_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies = NULL) {
+	
+	DeepBreathLog& log = DeepBreathLog::getInstance();
+	assert(log);
+
 	if (samples->size() < 5) {
-		logFile << '\n';
+		log.log_file << '\n';
 		return 0;
 	}
 	int realSamplesNum = samples->size();	// N - number of samples (frames)
@@ -268,11 +235,11 @@ long double calc_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv
 	delete X;
 	delete Y;
 	
-	logFile << fps << ',';
-	logFile << realSamplesNum << ',';
+	log.log_file << fps << ',';
+	log.log_file << realSamplesNum << ',';
 	long double f = fps / (paddedSamplesNum - 2.0) * max_idx;
-	logFile << std::fixed <<std::setprecision(6) << f << ',';
-	logFile << std::fixed << std::setprecision(6) << f*60.0 << '\n';
+	log.log_file << std::fixed <<std::setprecision(6) << f << ',';
+	log.log_file << std::fixed << std::setprecision(6) << f*60.0 << '\n';
 	return f;
 }
 
@@ -286,8 +253,12 @@ long double calc_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv
  * return frequency
  */
 long double calc_frequency_differently(std::vector<cv::Point2d>* samples, bool cm_units) {
+
+	DeepBreathLog& log = DeepBreathLog::getInstance();
+	assert(log);
+
 	if (samples->size() < 40) {
-		logFile << "\n";
+		log.log_file << "\n";
 		return 0;
 	}
 	int neighborhood = (cm_units) ? 3 : 5;
@@ -322,7 +293,7 @@ long double calc_frequency_differently(std::vector<cv::Point2d>* samples, bool c
 	}
 	
 	if (peaks.size() < 2) {
-		logFile << "\n";
+		log.log_file << "\n";
 		return 0;
 	}
 	//get avg time lapse between picks
@@ -344,10 +315,10 @@ long double calc_frequency_differently(std::vector<cv::Point2d>* samples, bool c
 	long double bpm = 60.0 / breath_cycle;
 	long double f = bpm / 60.0;
 	
-	logFile << "-" << ","; // FPS coloumn
-	logFile << samples->size() << ","; // realSamplesNum coloumn
-	logFile << f << ",";
-	logFile << bpm << "\n";
+	log.log_file << "-" << ","; // FPS coloumn
+	log.log_file << samples->size() << ","; // realSamplesNum coloumn
+	log.log_file << f << ",";
+	log.log_file << bpm << "\n";
 	return f;
 
 }
