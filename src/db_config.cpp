@@ -83,7 +83,7 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 		line_num++;
 
 		//get distances:
-		//skip distances for Locations
+		//skip distances for Locations - UNCOMMENT TO SKIP
 		//if (this->mode == graph_mode::LOCATION) {
 		//	getline(config_file, line);
 		//	line_num++;
@@ -115,7 +115,7 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 		line_num++;
 		getline(config_file, line);	//locations comment
 		line_num++;
-		//for Distances, Fourier, Volume, No Graph: Skip locations
+		//for Distances, Fourier, Volume, No Graph: Skip locations - UNCOMMENT TO SKIP
 		//if (this->mode == graph_mode::DISTANCES
 		//	|| this->mode == graph_mode::FOURIER
 		//	|| this->mode == graph_mode::VOLUME

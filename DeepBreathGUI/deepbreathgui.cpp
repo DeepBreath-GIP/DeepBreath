@@ -856,8 +856,11 @@ void QDeepBreath::on_load_file_button_clicked()
 
     }
     else {
-        //turn streaming off and change title
-        ui->load_file_button->setText("Load File...");
+		//stop frame polling:
+		DeepBreathSync::is_poll_frame = false;
+
+		//turn streaming off and change title
+		ui->load_file_button->setText("Load File...");
 
 		camera.cfg.disable_all_streams();
 		camera.cfg = rs2::config();
@@ -870,13 +873,10 @@ void QDeepBreath::on_load_file_button_clicked()
 		ui->pause_button->setVisible(false);
 		ui->pause_button->setEnabled(false);
 
-        //enable change of menu:
+		//enable change of menu:
 		enableMenu(true);
 		enableDistances(true);
 		enableLocations(true);
-
-		//stop frame polling:
-		DeepBreathSync::is_poll_frame = false;
 
 		is_run_from_file = false;
     }
@@ -887,6 +887,8 @@ void QDeepBreath::on_pause_button_clicked()
 	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
 
     if(!is_pause) {
+		DeepBreathSync::is_poll_frame = false;
+
         ui->pause_button->setText("Continue");
 
 		rs2::device device = camera.pipe.get_active_profile().get_device();
@@ -904,8 +906,6 @@ void QDeepBreath::on_pause_button_clicked()
 			freeze_frames[1] = camera.colorizer.process(d);
 
 		}
-
-		DeepBreathSync::is_poll_frame = false;
 
         is_pause = true;
     }
