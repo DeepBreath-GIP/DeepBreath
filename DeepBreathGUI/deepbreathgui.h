@@ -3,9 +3,9 @@
 
 #include <QMainWindow>
 #include <map>
+#include "CustomOpenGLWidget.hpp"
 #include "db_config.hpp"
 #include "db_camera.hpp"
-#include "CustomOpenGLWidget.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class DeepBreath; }

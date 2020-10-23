@@ -22,6 +22,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 #include "CustomOpenGLWidget.hpp"
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -69,7 +70,7 @@ public:
     CustomOpenGLWidget *color_stream_widget;
     CustomOpenGLWidget *depth_stream_widget;
     CustomOpenGLWidget *volume_stream_widget;
-    CustomOpenGLWidget *graph_widget;
+	QCustomPlot *graph_widget;
     QMenuBar *menubar;
     QStatusBar *statusbar;
     QButtonGroup *dimension_button_group;
@@ -260,7 +261,7 @@ public:
         volume_stream_widget = new CustomOpenGLWidget(centralwidget);
         volume_stream_widget->setObjectName(QString::fromUtf8("volume_stream_widget"));
         volume_stream_widget->setGeometry(QRect(420, 350, 401, 301));
-        graph_widget = new CustomOpenGLWidget(centralwidget);
+        graph_widget = new QCustomPlot(centralwidget);
         graph_widget->setObjectName(QString::fromUtf8("graph_widget"));
         graph_widget->setGeometry(QRect(850, 350, 401, 301));
         DeepBreath->setCentralWidget(centralwidget);
