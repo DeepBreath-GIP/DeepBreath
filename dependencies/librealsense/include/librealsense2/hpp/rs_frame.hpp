@@ -891,7 +891,7 @@ namespace rs2
         frame first_or_default(rs2_stream s, rs2_format f = RS2_FORMAT_ANY) const
         {
             frame result;
-            foreach([&result, s, f](frame frm) {
+            foreach_rs([&result, s, f](frame frm) {
                 if (!result && frm.get_profile().stream_type() == s && (f == RS2_FORMAT_ANY || f == frm.get_profile().format()))
                 {
                     result = std::move(frm);
@@ -951,7 +951,7 @@ namespace rs2
             }
             else
             {
-                foreach([&f, index](const frame& frm) {
+                foreach_rs([&f, index](const frame& frm) {
                     if (frm.get_profile().stream_type() == RS2_STREAM_INFRARED &&
                         frm.get_profile().stream_index() == index) f = frm;
                 });
@@ -973,7 +973,7 @@ namespace rs2
             }
             else
             {
-                foreach([&f, index](const frame& frm) {
+                foreach_rs([&f, index](const frame& frm) {
                     if (frm.get_profile().stream_type() == RS2_STREAM_FISHEYE &&
                         frm.get_profile().stream_index() == index) f = frm;
                 });
@@ -995,7 +995,7 @@ namespace rs2
             }
             else
             {
-                foreach([&f, index](const frame& frm) {
+                foreach_rs([&f, index](const frame& frm) {
                     if (frm.get_profile().stream_type() == RS2_STREAM_POSE &&
                         frm.get_profile().stream_index() == index) f = frm;
                 });
@@ -1015,9 +1015,10 @@ namespace rs2
         /**
         * Template function, extract internal frame handles from the frameset and invoke the action function
         * \param[in] action - instance with () operator implemented will be invoke after frame extraction.
+		* NOTE: Renamed to foreach_rs due to naming conflict with QT foreach.
         */
         template<class T>
-        void foreach(T action) const
+        void foreach_rs(T action) const
         {
             rs2_error* e = nullptr;
             auto count = size();

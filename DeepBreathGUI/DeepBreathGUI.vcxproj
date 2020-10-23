@@ -72,7 +72,7 @@
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;printsupport;widgets</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -88,7 +88,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>release\</ObjectFileName>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;UNICODE;_WIN32;WIN64;QT_NO_FOREACH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_WIN32;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>
       </ProgramDataBaseFileName>
@@ -203,6 +203,7 @@
     <ClCompile Include="..\src\db_sync.cpp" />
     <ClCompile Include="deepbreathgui.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="qcustomplot.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="deepbreathgui.h">
@@ -276,6 +277,7 @@
     <ClInclude Include="..\include\db_sync.hpp" />
     <ClInclude Include="..\include\utilities.h" />
     <ClInclude Include="CustomOpenGLWidget.hpp" />
+    <QtMoc Include="qcustomplot.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
