@@ -30,6 +30,7 @@ public:
 	*/
 	void renderStreamWidgets(std::map<int, rs2::frame>& render_frames, const int width, const int height);
 
+
 private slots:
     void on_left_mid1_checkbox_clicked();
 

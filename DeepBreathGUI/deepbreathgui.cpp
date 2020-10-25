@@ -18,6 +18,7 @@
 #include "db_sync.hpp"
 #include "db_frame_manager.hpp"
 #include "db_log.hpp"
+#include "db_graph_plot.hpp"
 
 #define FILE_ON_REPEAT false
 //extern void init_logFile(const char* filename, int num_of_stickers, std::string D2units);
@@ -55,6 +56,16 @@ QDeepBreath::QDeepBreath(QWidget *parent)
     setTransparentBackroundToText();
     ui->record_button->setVisible(false);
     ui->pause_button->setVisible(false);
+
+	//ui->graph_widget->addGraph(); // blue line
+	//ui->graph_widget->graph(0)->setPen(QPen(QColor(40, 110, 255)));
+	//ui->graph_widget->xAxis->setRange(-1.2, 1.2);
+	//ui->graph_widget->graph(0)->addData(0,1);
+	//ui->graph_widget->graph(0)->addData(1,2);
+	//ui->graph_widget->graph(0)->addData(2,2);
+	//ui->graph_widget->graph(0)->addData(3,0);
+	//ui->graph_widget->replot();
+
 
 	initDefaultSelection();
 }
@@ -746,6 +757,7 @@ void QDeepBreath::on_start_camera_button_clicked()
 		//create logging:
 		std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
 		DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+		DeepBreathGraphPlot::createInstance(ui->graph_widget);
 
 		//update condition variable to start polling:
 		DeepBreathSync::is_poll_frame = true;
@@ -856,6 +868,7 @@ void QDeepBreath::on_load_file_button_clicked()
 			//create logging:
 			std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
 			DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+			DeepBreathGraphPlot::createInstance(ui->graph_widget);
 		}
 
 		//show and enable pause button

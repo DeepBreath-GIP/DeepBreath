@@ -84,6 +84,11 @@ private:
 	 */
 	void add_frame_data(DeepBreathFrameData * frame_data);
 
+	/**
+	 * Add the data arrived to the graph according to the graph mode as set in config.
+	 */
+	void add_data_to_graph(DeepBreathFrameData * frame_data);
+
 	/* Identify marker points: stickers or nipples and bellybutton image recognition. */
 	void identify_markers(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data);
 

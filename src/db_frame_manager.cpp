@@ -3,6 +3,7 @@
 
 #include "db_frame_manager.hpp"
 #include "db_log.hpp"
+#include "db_graph_plot.hpp"
 #include "utilities.h"
 
 DeepBreathFrameManager* DeepBreathFrameManager::_frame_manager = nullptr;
@@ -110,6 +111,10 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 		//for logging
 		breathing_data->GetDescription();
 		add_frame_data(breathing_data);
+
+		//update graph:
+		add_data_to_graph(breathing_data);
+
 	}
 	else {
 		log.log_file << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
@@ -276,6 +281,42 @@ void DeepBreathFrameManager::add_frame_data(DeepBreathFrameData * frame_data)
 	_oldest_frame_index = (_oldest_frame_index + 1) % _n_frames;
 }
 
+void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data) {
+
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	DeepBreathGraphPlot& graph_plot = DeepBreathGraphPlot::getInstance();
+	assert(graph_plot); //graph plot instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+
+	cv::Point2d p(0, 0);
+
+	switch (user_cfg.mode) {
+	case DISTANCES:
+		if (user_cfg.dimension == D2) {
+			p.x = frame_data->system_color_timestamp;
+			p.y = frame_data->average_2d_dist;
+		}
+		else {
+			p.x = frame_data->system_depth_timestamp;
+			p.y = frame_data->average_3d_dist;
+		}
+		graph_plot.addData(p);
+		break;
+		//case FOURIER:
+		//	_plotFourier(points);
+		//	break;
+		//case LOCATION:
+		//	_plotLoc(points, i);
+		//	break;
+		//case VOLUME:
+		//	_plotFourier(points);
+		//	break;
+		//case NOGRAPH:
+		//	_plotNoGraph(points); 
+	}
+
+	graph_plot.update();
+
+}
 
 void DeepBreathFrameManager::get_locations(stickers s, std::vector<cv::Point2d> *out) {
 	if (DeepBreathConfig::getInstance().mode != graph_mode::LOCATION) {
