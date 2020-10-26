@@ -18,8 +18,6 @@ public:
 
 	void update();
 
-	void plot(std::vector<cv::Point2d>& points);
-
 protected:
 
 	//ctor:
@@ -28,12 +26,6 @@ protected:
 	static DeepBreathGraphPlot* _graph_plot;
 
 private:
-
-	//void _plotFourier(std::vector<cv::Point2d>& points);
-	void _plotDists(std::vector<cv::Point2d>& points);
-	//void _plotLoc(std::vector<cv::Point2d>& points, int i);
-	//void _plotVolume(std::vector<cv::Point2d>& points);
-	//void _plotNoGraph(std::vector<cv::Point2d>& points);
 
 	QCustomPlot* _graph_widget;
 	clock_t _time_begin;
