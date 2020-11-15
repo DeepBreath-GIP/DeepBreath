@@ -373,8 +373,9 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 		//case VOLUME:
 		//	_plotFourier(points);
 		//	break;
-		//case NOGRAPH:
-		//	_plotNoGraph(points); 
+	case NOGRAPH:
+		//Do nothing, nothing to plot.
+		break;
 	}
 
 	graph_plot.update();
@@ -408,6 +409,7 @@ void DeepBreathFrameManager::get_dists(std::vector<cv::Point2d>* out) {
 	if (DeepBreathConfig::getInstance().mode == graph_mode::LOCATION) {
 		DeepBreathLog& log = DeepBreathLog::getInstance();
 		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		//TODO: Log bpm info?
 		log.log_file << "Warning: get_dists was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;

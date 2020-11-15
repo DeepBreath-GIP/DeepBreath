@@ -144,9 +144,10 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 		//case VOLUME:
 		//	_plotFourier(points);
 		//	break;
-		//case NOGRAPH:
-		//	_plotNoGraph(points);
-	default: //distances, fourier, no graph - the same:
+	case NOGRAPH:
+		//No data to add, do nothing.
+		break;
+	default: //distances, fourier - the same:
 		_graph_widget->graph(0)->addData(p.x, p.y);
 		break;
 	}
