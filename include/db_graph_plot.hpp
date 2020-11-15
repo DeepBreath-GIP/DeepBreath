@@ -30,5 +30,9 @@ private:
 	QCustomPlot* _graph_widget;
 	clock_t _time_begin;
 	bool _is_first_plot;
+	float _min_x;
+	float _max_x;
+	float _min_y;
+	float _max_y;
 
 };

@@ -29,7 +29,11 @@ DeepBreathGraphPlot & DeepBreathGraphPlot::getInstance()
 
 
 DeepBreathGraphPlot::DeepBreathGraphPlot(QCustomPlot* graph_widget) :
-	_is_first_plot(true) {
+	_is_first_plot(true),
+	_min_x(0),
+	_max_x(0),
+	_min_y(0),
+	_max_y(0) {
 
 	_graph_widget = graph_widget;
 
@@ -75,11 +79,30 @@ void DeepBreathGraphPlot::reset() {
 	//clear graphs:
 	_graph_widget->clearGraphs();
 	_is_first_plot = true;
+	_min_x = 0;
+	_max_x = 0;
+	_min_y = 0;
+	_max_y = 0;
 }
 
 void DeepBreathGraphPlot::addData(cv::Point2d& p) {
 
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	if (p.x > _max_x) {
+		_max_x = p.x;
+	}
+	if (p.x < _min_x) {
+		_min_x = p.x;
+	}
+
+	if (p.y > _max_y) {
+		_max_y = p.y;
+		_graph_widget->yAxis->setRange(_min_y, _max_y);
+	}
+	if (p.y < _min_y || _min_y == 0) {
+		_min_y = p.y;
+		_graph_widget->yAxis->setRange(_min_y, _max_y);
+	}
 
 	switch (user_cfg.mode) {
 	case DISTANCES:
