@@ -43,6 +43,9 @@ DeepBreathGraphPlot::DeepBreathGraphPlot(QCustomPlot* graph_widget) :
 
 	_graph_widget->yAxis->setRange(0, 200, Qt::AlignLeft);
 
+	_graph_widget->setInteraction(QCP::iRangeDrag, true);
+	_graph_widget->setInteraction(QCP::iRangeZoom, true);
+
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
 	int i = 0;
