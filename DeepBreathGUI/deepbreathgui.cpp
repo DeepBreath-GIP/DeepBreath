@@ -947,6 +947,10 @@ void QDeepBreath::on_pause_button_clicked()
 
 void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
 {
+
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
     switch(index) {
         case 0: //Distances
             enableDistances(true);
@@ -954,6 +958,7 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
             enableLocations(false);
 			ui->dimension_2d_radio_button->setEnabled(true);
 			setConfigDimension();
+			user_cfg.mode = DISTANCES;
             break;
         case 1: //Locations
             enableDistances(false);
@@ -961,12 +966,14 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
 			setConfigLocations();
 			ui->dimension_2d_radio_button->setEnabled(true);
 			setConfigDimension();
+			user_cfg.mode = LOCATION;
             break;
         case 2: //Fourier
             enableDistances(true);
 			setConfigDistances();
             enableLocations(false);
 			ui->dimension_2d_radio_button->setEnabled(true);
+			user_cfg.mode = FOURIER;
             break;
         case 3: //Volume
             enableDistances(false);
@@ -975,6 +982,7 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
             ui->dimension_3d_radio_button->setChecked(true);
             ui->dimension_2d_radio_button->setEnabled(false);
             //ui->is_stickers_checkbox->setEnabled(false);
+			user_cfg.mode = VOLUME;
             break;
         case 4: //No Graph
             enableDistances(true);
@@ -982,6 +990,7 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
             enableLocations(false);
 			ui->dimension_2d_radio_button->setEnabled(true);
 			setConfigDimension();
+			user_cfg.mode = NOGRAPH;
             break;
     }
 }

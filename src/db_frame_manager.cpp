@@ -324,8 +324,12 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	DeepBreathGraphPlot& graph_plot = DeepBreathGraphPlot::getInstance();
 	assert(graph_plot); //graph plot instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+	DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
 
 	cv::Point2d p(0, 0);
+	std::vector<cv::Point2d> points;
+	std::vector<cv::Point2d> frequency_points;
+	long double f;
 
 	switch (user_cfg.mode) {
 	case DISTANCES:
@@ -339,9 +343,10 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 		}
 		graph_plot.addData(p);
 		break;
-		//case FOURIER:
-		//	_plotFourier(points);
-		//	break;
+	case FOURIER:
+		//DO NOTHING! cannot calculate fft based on single point.
+		//Implementation of graph data setting is in: _calc_bpm_and_log_dists for this case. 
+		break;
 		//case LOCATION:
 		//	_plotLoc(points, i);
 		//	break;
@@ -426,7 +431,22 @@ void DeepBreathFrameManager::deactivateInterval() {
 long double DeepBreathFrameManager::_calc_bpm_and_log_dists(std::vector<cv::Point2d>& points) {
 	long double f;
 	normalize_distances(&points);
-	f = (calc_and_log_frequency_fft(&points));
+	std::vector<cv::Point2d> frequency_points;
+	f = calc_and_log_frequency_fft(&points, &frequency_points);
+
+	if (DeepBreathConfig::getInstance().mode == FOURIER) {
+
+		DeepBreathGraphPlot& graph_plot = DeepBreathGraphPlot::getInstance();
+		assert(graph_plot);
+
+		graph_plot.reset();
+
+		for (auto fp : frequency_points) {
+			graph_plot.addData(fp);
+		}
+
+		graph_plot.update();
+	}
 
 	if (points.size() < NUM_OF_LAST_FRAMES * 0.5)
 		f = 0;

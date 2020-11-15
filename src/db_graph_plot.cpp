@@ -81,6 +81,32 @@ void DeepBreathGraphPlot::reset() {
 	
 	//clear graphs:
 	_graph_widget->clearGraphs();
+
+	//and set new brushes for new graphs:
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	int i = 0;
+	QPen pen(QColor(qSin(i*0.3) * 100 + 100, qSin(i*0.6 + 0.7) * 100 + 100, qSin(i*0.4 + 0.6) * 100 + 100));
+
+	switch (user_cfg.mode) {
+	case LOCATION:
+		//Add graphs as the number of locations to show:
+		for (auto loc : user_cfg.stickers_included) {
+			if (loc.second == true) {
+				_graph_widget->addGraph(); // blue line
+				_graph_widget->graph(i)->setPen(pen);
+			}
+			i++;
+			pen.setColor(QColor(qSin(i*0.3) * 100 + 100, qSin(i*0.6 + 0.7) * 100 + 100, qSin(i*0.4 + 0.6) * 100 + 100));
+		}
+		break;
+	default:
+		//just one graph:
+		_graph_widget->addGraph(); // blue line
+		_graph_widget->graph(0)->setPen(QPen(QColor(40, 110, 255)));
+		break;
+	}
+
 	_is_first_plot = true;
 	_min_x = 0;
 	_max_x = 0;
@@ -107,17 +133,12 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p) {
 		_graph_widget->yAxis->setRange(_min_y, _max_y);
 	}
 
-	switch (user_cfg.mode) {
-	case DISTANCES:
-		_graph_widget->graph(0)->addData(p.x, p.y);
+	//set graph running to right:
+	if (p.x > 8) {
+		_graph_widget->xAxis->setRange(p.x, 8, Qt::AlignRight);
+	}
 
-		if (p.x > 8) {
-			_graph_widget->xAxis->setRange(p.x, 8, Qt::AlignRight);
-		}
-		break;
-		//case FOURIER:
-		//	_plotFourier(points);
-		//	break;
+	switch (user_cfg.mode) {
 		//case LOCATION:
 		//	_plotLoc(points, i);
 		//	break;
@@ -126,6 +147,9 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p) {
 		//	break;
 		//case NOGRAPH:
 		//	_plotNoGraph(points);
+	default: //distances, fourier, no graph - the same:
+		_graph_widget->graph(0)->addData(p.x, p.y);
+		break;
 	}
 
 }
