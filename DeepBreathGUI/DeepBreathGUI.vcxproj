@@ -87,7 +87,7 @@
       <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>release\</ObjectFileName>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;UNICODE;_WIN32;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>
@@ -199,6 +199,7 @@
     <ClCompile Include="..\src\db_camera.cpp" />
     <ClCompile Include="..\src\db_config.cpp" />
     <ClCompile Include="..\src\db_frame_manager.cpp" />
+    <ClCompile Include="..\src\db_graph_plot.cpp" />
     <ClCompile Include="..\src\db_log.cpp" />
     <ClCompile Include="..\src\db_sync.cpp" />
     <ClCompile Include="deepbreathgui.cpp" />
@@ -273,6 +274,7 @@
     <ClInclude Include="..\include\db_config.hpp" />
     <ClInclude Include="..\include\db_frame_data.hpp" />
     <ClInclude Include="..\include\db_frame_manager.hpp" />
+    <ClInclude Include="..\include\db_graph_plot.hpp" />
     <ClInclude Include="..\include\db_log.hpp" />
     <ClInclude Include="..\include\db_sync.hpp" />
     <ClInclude Include="..\include\utilities.h" />

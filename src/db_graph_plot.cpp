@@ -1,0 +1,109 @@
+#include "db_graph_plot.hpp"
+#include "db_frame_manager.hpp"
+#include "db_config.hpp"
+#include "db_log.hpp"
+
+#define NUM_OF_LAST_FRAMES 256
+
+/* Forward declarations: */
+
+
+/* ** */
+
+DeepBreathGraphPlot* DeepBreathGraphPlot::_graph_plot = nullptr;
+
+void DeepBreathGraphPlot::createInstance(QCustomPlot* graph_widget) {
+	if (_graph_plot == nullptr) {
+		_graph_plot = new DeepBreathGraphPlot(graph_widget);
+
+	}
+	else {
+		_graph_plot->reset();
+	}
+}
+
+DeepBreathGraphPlot & DeepBreathGraphPlot::getInstance()
+{
+	return *_graph_plot;
+}
+
+
+DeepBreathGraphPlot::DeepBreathGraphPlot(QCustomPlot* graph_widget) :
+	_is_first_plot(true) {
+
+	_graph_widget = graph_widget;
+
+	this->reset();
+
+	_graph_widget->xAxis->setRange(_time_begin, 8, Qt::AlignLeft);
+
+	_graph_widget->yAxis->setRange(0, 200, Qt::AlignLeft);
+
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	int i = 0;
+	QPen pen(QColor(qSin(i*0.3) * 100 + 100, qSin(i*0.6 + 0.7) * 100 + 100, qSin(i*0.4 + 0.6) * 100 + 100));
+
+	switch (user_cfg.mode) {
+	case LOCATION:
+		//Add graphs as the number of locations to show:
+		for (auto loc : user_cfg.stickers_included) {
+			if (loc.second == true) {
+				_graph_widget->addGraph(); // blue line
+				_graph_widget->graph(i)->setPen(pen);
+			}
+			i++;
+			pen.setColor(QColor(qSin(i*0.3) * 100 + 100, qSin(i*0.6 + 0.7) * 100 + 100, qSin(i*0.4 + 0.6) * 100 + 100));
+		}
+		break;
+	default:
+		//just one graph:
+		_graph_widget->addGraph(); // blue line
+		_graph_widget->graph(0)->setPen(QPen(QColor(40, 110, 255)));
+		break;
+	}
+
+}
+
+void DeepBreathGraphPlot::reset() {
+
+	DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
+
+	clock_t current_system_time = clock();
+	_time_begin = (current_system_time - frame_manager.manager_start_time) / double(CLOCKS_PER_SEC);
+	
+	//clear graphs:
+	_graph_widget->clearGraphs();
+	_is_first_plot = true;
+}
+
+void DeepBreathGraphPlot::addData(cv::Point2d& p) {
+
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	switch (user_cfg.mode) {
+	case DISTANCES:
+		_graph_widget->graph(0)->addData(p.x, p.y);
+
+		if (p.x > 8) {
+			_graph_widget->xAxis->setRange(p.x, 8, Qt::AlignRight);
+		}
+		break;
+		//case FOURIER:
+		//	_plotFourier(points);
+		//	break;
+		//case LOCATION:
+		//	_plotLoc(points, i);
+		//	break;
+		//case VOLUME:
+		//	_plotFourier(points);
+		//	break;
+		//case NOGRAPH:
+		//	_plotNoGraph(points);
+	}
+
+}
+
+void DeepBreathGraphPlot::update() {
+	_graph_widget->replot(QCustomPlot::rpQueuedReplot);
+}

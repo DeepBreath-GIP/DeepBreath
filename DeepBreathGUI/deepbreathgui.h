@@ -30,6 +30,12 @@ public:
 	*/
 	void renderStreamWidgets(std::map<int, rs2::frame>& render_frames, const int width, const int height);
 
+	/*
+		Update BPM:
+	*/
+	void updateBPM(long double bpm);
+
+
 private slots:
     void on_left_mid1_checkbox_clicked();
 
@@ -83,9 +89,6 @@ private:
 
 	/* Select the dimension in config: */
 	void setConfigDimension();
-
-	/* Sets transparent backrounds to certain objects: */
-    void setTransparentBackroundToText();
 
 	/* Draws the lines on the distances according to their checked state:
 		NOTE: Renders only upon paintEvent trigger (See paintEvent) */

@@ -5,6 +5,8 @@
    of the Technion - Israel Institute of Technology
    For the use of Ichilov hospital in Israel. */
 
+#include <sstream>
+
 #include "deepbreathgui.h"
 #include "ui_deepbreathgui.h"
 #include <Qt>
@@ -18,10 +20,9 @@
 #include "db_sync.hpp"
 #include "db_frame_manager.hpp"
 #include "db_log.hpp"
+#include "db_graph_plot.hpp"
 
 #define FILE_ON_REPEAT false
-//extern void init_logFile(const char* filename, int num_of_stickers, std::string D2units);
-//extern std::ofstream logFile;
 
 // copied os.h because project does comile when including it (seems to be due to double inclusion of rendering.h)
 // *****	START of os.h copy	*****
@@ -52,7 +53,6 @@ QDeepBreath::QDeepBreath(QWidget *parent)
 {
     ui->setupUi(this);
 
-    setTransparentBackroundToText();
     ui->record_button->setVisible(false);
     ui->pause_button->setVisible(false);
 
@@ -88,6 +88,14 @@ void QDeepBreath::renderStreamWidgets(std::map<int, rs2::frame>& render_frames, 
 	}
 }
 
+void QDeepBreath::updateBPM(long double bpm) {
+
+	std::stringstream ss;
+	ss << std::fixed << std::setprecision(2) << bpm;
+	std::string bpm_str = std::string(ss.str());
+	const QString bpm_q = QString::fromStdString(bpm_str);
+	ui->bpm_value->setText(bpm_q);
+}
 
 /*	Initiates the UI to default selection as configured in the config file. */
 void QDeepBreath::initDefaultSelection() {
@@ -254,23 +262,6 @@ void QDeepBreath::setConfigDimension() {
 		ui->dimension_3d_radio_button->click();
 	}
 
-}
-
-
-/* Removes backgrounds from texts: */
-void QDeepBreath::setTransparentBackroundToText() {
-    ui->dimension_text->viewport()->setAutoFillBackground(false);
-    ui->distances_text->viewport()->setAutoFillBackground(false);
-    ui->locations_text->viewport()->setAutoFillBackground(false);
-    ui->mode_text->viewport()->setAutoFillBackground(false);
-    ui->num_markers_text->viewport()->setAutoFillBackground(false);
-    ui->left_text->viewport()->setAutoFillBackground(false);
-    ui->right_text->viewport()->setAutoFillBackground(false);
-    ui->mid1_text->viewport()->setAutoFillBackground(false);
-    ui->mid2_text->viewport()->setAutoFillBackground(false);
-    ui->mid3_text->viewport()->setAutoFillBackground(false);
-
-    enableLocations(false);
 }
 
 /* Draw Lines of distances to choose */
@@ -746,6 +737,7 @@ void QDeepBreath::on_start_camera_button_clicked()
 		//create logging:
 		std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
 		DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+		DeepBreathGraphPlot::createInstance(ui->graph_widget);
 
 		//update condition variable to start polling:
 		DeepBreathSync::is_poll_frame = true;
@@ -856,6 +848,7 @@ void QDeepBreath::on_load_file_button_clicked()
 			//create logging:
 			std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
 			DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+			DeepBreathGraphPlot::createInstance(ui->graph_widget);
 		}
 
 		//show and enable pause button

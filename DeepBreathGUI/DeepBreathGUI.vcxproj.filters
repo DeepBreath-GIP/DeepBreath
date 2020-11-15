@@ -142,6 +142,9 @@
     <ClCompile Include="qcustomplot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\db_graph_plot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="deepbreathgui.h">
@@ -298,6 +301,9 @@
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\db_sync.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\db_graph_plot.hpp">
       <Filter>Header Files\include</Filter>
     </ClInclude>
   </ItemGroup>

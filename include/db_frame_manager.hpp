@@ -37,9 +37,48 @@ public:
 	 */
 	void process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame);
 
+	/**
+	 * Calculate breath rate of the NUM_OF_LAST_FRAMES samples processed.
+	 */
+	long double calculate_breath_rate();
+
 	/* Turn interval activity on/off: */
 	void activateInterval();
 	void deactivateInterval();
+
+protected:
+
+	//ctor
+	DeepBreathFrameManager(unsigned int n_frames = NUM_OF_LAST_FRAMES, const char * frame_disk_path = NULL);
+
+	static DeepBreathFrameManager* _frame_manager;
+
+private:
+
+	long double _calc_bpm_and_log_dists(std::vector<cv::Point2d>& points);
+
+	/**
+	 * Cleans all allocated resources
+	 */
+	void cleanup();
+
+	/**
+	 * Add frame_data to collection of frame datas.
+	 * NOTE: only last n_frames saved so the oldest frame_data will be deleted
+	 */
+	void add_frame_data(DeepBreathFrameData * frame_data);
+
+	/**
+	 * Add the data arrived to the graph according to the graph mode as set in config.
+	 */
+	void add_data_to_graph(DeepBreathFrameData * frame_data);
+
+	/* Identify marker points: stickers or nipples and bellybutton image recognition. */
+	void identify_markers(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data);
+
+	/* Update frames timestamps. */
+	void update_timestamps(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data);
+
 	/**
 	* To be used in L mode (for plotting locations of stickers)
 	* TODO: for now, return only z coordinate (depth)
@@ -58,37 +97,20 @@ public:
 	void get_dists(std::vector<cv::Point2d> *out);
 
 	/**
+	* To be used in V mode (for plotting d volumes)
+	* returns system_timestamp and according difference of volume of every two following frames received in the last 15 seconds
+	* the volumes are calculated according to three markers: left, right, mid3 + another permanent point in the background.
+	* if called in L mode, no points are pushed to vector out
+	*/
+	void get_volumes(std::vector<cv::Point2d> *out);
+
+	/**
 	* To be used in N mode (for calculating frequency and BPM without generating any graphs)
 	* returns frequency calculated using get_frequency_fft if GET_FREQUENCY_BY_FFT. using get_frequency_differently otherwise.
 	* the avg distances used for crequency calculation are the  distances set to true in user_cfg.dists_included
 	*/
 	long double no_graph();
 
-protected:
-
-	//ctor
-	DeepBreathFrameManager(unsigned int n_frames = NUM_OF_LAST_FRAMES, const char * frame_disk_path = NULL);
-
-	static DeepBreathFrameManager* _frame_manager;
-
-private:
-
-	/**
-	 * Cleans all allocated resources
-	 */
-	void cleanup();
-
-	/**
-	 * Add frame_data to collection of frame datas.
-	 * NOTE: only last n_frames saved so the oldest frame_data will be deleted
-	 */
-	void add_frame_data(DeepBreathFrameData * frame_data);
-
-	/* Identify marker points: stickers or nipples and bellybutton image recognition. */
-	void identify_markers(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data);
-
-	/* Update frames timestamps. */
-	void update_timestamps(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data);
 
 	int frame_idx = 1;
 	double first_timestamp = NULL;
