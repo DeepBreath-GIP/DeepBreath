@@ -39,6 +39,49 @@ static float distance3D(float x, float y, float z, float a, float b, float c) {
 
 /*	METHODS:	*/
 
+DeepBreathFrameData::DeepBreathFrameData() :
+	left(NULL),
+	right(NULL),
+	mid1(NULL),
+	mid2(NULL),
+	mid3(NULL),
+	stickers_map_cm({ {stickers::left, &left_cm},
+						{stickers::mid1, &mid1_cm},
+						{stickers::mid2, &mid2_cm},
+						{stickers::mid3, &mid3_cm},
+						{stickers::right, &right_cm} }),
+	dLM1(0.0), dLM2(0.0), dLM3(0.0),
+	dRM1(0.0), dRM2(0.0), dRM3(0.0),
+	dM1M2(0.0), dM1M3(0.0), dM2M3(0.0),
+	dLR(0.0),
+	distances_map_2d({ {distances::left_mid1, &dLM1},
+						{distances::left_mid2, &dLM2},
+						{distances::left_mid3, &dLM3},
+						{distances::left_right, &dLR},
+						{distances::right_mid1, &dRM1},
+						{distances::right_mid2, &dRM2},
+						{distances::right_mid3, &dRM3},
+						{distances::mid1_mid2, &dM1M2},
+						{distances::mid1_mid3, &dM1M3},
+						{distances::mid2_mid3, &dM2M3} }),
+	dLM1_depth(0.0), dLM2_depth(0.0), dLM3_depth(0.0),
+	dRM1_depth(0.0), dRM2_depth(0.0), dRM3_depth(0.0),
+	dM1M2_depth(0.0), dM1M3_depth(0.0), dM2M3_depth(0.0),
+	dLR_depth(0.0),
+	distances_map_3d({ {distances::left_mid1, &dLM1_depth},
+						{distances::left_mid2, &dLM2_depth},
+						{distances::left_mid3, &dLM3_depth},
+						{distances::left_right, &dLR_depth},
+						{distances::right_mid1, &dRM1_depth},
+						{distances::right_mid2, &dRM2_depth},
+						{distances::right_mid3, &dRM3_depth},
+						{distances::mid1_mid2, &dM1M2_depth},
+						{distances::mid1_mid3, &dM1M3_depth},
+						{distances::mid2_mid3, &dM2M3_depth} }),
+	average_2d_dist(0.0), average_3d_dist(0.0),
+	color_timestamp(0.0), depth_timestamp(0.0)
+{}
+
 void DeepBreathFrameData::UpdateStickersLoactions()
 {
 	if (circles.size() < DeepBreathConfig::getInstance().num_of_stickers)
@@ -153,8 +196,6 @@ void DeepBreathFrameData::CalculateDistances2D()
 	average_2d_dist = average_2d_dist / (1.0 * count);
 }
 
-
-
 void DeepBreathFrameData::CalculateDistances3D()
 {
 	if (!left || !right || !mid3) return;
@@ -194,6 +235,8 @@ void DeepBreathFrameData::CalculateDistances3D()
 
 	average_3d_dist = average_3d_dist / (1.0 * count);
 }
+
+
 
 void DeepBreathFrameData::GetDescription()
 {

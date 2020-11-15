@@ -4,6 +4,8 @@
 #include "db_frame_manager.hpp"
 #include "db_log.hpp"
 #include "db_graph_plot.hpp"
+#include <librealsense2/rsutil.h>
+
 //#include "utilities.h"
 
 /* Forward Decalrations: */
@@ -11,6 +13,7 @@ static void normalize_distances(std::vector<cv::Point2d>* samples);
 static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies = NULL);
 static void FFT(short int dir, long m, double *x, double *y);
 static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_data);
+static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output);
 /* ** */
 
 DeepBreathFrameManager* DeepBreathFrameManager::_frame_manager = nullptr;
@@ -69,11 +72,30 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 	DeepBreathLog& log = DeepBreathLog::getInstance();
 	assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
 	DeepBreathFrameData * breathing_data = new DeepBreathFrameData();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
 	identify_markers(color_frame, depth_frame, breathing_data);
 
 	//if user config dimension is 3D, check for 0,-0,0 3d coordinates. dump such frames
-	if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
+	if (user_cfg.dimension == dimension::D3) {
+
+		//get 3d coords:
+		if (user_cfg.stickers_included[stickers::left]) {
+			get_3d_coordinates(depth_frame, (*breathing_data->left)[0], (*breathing_data->left)[1], breathing_data->left_cm);
+		}
+		if (user_cfg.stickers_included[stickers::right]) {
+			get_3d_coordinates(depth_frame, (*breathing_data->right)[0], (*breathing_data->right)[1], breathing_data->right_cm);
+		}
+		if (user_cfg.stickers_included[stickers::mid1]) {
+			get_3d_coordinates(depth_frame, (*breathing_data->mid1)[0], (*breathing_data->mid1)[1], breathing_data->mid1_cm);
+		}
+		if (user_cfg.stickers_included[stickers::mid2]) {
+			get_3d_coordinates(depth_frame, (*breathing_data->mid2)[0], (*breathing_data->mid2)[1], breathing_data->mid2_cm);
+		}
+		if (user_cfg.stickers_included[stickers::mid3]) {
+			get_3d_coordinates(depth_frame, (*breathing_data->mid3)[0], (*breathing_data->mid3)[1], breathing_data->mid3_cm);
+		}
+
 		if (check_illegal_3D_coordinates(breathing_data)) {
 			frames_dumped_in_row++;
 			log.log_file << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
@@ -139,15 +161,6 @@ long double DeepBreathFrameManager::calculate_breath_rate() {
 	std::vector<cv::Point2d> loc_points[5];
 
 	switch (user_cfg.mode) {
-
-	case LOCATION:
-		for (int stInt = stickers::left; stInt != stickers::sdummy; stInt++) {
-			stickers s = static_cast<stickers>(stInt);
-			if (DeepBreathConfig::getInstance().stickers_included.at(s)) {
-				get_locations(s, &loc_points[stInt]);
-			}
-		}
-		break;
 	case VOLUME:
 		//get_volumes(&points);
 		break;
@@ -347,9 +360,16 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 		//DO NOTHING! cannot calculate fft based on single point.
 		//Implementation of graph data setting is in: _calc_bpm_and_log_dists for this case. 
 		break;
-		//case LOCATION:
-		//	_plotLoc(points, i);
-		//	break;
+	case LOCATION:
+		for (int stInt = stickers::left; stInt != stickers::sdummy; stInt++) {
+			stickers s = static_cast<stickers>(stInt);
+			if (user_cfg.stickers_included[s]) {
+				p.x = frame_data->system_timestamp;
+				p.y = (*frame_data->stickers_map_cm[s])[2];
+				graph_plot.addData(p, s);
+			}
+		}
+		break;
 		//case VOLUME:
 		//	_plotFourier(points);
 		//	break;
@@ -637,15 +657,35 @@ static void FFT(short int dir, long m, double *x, double *y) {
 }
 
 static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_data) {
+
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
 	bool illegal_3d_coordinates = false;
 	//check for 0,-0,0 3d coordinates.
 	for (std::pair<stickers, cv::Vec3f*> sticker_elem : breathing_data->stickers_map_cm) {
 		stickers s = sticker_elem.first;
 		cv::Vec3f* d3_coor = sticker_elem.second;
-		if ((*d3_coor)[0] == 0.0 && (*d3_coor)[1] == -0 && (*d3_coor)[2] == 0) {
+		if (user_cfg.stickers_included[s] &&
+			(*d3_coor)[0] == 0.0 && (*d3_coor)[1] == -0 && (*d3_coor)[2] == 0) {
 			illegal_3d_coordinates = true;
 			break;
 		}
 	}
 	return illegal_3d_coordinates;
+}
+
+static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
+	float pixel[2] = { x, y };
+	float point[3]; // From point (in 3D)
+	auto dist = depth_frame.get_distance(pixel[0], pixel[1]);
+
+	rs2_intrinsics depth_intr = depth_frame.get_profile().as<rs2::video_stream_profile>().get_intrinsics(); // Calibration data
+
+	rs2_deproject_pixel_to_point(point, &depth_intr, pixel, dist);
+
+	//convert to cm
+	output[0] = float(point[0]) * 100.0;
+	output[1] = float(point[1]) * 100.0;
+	output[2] = float(point[2]) * 100.0;
+
 }

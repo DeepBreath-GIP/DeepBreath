@@ -45,53 +45,14 @@ public:
 	double system_color_timestamp, system_depth_timestamp;
 
 	//ctor:
-	DeepBreathFrameData() :
-		left(NULL),
-		right(NULL),
-		mid1(NULL),
-		mid2(NULL),
-		mid3(NULL),
-		stickers_map_cm({	{stickers::left, &left_cm},
-							{stickers::mid1, &mid1_cm},
-							{stickers::mid2, &mid2_cm},
-							{stickers::mid3, &mid3_cm},
-							{stickers::right, &right_cm} }),
-		dLM1(0.0), dLM2(0.0), dLM3(0.0),
-		dRM1(0.0), dRM2(0.0), dRM3(0.0),
-		dM1M2(0.0), dM1M3(0.0), dM2M3(0.0),
-		dLR(0.0),
-		distances_map_2d({	{distances::left_mid1, &dLM1},
-							{distances::left_mid2, &dLM2},
-							{distances::left_mid3, &dLM3},
-							{distances::left_right, &dLR},
-							{distances::right_mid1, &dRM1},
-							{distances::right_mid2, &dRM2},
-							{distances::right_mid3, &dRM3},
-							{distances::mid1_mid2, &dM1M2},
-							{distances::mid1_mid3, &dM1M3},
-							{distances::mid2_mid3, &dM2M3} }),
-		dLM1_depth(0.0), dLM2_depth(0.0), dLM3_depth(0.0),
-		dRM1_depth(0.0), dRM2_depth(0.0), dRM3_depth(0.0),
-		dM1M2_depth(0.0), dM1M3_depth(0.0), dM2M3_depth(0.0),
-		dLR_depth(0.0),
-		distances_map_3d({	{distances::left_mid1, &dLM1_depth},
-							{distances::left_mid2, &dLM2_depth},
-							{distances::left_mid3, &dLM3_depth},
-							{distances::left_right, &dLR_depth},
-							{distances::right_mid1, &dRM1_depth},
-							{distances::right_mid2, &dRM2_depth},
-							{distances::right_mid3, &dRM3_depth},
-							{distances::mid1_mid2, &dM1M2_depth},
-							{distances::mid1_mid3, &dM1M3_depth},
-							{distances::mid2_mid3, &dM2M3_depth} }),
-		average_2d_dist(0.0), average_3d_dist(0.0),
-		color_timestamp(0.0), depth_timestamp(0.0)
-	{}
+	DeepBreathFrameData();
 
 	//METHODS://
 
 	/* Updates the locations of the stickers and validates the pointers to them. */
 	void UpdateStickersLoactions();
+
+	void getDepths();
 
 	/* Calculates 2D distances between all stickers and their average. */
 	void CalculateDistances2D();

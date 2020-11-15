@@ -964,8 +964,9 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
             enableDistances(false);
             enableLocations(true);
 			setConfigLocations();
-			ui->dimension_2d_radio_button->setEnabled(true);
-			setConfigDimension();
+			ui->dimension_3d_radio_button->click();
+			ui->dimension_2d_radio_button->setEnabled(false); //locations are only relevant in 3d
+			ui->dimension_3d_radio_button->setEnabled(false);
 			user_cfg.mode = LOCATION;
             break;
         case 2: //Fourier
@@ -1007,4 +1008,62 @@ void QDeepBreath::on_is_stickers_checkbox_clicked()
         ui->g_color_radio_button->setEnabled(false);
         ui->y_color_radio_button->setEnabled(false);
     }
+}
+
+void QDeepBreath::on_left_loc_checkbox_clicked()
+{
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	user_cfg.stickers_included[stickers::left] = ui->left_loc_checkbox->isChecked();
+}
+
+void QDeepBreath::on_mid1_loc_checkbox_clicked()
+{
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	user_cfg.stickers_included[stickers::mid1] = ui->mid1_loc_checkbox->isChecked();
+}
+
+void QDeepBreath::on_right_loc_checkbox_clicked()
+{
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	user_cfg.stickers_included[stickers::right] = ui->right_loc_checkbox->isChecked();
+}
+
+void QDeepBreath::on_mid2_loc_checkbox_clicked()
+{
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	user_cfg.stickers_included[stickers::mid2] = ui->mid2_loc_checkbox->isChecked();
+}
+
+void QDeepBreath::on_mid3_loc_checkbox_clicked()
+{
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	user_cfg.stickers_included[stickers::mid3] = ui->mid3_loc_checkbox->isChecked();
+}
+
+void QDeepBreath::on_dimension_2d_radio_button_clicked() {
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+	
+	if (ui->dimension_2d_radio_button->isChecked()) {
+		user_cfg.dimension = D2;
+	}
+}
+
+void QDeepBreath::on_dimension_3d_radio_button_clicked() {
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	if (ui->dimension_3d_radio_button->isChecked()) {
+		user_cfg.dimension = D3;
+	}
 }

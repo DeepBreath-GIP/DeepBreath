@@ -14,7 +14,7 @@ public:
 
 	void reset();
 
-	void addData(cv::Point2d& p);
+	void addData(cv::Point2d& p, int s = 0);
 
 	void update();
 

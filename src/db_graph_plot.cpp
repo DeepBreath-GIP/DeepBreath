@@ -58,8 +58,8 @@ DeepBreathGraphPlot::DeepBreathGraphPlot(QCustomPlot* graph_widget) :
 			if (loc.second == true) {
 				_graph_widget->addGraph(); // blue line
 				_graph_widget->graph(i)->setPen(pen);
+				i++;
 			}
-			i++;
 			pen.setColor(QColor(qSin(i*0.3) * 100 + 100, qSin(i*0.6 + 0.7) * 100 + 100, qSin(i*0.4 + 0.6) * 100 + 100));
 		}
 		break;
@@ -90,12 +90,11 @@ void DeepBreathGraphPlot::reset() {
 
 	switch (user_cfg.mode) {
 	case LOCATION:
-		//Add graphs as the number of locations to show:
+		//Add graphs for all locations (in the beginning all are empty):
 		for (auto loc : user_cfg.stickers_included) {
-			if (loc.second == true) {
-				_graph_widget->addGraph(); // blue line
-				_graph_widget->graph(i)->setPen(pen);
-			}
+			_graph_widget->addGraph();
+			_graph_widget->graph(i)->setPen(pen);
+			//update pen for next iteration:
 			i++;
 			pen.setColor(QColor(qSin(i*0.3) * 100 + 100, qSin(i*0.6 + 0.7) * 100 + 100, qSin(i*0.4 + 0.6) * 100 + 100));
 		}
@@ -114,7 +113,7 @@ void DeepBreathGraphPlot::reset() {
 	_max_y = 0;
 }
 
-void DeepBreathGraphPlot::addData(cv::Point2d& p) {
+void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	if (p.x > _max_x) {
@@ -139,9 +138,9 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p) {
 	}
 
 	switch (user_cfg.mode) {
-		//case LOCATION:
-		//	_plotLoc(points, i);
-		//	break;
+	case LOCATION:
+		_graph_widget->graph(s)->addData(p.x, p.y);
+		break;
 		//case VOLUME:
 		//	_plotFourier(points);
 		//	break;

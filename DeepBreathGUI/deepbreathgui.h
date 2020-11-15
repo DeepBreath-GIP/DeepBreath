@@ -69,6 +69,20 @@ private slots:
 
     void on_is_stickers_checkbox_clicked();
 
+    void on_left_loc_checkbox_clicked();
+
+    void on_mid1_loc_checkbox_clicked();
+
+    void on_right_loc_checkbox_clicked();
+
+    void on_mid2_loc_checkbox_clicked();
+
+    void on_mid3_loc_checkbox_clicked();
+
+	void on_dimension_2d_radio_button_clicked();
+
+	void on_dimension_3d_radio_button_clicked();
+
 private:
     Ui::DeepBreath *ui;
 
