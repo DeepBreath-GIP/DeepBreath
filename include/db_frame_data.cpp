@@ -79,6 +79,7 @@ DeepBreathFrameData::DeepBreathFrameData() :
 						{distances::mid1_mid3, &dM1M3_depth},
 						{distances::mid2_mid3, &dM2M3_depth} }),
 	average_2d_dist(0.0), average_3d_dist(0.0),
+	tetra_volume(0.0), reimann_volume(0.0),
 	color_timestamp(0.0), depth_timestamp(0.0)
 {}
 
@@ -236,7 +237,16 @@ void DeepBreathFrameData::CalculateDistances3D()
 	average_3d_dist = average_3d_dist / (1.0 * count);
 }
 
+void DeepBreathFrameData::CalculateVolumes()
+{
+	if (!left || !right || !mid3) return;
 
+	//tetrahedron volume:
+	Tetrahedron tet(left_cm, right_cm, mid3_cm);
+	tetra_volume = tet.volume();
+
+	//TODO: reimann volume:
+}
 
 void DeepBreathFrameData::GetDescription()
 {

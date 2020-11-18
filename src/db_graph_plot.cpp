@@ -33,7 +33,8 @@ DeepBreathGraphPlot::DeepBreathGraphPlot(QCustomPlot* graph_widget) :
 	_min_x(0),
 	_max_x(0),
 	_min_y(0),
-	_max_y(0) {
+	_max_y(0),
+	_prev_vol(0) {
 
 	_graph_widget = graph_widget;
 
@@ -116,6 +117,15 @@ void DeepBreathGraphPlot::reset() {
 void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	if (user_cfg.mode == VOLUME) {
+		if (_prev_vol == 0) {
+			//don't plot the first volume that arrives:
+			_prev_vol = p.y;
+			return;
+		}
+		_prev_vol = p.y;
+	}
 	if (p.x > _max_x) {
 		_max_x = p.x;
 	}
@@ -141,9 +151,9 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 	case LOCATION:
 		_graph_widget->graph(s)->addData(p.x, p.y);
 		break;
-		//case VOLUME:
-		//	_plotFourier(points);
-		//	break;
+	case VOLUME:
+		_graph_widget->graph(0)->addData(p.x - _prev_vol, p.y);
+		break;
 	case NOGRAPH:
 		//No data to add, do nothing.
 		break;

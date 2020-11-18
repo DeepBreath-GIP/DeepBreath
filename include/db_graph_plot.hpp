@@ -35,4 +35,6 @@ private:
 	float _min_y;
 	float _max_y;
 
+	float _prev_vol; //helper for volume difference plotting
+
 };

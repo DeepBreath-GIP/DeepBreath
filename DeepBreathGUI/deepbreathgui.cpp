@@ -957,6 +957,7 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
 			setConfigDistances();
             enableLocations(false);
 			ui->dimension_2d_radio_button->setEnabled(true);
+			ui->dimension_3d_radio_button->setEnabled(true);
 			setConfigDimension();
 			user_cfg.mode = DISTANCES;
             break;
@@ -974,15 +975,31 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
 			setConfigDistances();
             enableLocations(false);
 			ui->dimension_2d_radio_button->setEnabled(true);
+			ui->dimension_3d_radio_button->setEnabled(true);
 			user_cfg.mode = FOURIER;
             break;
         case 3: //Volume
             enableDistances(false);
             enableLocations(false);
+			ui->left_loc_checkbox->setEnabled(true);
+			ui->right_loc_checkbox->setEnabled(true);
+			ui->mid3_loc_checkbox->setEnabled(true);
+			ui->left_loc_checkbox->click();
+			ui->right_loc_checkbox->click();
+			ui->mid3_loc_checkbox->click();
+			ui->left_loc_checkbox->setEnabled(false);
+			ui->right_loc_checkbox->setEnabled(false);
+			ui->mid3_loc_checkbox->setEnabled(false);
 			//only 3D allowed:
-            ui->dimension_3d_radio_button->setChecked(true);
+            ui->dimension_3d_radio_button->click();
+            ui->dimension_3d_radio_button->setEnabled(false);
             ui->dimension_2d_radio_button->setEnabled(false);
-            //ui->is_stickers_checkbox->setEnabled(false);
+			ui->num_markers_combo_box->setCurrentIndex(ui->num_markers_combo_box->findText("3"));
+			user_cfg.stickers_included[stickers::left] = true;
+			user_cfg.stickers_included[stickers::right] = true;
+			user_cfg.stickers_included[stickers::mid3] = true;
+			user_cfg.stickers_included[stickers::mid1] = false;
+			user_cfg.stickers_included[stickers::mid2] = false;
 			user_cfg.mode = VOLUME;
             break;
         case 4: //No Graph
@@ -990,6 +1007,7 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
 			setConfigDistances();
             enableLocations(false);
 			ui->dimension_2d_radio_button->setEnabled(true);
+			ui->dimension_3d_radio_button->setEnabled(true);
 			setConfigDimension();
 			user_cfg.mode = NOGRAPH;
             break;
@@ -1067,3 +1085,23 @@ void QDeepBreath::on_dimension_3d_radio_button_clicked() {
 		user_cfg.dimension = D3;
 	}
 }
+
+void QDeepBreath::on_num_markers_combo_box_currentIndexChanged(int index)
+{
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	switch (index) {
+	case 0: //3
+		user_cfg.num_of_stickers = 3;
+		break;
+	case 1: //4
+		user_cfg.num_of_stickers = 4;
+		break;
+	case 2: //5
+		user_cfg.num_of_stickers = 5;
+		break;
+	}
+}
+
+

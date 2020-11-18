@@ -55,6 +55,8 @@ protected:
 
 private:
 
+	//long double _calc_bpm_and_log_volumes(std::vector<cv::Point2d>& points);
+
 	long double _calc_bpm_and_log_dists(std::vector<cv::Point2d>& points);
 
 	/**
