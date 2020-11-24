@@ -48,6 +48,11 @@ enum distances {
 	ddummy // needed for enum iteration
 };
 
+enum volume_type {
+	TETRAHEDRON,
+	REIMANN
+};
+
 /*
 	Configuration details extracted from config.txt
 	@ mode: indicates the kind of graph to be presented.
@@ -74,6 +79,8 @@ public:
 	std::map<distances, bool> dists_included;
 	sticker_color color;
 	bool is_stickers;
+	volume_type volume_type;
+
 
 	// set configuration to default. used in case of en illegal config file.
 	void set_default();

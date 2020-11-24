@@ -214,6 +214,23 @@ DeepBreathConfig::DeepBreathConfig(const char* config_filepath, std::string* err
 			throw line_num;
 		line_num++;
 
+		//skip lines to next comment (volume type)
+		while (line.substr(0, 1).compare("#") != 0) {
+			getline(config_file, line);
+			line_num++;
+		}
+
+		//get volume type:
+		getline(config_file, line);
+		if (line.compare("T") == 0)
+			volume_type = TETRAHEDRON;
+		else if (line.compare("R") == 0)
+			volume_type = REIMANN;
+		else
+			throw line_num;
+		line_num++;
+
+
 		//TODO: update illegal cases
 		// check illegal use of sticker mid1
 		// if num_of_stickers is 4, there is no mid1 sticker
@@ -255,4 +272,5 @@ void DeepBreathConfig::set_default() {
 	this->color = sticker_color::YELLOW;
 	this->calc_2d_by_cm = false;
 	this->is_stickers = true;
+	this->volume_type = TETRAHEDRON;
 }

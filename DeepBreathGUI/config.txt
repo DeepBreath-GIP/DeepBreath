@@ -31,5 +31,8 @@ Y
 #2D measure units: cm or pixel. recommended: pixel
 pixel
 
-#use stikers:
+#use stickers:
 y
+
+#volume calculation type(for V mode only): T for tetrahedron volume, R for reimann sums
+T
