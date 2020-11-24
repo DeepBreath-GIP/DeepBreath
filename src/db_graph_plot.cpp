@@ -124,22 +124,36 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 			_prev_vol = p.y;
 			return;
 		}
-		_prev_vol = p.y;
+
+		//set y ranges according to difference (and not p.y):
+		if (p.y - _prev_vol > _max_y) {
+			_max_y = p.y - _prev_vol;
+			_graph_widget->yAxis->setRange(_min_y, _max_y);
+		}
+		if (p.y - _prev_vol < _min_y || _min_y == 0) {
+			_min_y = p.y - _prev_vol;
+			_graph_widget->yAxis->setRange(_min_y, _max_y);
+		}
+
 	}
+	else {
+
+		if (p.y > _max_y) {
+			_max_y = p.y;
+			_graph_widget->yAxis->setRange(_min_y, _max_y);
+		}
+		if (p.y < _min_y || _min_y == 0) {
+			_min_y = p.y;
+			_graph_widget->yAxis->setRange(_min_y, _max_y);
+		}
+
+	}
+
 	if (p.x > _max_x) {
 		_max_x = p.x;
 	}
 	if (p.x < _min_x) {
 		_min_x = p.x;
-	}
-
-	if (p.y > _max_y) {
-		_max_y = p.y;
-		_graph_widget->yAxis->setRange(_min_y, _max_y);
-	}
-	if (p.y < _min_y || _min_y == 0) {
-		_min_y = p.y;
-		_graph_widget->yAxis->setRange(_min_y, _max_y);
 	}
 
 	//set graph running to right:
@@ -152,7 +166,8 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 		_graph_widget->graph(s)->addData(p.x, p.y);
 		break;
 	case VOLUME:
-		_graph_widget->graph(0)->addData(p.x - _prev_vol, p.y);
+		_graph_widget->graph(0)->addData(p.x, p.y - _prev_vol);
+		_prev_vol = p.y;
 		break;
 	case NOGRAPH:
 		//No data to add, do nothing.
