@@ -151,43 +151,77 @@ private:
 
 	class Surface {
 		BoundingBox bbox;
-		int h, w;
+		int rows;
+		int* cols;
 		rs2::vertex** mat;
 		rs2::depth_frame depth_frame;
 
 	public:
 		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left_cm, cv::Vec3f& right_cm, cv::Vec3f& mid3_cm) :
-			depth_frame(depth_frame), h(0), w(0) {
+			depth_frame(depth_frame) {
 
-			if (points.size() > 0) {
+			int points_size = points.size();
+
+			if (points_size > 0) {
 				auto vertices = points.get_vertices();
 				//place in iterable for sort:
 				std::vector<rs2::vertex> vertices_vec(0);
-				for (int i = 0; i < points.size(); i++) {
+				for (int i = 0; i < points_size; i++) {
 					vertices_vec.push_back(vertices[i]);
 				}
 
 				//sort by y and then by x:
-				std::stable_sort(vertices_vec.begin(), vertices_vec.end(), yCompare());
 				std::stable_sort(vertices_vec.begin(), vertices_vec.end(), xCompare());
+				std::stable_sort(vertices_vec.begin(), vertices_vec.end(), yCompare());
 
 				//fill mat:
-				this->h = depth_frame.get_height();
-				this->w = depth_frame.get_width();
+				//this->h = depth_frame.get_height();
+				//this->w = depth_frame.get_width();
 
-				this->mat = new rs2::vertex*[h];
+				//this->mat = new rs2::vertex*[h];
 
-				for (int i = 0; i < this->h; i++) {
-					this->mat[i] = new rs2::vertex[w];
-					for (int j = 0; j < this->w; ++j) {
-						this->mat[i][j] = vertices_vec.at(i*j + j);
+				//for (int i = 0; i < this->h; i++) {
+				//	this->mat[i] = new rs2::vertex[w];
+				//	for (int j = 0; j < this->w; ++j) {
+				//		this->mat[i][j] = vertices_vec.at(i * w + j);
+				//	}
+				//}
+
+				//get rows (not promised they are the same sizes!)
+				float row_x = vertices_vec.at(0)[0];
+
+				std::vector<std::vector<rs2::vertex>> vec_mat;
+				std::vector<rs2::vertex> row_vec;
+
+				for (auto v : vertices_vec) {
+					if (v.x < row_x) {
+						vec_mat.push_back(row_vec);
+						row_vec.clear();
+					}
+					row_vec.push_back(v);
+					row_x = v.x;
+				}
+
+				//create matrix:
+				int vertices_index = 0;
+				this->rows = vec_mat.size();
+				cols = new int[this->rows];
+				this->mat = new rs2::vertex*[rows];
+				for (int i = 0; i < rows; i++) {
+					auto current_row = vec_mat.at(i);
+					cols[i] = current_row.size();
+					this->mat[i] = new rs2::vertex[cols[i]];
+					for (int j = 0; j < cols[i]; ++j) {
+						this->mat[i][j] = vertices_vec.at(vertices_index);
+						vertices_index++;
 					}
 				}
 
 				float left_x = left_cm[0];
 				float right_x = right_cm[0];
-				float top_y = std::max({ left_cm[1], right_cm[1] });
-				float bottom_y = mid3_cm[1];
+				//y axis is pointed DOWN:
+				float bottom_y = std::max({ left_cm[1], right_cm[1] });
+				float top_y = mid3_cm[1];
 
 				bbox = BoundingBox(left_x, right_x, top_y, bottom_y);
 
@@ -203,9 +237,9 @@ private:
 
 			//calculate
 
-			for (int i = 0; i < this->h - 1; i++) {
+			for (int i = 0; i < this->rows - 1; i++) {
 
-				for (int j = 0; j < this->w - 1; ++j) {
+				for (int j = 0; j < this->cols[i] - 1; ++j) {
 
 					//current point i,j vals:
 					float p_x = (this->mat[i][j])[0];

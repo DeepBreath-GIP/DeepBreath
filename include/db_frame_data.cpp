@@ -363,13 +363,18 @@ void DeepBreathFrameData::GetDescription()
 
 float triangle_area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c) {
 	//find angle between two edges (ab, ac)
+	float area = 0;
 	cv::Vec3f u(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
 	cv::Vec3f v(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
 	float dot_product = (u[0] * v[0]) + (u[1] * v[1]) + (u[2] * v[2]);
 	float u_size = sqrt(pow(u[0], 2) + pow(u[1], 2) + pow(u[2], 2));
 	float v_size = sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2));
 	//cos(x) = u * v / (|u||v|)
-	float cos_x = dot_product / (u_size * v_size);
+	float cos_x = 0;
+	if (u_size * v_size != 0) {
+		cos_x = dot_product / (u_size * v_size);
+	}
 	float x = acos(cos_x);
-	return (u_size * v_size * sin(x) / 2);
+	area = (u_size * v_size * sin(x) / 2);
+	return area;
 }
