@@ -1,5 +1,6 @@
 
 #include <fstream>
+#include <librealsense2/rsutil.h>
 
 #include "db_frame_data.hpp"
 #include "db_camera.hpp"
@@ -363,6 +364,9 @@ void DeepBreathFrameData::GetDescription()
 
 float triangle_area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c) {
 	//find angle between two edges (ab, ac)
+	if (a == b || a == c || b == c) {
+		return 0;
+	}
 	float area = 0;
 	cv::Vec3f u(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
 	cv::Vec3f v(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
@@ -377,4 +381,20 @@ float triangle_area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c) {
 	float x = acos(cos_x);
 	area = (u_size * v_size * sin(x) / 2);
 	return area;
+}
+
+void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
+	float pixel[2] = { x, y };
+	float point[3]; // From point (in 3D)
+	auto dist = depth_frame.get_distance(pixel[0], pixel[1]);
+
+	rs2_intrinsics depth_intr = depth_frame.get_profile().as<rs2::video_stream_profile>().get_intrinsics(); // Calibration data
+
+	rs2_deproject_pixel_to_point(point, &depth_intr, pixel, dist);
+
+	//convert to cm
+	output[0] = float(point[0]) * 100.0;
+	output[1] = float(point[1]) * 100.0;
+	output[2] = float(point[2]) * 100.0;
+
 }

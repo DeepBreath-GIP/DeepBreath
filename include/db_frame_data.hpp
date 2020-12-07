@@ -9,6 +9,7 @@
 //#define CALC_TRIANGLE_CENTER_COORDS(a,b,c) { (a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3 }
 
 float triangle_area(cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& bottom);
+void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output);
 
 
 /*	DeepBreathFrameData class
@@ -151,69 +152,24 @@ private:
 
 	class Surface {
 		BoundingBox bbox;
-		int rows;
+		int h, w;
 		int* cols;
-		rs2::vertex** mat;
-		rs2::depth_frame depth_frame;
+		cv::Vec3f** mat;
 
 	public:
-		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left_cm, cv::Vec3f& right_cm, cv::Vec3f& mid3_cm) :
-			depth_frame(depth_frame) {
+		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left_cm, cv::Vec3f& right_cm, cv::Vec3f& mid3_cm) {
 
-			int points_size = points.size();
+				this->h = depth_frame.get_height();
+				this->w = depth_frame.get_width();
 
-			if (points_size > 0) {
-				auto vertices = points.get_vertices();
-				//place in iterable for sort:
-				std::vector<rs2::vertex> vertices_vec(0);
-				for (int i = 0; i < points_size; i++) {
-					vertices_vec.push_back(vertices[i]);
-				}
+				this->mat = new cv::Vec3f*[h];
 
-				//sort by y and then by x:
-				std::stable_sort(vertices_vec.begin(), vertices_vec.end(), xCompare());
-				std::stable_sort(vertices_vec.begin(), vertices_vec.end(), yCompare());
-
-				//fill mat:
-				//this->h = depth_frame.get_height();
-				//this->w = depth_frame.get_width();
-
-				//this->mat = new rs2::vertex*[h];
-
-				//for (int i = 0; i < this->h; i++) {
-				//	this->mat[i] = new rs2::vertex[w];
-				//	for (int j = 0; j < this->w; ++j) {
-				//		this->mat[i][j] = vertices_vec.at(i * w + j);
-				//	}
-				//}
-
-				//get rows (not promised they are the same sizes!)
-				float row_x = vertices_vec.at(0)[0];
-
-				std::vector<std::vector<rs2::vertex>> vec_mat;
-				std::vector<rs2::vertex> row_vec;
-
-				for (auto v : vertices_vec) {
-					if (v.x < row_x) {
-						vec_mat.push_back(row_vec);
-						row_vec.clear();
-					}
-					row_vec.push_back(v);
-					row_x = v.x;
-				}
-
-				//create matrix:
-				int vertices_index = 0;
-				this->rows = vec_mat.size();
-				cols = new int[this->rows];
-				this->mat = new rs2::vertex*[rows];
-				for (int i = 0; i < rows; i++) {
-					auto current_row = vec_mat.at(i);
-					cols[i] = current_row.size();
-					this->mat[i] = new rs2::vertex[cols[i]];
-					for (int j = 0; j < cols[i]; ++j) {
-						this->mat[i][j] = vertices_vec.at(vertices_index);
-						vertices_index++;
+				for (int i = 0; i < this->h; i++) {
+					this->mat[i] = new cv::Vec3f[w];
+					for (int j = 0; j < this->w; ++j) {
+						cv::Vec3f p(0, 0, 0);
+						get_3d_coordinates(depth_frame, i, j, p);
+						this->mat[i][j] = p;
 					}
 				}
 
@@ -225,8 +181,6 @@ private:
 
 				bbox = BoundingBox(left_x, right_x, top_y, bottom_y);
 
-			}
-
 		}
 
 		float volume() {
@@ -237,9 +191,9 @@ private:
 
 			//calculate
 
-			for (int i = 0; i < this->rows - 1; i++) {
+			for (int i = 0; i < this->h - 2; i++) {
 
-				for (int j = 0; j < this->cols[i] - 1; ++j) {
+				for (int j = 0; j < this->w - 2; ++j) {
 
 					//current point i,j vals:
 					float p_x = (this->mat[i][j])[0];
@@ -287,24 +241,6 @@ private:
 		}
 
 	private:
-
-		class xCompare {
-		public:
-
-			bool operator() (const rs2::vertex& p1, const rs2::vertex& p2) {
-				return (p1[0] < p2[0]);
-			}
-
-		};
-
-		class yCompare {
-		public:
-
-			bool operator() (const rs2::vertex& p1, const rs2::vertex& p2) {
-				return (p1[1] < p2[1]);
-			}
-
-		};
 
 		float area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d) {
 

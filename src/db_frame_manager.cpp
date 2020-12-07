@@ -4,7 +4,7 @@
 #include "db_frame_manager.hpp"
 #include "db_log.hpp"
 #include "db_graph_plot.hpp"
-#include <librealsense2/rsutil.h>
+//#include <librealsense2/rsutil.h>
 
 //#include "utilities.h"
 
@@ -13,7 +13,7 @@ static void normalize_distances(std::vector<cv::Point2d>* samples);
 static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies = NULL);
 static void FFT(short int dir, long m, double *x, double *y);
 static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_data);
-static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output);
+//static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output);
 /* ** */
 
 DeepBreathFrameManager* DeepBreathFrameManager::_frame_manager = nullptr;
@@ -378,7 +378,12 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 		break;
 	case VOLUME:
 		p.x = frame_data->system_depth_timestamp;
-		p.y = frame_data->tetra_volume;
+		if (user_cfg.volume_type == TETRAHEDRON) {
+			p.y = frame_data->tetra_volume;
+		}
+		else {
+			p.y = frame_data->reimann_volume;
+		}
 		graph_plot.addData(p); //graph plot is responsible for the calculation of the difference (see addData)
 		break;
 	case NOGRAPH:
@@ -737,18 +742,18 @@ static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_da
 	return illegal_3d_coordinates;
 }
 
-static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
-	float pixel[2] = { x, y };
-	float point[3]; // From point (in 3D)
-	auto dist = depth_frame.get_distance(pixel[0], pixel[1]);
-
-	rs2_intrinsics depth_intr = depth_frame.get_profile().as<rs2::video_stream_profile>().get_intrinsics(); // Calibration data
-
-	rs2_deproject_pixel_to_point(point, &depth_intr, pixel, dist);
-
-	//convert to cm
-	output[0] = float(point[0]) * 100.0;
-	output[1] = float(point[1]) * 100.0;
-	output[2] = float(point[2]) * 100.0;
-
-}
+//static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
+//	float pixel[2] = { x, y };
+//	float point[3]; // From point (in 3D)
+//	auto dist = depth_frame.get_distance(pixel[0], pixel[1]);
+//
+//	rs2_intrinsics depth_intr = depth_frame.get_profile().as<rs2::video_stream_profile>().get_intrinsics(); // Calibration data
+//
+//	rs2_deproject_pixel_to_point(point, &depth_intr, pixel, dist);
+//
+//	//convert to cm
+//	output[0] = float(point[0]) * 100.0;
+//	output[1] = float(point[1]) * 100.0;
+//	output[2] = float(point[2]) * 100.0;
+//
+//}
