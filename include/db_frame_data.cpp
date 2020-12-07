@@ -242,15 +242,17 @@ void DeepBreathFrameData::CalculateVolumes(const rs2::points& points, const rs2:
 {
 	if (!left || !right || !mid3) return;
 
-	//tetrahedron volume:
-	Tetrahedron tet(left_cm, right_cm, mid3_cm);
-	tetra_volume = tet.volume();
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
-	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
-
-	//TODO: reimann volume:
-	Surface chest(points, depth_frame, left_cm, right_cm, mid3_cm);
-	reimann_volume = chest.volume();
+	if (user_cfg.volume_type == TETRAHEDRON) {
+		//tetrahedron volume:
+		Tetrahedron tet(left_cm, right_cm, mid3_cm);
+		tetra_volume = tet.volume();
+	}
+	else { //REIMANN
+		Surface chest(points, depth_frame, left_cm, right_cm, mid3_cm);
+		reimann_volume = chest.volume();
+	}
 }
 
 void DeepBreathFrameData::GetDescription()

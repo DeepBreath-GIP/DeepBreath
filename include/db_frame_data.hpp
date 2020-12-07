@@ -70,9 +70,6 @@ public:
 	/* Calculates 3D distances between all stickers and their average. */
 	void CalculateDistances3D();
 
-	/* Defines the bounding box of the volume object. */
-	//void defineBoundingBox();
-
 	/* Calculates volumes based on markers' distances and depths.
 		Calculates both volumes, while taking consideration only of 3 markers (left, right, mid3).
 		NOTE: Call function AFTER 3D Distances calculation. */
@@ -132,38 +129,12 @@ private:
 
 	/* Bounding Box for Volume (Reimann Sums in particular) calculations: */
 	class BoundingBox {
-		//cv::Vec3f	front_upper_left,
-		//	front_lower_left,
-		//	front_upper_right,
-		//	front_lower_right,
-		//	//All rear points have the same depth:
-		//	rear_upper_left,
-		//	rear_lower_left,
-		//	rear_upper_right,
-		//	rear_lower_right;
 
 		float left_x, right_x, top_y, bottom_y;
 
 	public:
 		//c'tor:
 		BoundingBox() {};
-
-		//BoundingBox(cv::Vec3f front_upper_left,
-		//	cv::Vec3f front_lower_left,
-		//	cv::Vec3f front_upper_right,
-		//	cv::Vec3f front_lower_right,
-		//	cv::Vec3f rear_upper_left,
-		//	cv::Vec3f rear_lower_left,
-		//	cv::Vec3f rear_upper_right,
-		//	cv::Vec3f rear_lower_right) :
-		//	front_upper_left(front_upper_left),
-		//	front_lower_left(front_lower_left),
-		//	front_upper_right(front_upper_right),
-		//	front_lower_right(front_lower_right),
-		//	rear_upper_left(rear_upper_left),
-		//	rear_lower_left(rear_lower_left),
-		//	rear_upper_right(rear_upper_right),
-		//	rear_lower_right(rear_lower_right) {}
 
 		BoundingBox(float left_x, float right_x, float top_y, float bottom_y) :
 			left_x(left_x), right_x(right_x), top_y(top_y), bottom_y(bottom_y) {}
@@ -217,18 +188,6 @@ private:
 				float right_x = right_cm[0];
 				float top_y = std::max({ left_cm[1], right_cm[1] });
 				float bottom_y = mid3_cm[1];
-				//float front_z = 0;
-				//float rear_z = std::max({ left[2], right[2], mid3[2] });
-
-				//bbox = BoundingBox(
-				//	cv::Vec3f(left_x, top_y, front_z),	//front_upper_left
-				//	cv::Vec3f(left_x, bottom_y, front_z),	//front_lower_left
-				//	cv::Vec3f(right_x, top_y, front_z),	//front_upper_right
-				//	cv::Vec3f(right_x, bottom_y, front_z),	//front_lower_right
-				//	cv::Vec3f(left_x, top_y, rear_z),	//rear_upper_left
-				//	cv::Vec3f(left_x, bottom_y, rear_z),	//rear_lower_left,
-				//	cv::Vec3f(right_x, top_y, rear_z),	//rear_upper_right,
-				//	cv::Vec3f(right_x, bottom_y, rear_z));	//rear_lower_right
 
 				bbox = BoundingBox(left_x, right_x, top_y, bottom_y);
 
@@ -324,38 +283,6 @@ private:
 			return (abc_space + adc_space);
 
 		}
-
-		//cv::Vec3f find_center(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d) {
-
-		//	//abc centroid:
-		//	cv::Vec3f c_abc(CALC_TRIANGLE_CENTER_COORDS(a,b,c));
-
-		//	//adc centroid:
-		//	cv::Vec3f c_adc(CALC_TRIANGLE_CENTER_COORDS(a, d, c));
-
-		//	//bcd centroid:
-		//	cv::Vec3f c_bcd(CALC_TRIANGLE_CENTER_COORDS(b, c, d));
-
-		//	//bad centroid:
-		//	cv::Vec3f c_bad(CALC_TRIANGLE_CENTER_COORDS(b, a, d));
-
-		//	//find intersecting lines:
-		//	//use only x,y coords, since depth is only approximate anyway
-		//	float m1 = (c_abc[1] - c_adc[1]) / (c_abc[0] - c_adc[0]);
-		//	float m2 = (c_bcd[1] - c_bad[1]) / (c_bcd[0] - c_bad[0]);
-
-		//	//(y-y1) = m(x-x1)	=>	y = mx-mx1+y1	=>	n = -mx1+y1
-		//	float n1 = (-1) * m1 * c_abc[0] + c_abc[1];
-		//	float n2 = (-1) * m2 * c_bcd[0] + c_bcd[1];
-
-		//	//find intersection:
-		//	//y = m1x + n1		=>	m1x + n1 = m2x + n2		=>	x = (n2 - n1) / (m1 - m2)
-		//	//y = m2x + n2
-		//	float x = (n2 - n1) / (m1 - m2);
-		//	float y = m1 * x + n1;
-
-		//	//for depth, use projection on 
-		//}
 		
 	};
 };
