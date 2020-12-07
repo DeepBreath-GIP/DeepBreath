@@ -2,8 +2,13 @@
 
 #include <librealsense2/rs.hpp>
 #include <opencv2/opencv.hpp>
+//#include <cv-helpers.hpp>
 
 #include "db_config.hpp"
+
+//#define CALC_TRIANGLE_CENTER_COORDS(a,b,c) { (a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3 }
+
+float triangle_area(cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& bottom);
 
 
 /*	DeepBreathFrameData class
@@ -71,7 +76,7 @@ public:
 	/* Calculates volumes based on markers' distances and depths.
 		Calculates both volumes, while taking consideration only of 3 markers (left, right, mid3).
 		NOTE: Call function AFTER 3D Distances calculation. */
-	void CalculateVolumes();
+	void CalculateVolumes(const rs2::points& points, const rs2::depth_frame& depth_frame);
 
 	/* Gets the description of the frame in the following format:
 		TODO: update format */
@@ -115,17 +120,7 @@ private:
 
 		/* Calculates tetrahedron's volume and returns it: */
 		float volume() {
-			float base_space = 0;
-			//find angle between two edges (lr, lb)
-			cv::Vec3f u(bottom[0] - left[0], bottom[1] - left[1], bottom[2] - left[2]);
-			cv::Vec3f v(right[0] - left[0], right[1] - left[1], right[2] - left[2]);
-			float dot_product = (u[0] * v[0]) + (u[1] * v[1]) + (u[2] * v[2]);
-			float u_size = sqrt(pow(u[0], 2) + pow(u[1], 2) + pow(u[2], 2));
-			float v_size = sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2));
-			//cos(a) = u * v / (|u||v|)
-			float cos_a = dot_product / (u_size * v_size);
-			float a = acos(cos_a);
-			base_space = u_size * v_size * sin(a) / 2;
+			float base_space = triangle_area(left, right, bottom);
 
 			float height = sqrt(pow(head[0] - middle[0], 2) +
 								pow(head[1] - middle[1], 2) +
@@ -137,19 +132,231 @@ private:
 
 	/* Bounding Box for Volume (Reimann Sums in particular) calculations: */
 	class BoundingBox {
-		cv::Vec3f	front_upper_left,
-			front_lower_left,
-			front_upper_right,
-			front_lower_right,
-			//All rear points have the same depth:
-			rear_upper_left,
-			rear_lower_left,
-			rear_upper_right,
-			rear_lower_right;
+		//cv::Vec3f	front_upper_left,
+		//	front_lower_left,
+		//	front_upper_right,
+		//	front_lower_right,
+		//	//All rear points have the same depth:
+		//	rear_upper_left,
+		//	rear_lower_left,
+		//	rear_upper_right,
+		//	rear_lower_right;
+
+		float left_x, right_x, top_y, bottom_y;
 
 	public:
 		//c'tor:
-		//BoundingBox();
+		BoundingBox() {};
+
+		//BoundingBox(cv::Vec3f front_upper_left,
+		//	cv::Vec3f front_lower_left,
+		//	cv::Vec3f front_upper_right,
+		//	cv::Vec3f front_lower_right,
+		//	cv::Vec3f rear_upper_left,
+		//	cv::Vec3f rear_lower_left,
+		//	cv::Vec3f rear_upper_right,
+		//	cv::Vec3f rear_lower_right) :
+		//	front_upper_left(front_upper_left),
+		//	front_lower_left(front_lower_left),
+		//	front_upper_right(front_upper_right),
+		//	front_lower_right(front_lower_right),
+		//	rear_upper_left(rear_upper_left),
+		//	rear_lower_left(rear_lower_left),
+		//	rear_upper_right(rear_upper_right),
+		//	rear_lower_right(rear_lower_right) {}
+
+		BoundingBox(float left_x, float right_x, float top_y, float bottom_y) :
+			left_x(left_x), right_x(right_x), top_y(top_y), bottom_y(bottom_y) {}
+
+		bool in_bbox(cv::Vec3f& p) {
+			if (p[0] < left_x || p[0] > right_x
+				|| p[1] < bottom_y || p[1] > top_y) {
+				return false;
+			}
+			return true;
+		}
+
+	};
+
+	class Surface {
+		BoundingBox bbox;
+		int h, w;
+		rs2::vertex** mat;
+		rs2::depth_frame depth_frame;
+
+	public:
+		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left_cm, cv::Vec3f& right_cm, cv::Vec3f& mid3_cm) :
+			depth_frame(depth_frame), h(0), w(0) {
+
+			if (points.size() > 0) {
+				auto vertices = points.get_vertices();
+				//place in iterable for sort:
+				std::vector<rs2::vertex> vertices_vec(0);
+				for (int i = 0; i < points.size(); i++) {
+					vertices_vec.push_back(vertices[i]);
+				}
+
+				//sort by y and then by x:
+				std::stable_sort(vertices_vec.begin(), vertices_vec.end(), yCompare());
+				std::stable_sort(vertices_vec.begin(), vertices_vec.end(), xCompare());
+
+				//fill mat:
+				this->h = depth_frame.get_height();
+				this->w = depth_frame.get_width();
+
+				this->mat = new rs2::vertex*[h];
+
+				for (int i = 0; i < this->h; i++) {
+					this->mat[i] = new rs2::vertex[w];
+					for (int j = 0; j < this->w; ++j) {
+						this->mat[i][j] = vertices_vec.at(i*j + j);
+					}
+				}
+
+				float left_x = left_cm[0];
+				float right_x = right_cm[0];
+				float top_y = std::max({ left_cm[1], right_cm[1] });
+				float bottom_y = mid3_cm[1];
+				//float front_z = 0;
+				//float rear_z = std::max({ left[2], right[2], mid3[2] });
+
+				//bbox = BoundingBox(
+				//	cv::Vec3f(left_x, top_y, front_z),	//front_upper_left
+				//	cv::Vec3f(left_x, bottom_y, front_z),	//front_lower_left
+				//	cv::Vec3f(right_x, top_y, front_z),	//front_upper_right
+				//	cv::Vec3f(right_x, bottom_y, front_z),	//front_lower_right
+				//	cv::Vec3f(left_x, top_y, rear_z),	//rear_upper_left
+				//	cv::Vec3f(left_x, bottom_y, rear_z),	//rear_lower_left,
+				//	cv::Vec3f(right_x, top_y, rear_z),	//rear_upper_right,
+				//	cv::Vec3f(right_x, bottom_y, rear_z));	//rear_lower_right
+
+				bbox = BoundingBox(left_x, right_x, top_y, bottom_y);
+
+			}
+
+		}
+
+		float volume() {
+
+			float total = 0;
+			float dij = 0;	// avg. depth of centroid of [i, i+1] x [j, j+1]
+			float Aij = 0;	//area of [i, i+1] x [j, j+1]
+
+			//calculate
+
+			for (int i = 0; i < this->h - 1; i++) {
+
+				for (int j = 0; j < this->w - 1; ++j) {
+
+					//current point i,j vals:
+					float p_x = (this->mat[i][j])[0];
+					float p_y = (this->mat[i][j])[1];
+					float p_z = (this->mat[i][j])[2];
+
+					//point to the right:
+					float r_x = (this->mat[i][j + 1])[0];
+					float r_y = (this->mat[i][j + 1])[1];
+					float r_z = (this->mat[i][j + 1])[2];
+
+					//point to the bottom:
+					float b_x = (this->mat[i + 1][j])[0];
+					float b_y = (this->mat[i + 1][j])[1];
+					float b_z = (this->mat[i + 1][j])[2];
+
+					//diagonal point:
+					float d_x = (this->mat[i + 1][j + 1])[0];
+					float d_y = (this->mat[i + 1][j + 1])[1];
+					float d_z = (this->mat[i + 1][j + 1])[2];
+
+					cv::Vec3f p(p_x, p_y, p_z);
+					cv::Vec3f r(r_x, r_y, r_z);
+					cv::Vec3f b(b_x, b_y, b_z);
+					cv::Vec3f d(d_x, d_y, d_z);
+
+					cv::Vec3f center(
+						(p_x + r_x + b_x + d_x) / 4,
+						(p_y + r_y + b_y + d_y) / 4,
+						(p_z + r_z + b_z + d_z) / 4
+						);
+
+					//if center is in bbox, include it in calculation:
+					if (bbox.in_bbox(center)) {
+						Aij = area(p, r, b, d);
+						dij = center[2];
+
+						total += dij * Aij;
+					}
+
+				}
+			}
+
+			return total;
+		}
+
+	private:
+
+		class xCompare {
+		public:
+
+			bool operator() (const rs2::vertex& p1, const rs2::vertex& p2) {
+				return (p1[0] < p2[0]);
+			}
+
+		};
+
+		class yCompare {
+		public:
+
+			bool operator() (const rs2::vertex& p1, const rs2::vertex& p2) {
+				return (p1[1] < p2[1]);
+			}
+
+		};
+
+		float area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d) {
+
+			//triangle abc:
+			float abc_space = triangle_area(a, b, c);
+
+			//triangle adc:
+			float adc_space = triangle_area(a, d, c);
+
+			return (abc_space + adc_space);
+
+		}
+
+		//cv::Vec3f find_center(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d) {
+
+		//	//abc centroid:
+		//	cv::Vec3f c_abc(CALC_TRIANGLE_CENTER_COORDS(a,b,c));
+
+		//	//adc centroid:
+		//	cv::Vec3f c_adc(CALC_TRIANGLE_CENTER_COORDS(a, d, c));
+
+		//	//bcd centroid:
+		//	cv::Vec3f c_bcd(CALC_TRIANGLE_CENTER_COORDS(b, c, d));
+
+		//	//bad centroid:
+		//	cv::Vec3f c_bad(CALC_TRIANGLE_CENTER_COORDS(b, a, d));
+
+		//	//find intersecting lines:
+		//	//use only x,y coords, since depth is only approximate anyway
+		//	float m1 = (c_abc[1] - c_adc[1]) / (c_abc[0] - c_adc[0]);
+		//	float m2 = (c_bcd[1] - c_bad[1]) / (c_bcd[0] - c_bad[0]);
+
+		//	//(y-y1) = m(x-x1)	=>	y = mx-mx1+y1	=>	n = -mx1+y1
+		//	float n1 = (-1) * m1 * c_abc[0] + c_abc[1];
+		//	float n2 = (-1) * m2 * c_bcd[0] + c_bcd[1];
+
+		//	//find intersection:
+		//	//y = m1x + n1		=>	m1x + n1 = m2x + n2		=>	x = (n2 - n1) / (m1 - m2)
+		//	//y = m2x + n2
+		//	float x = (n2 - n1) / (m1 - m2);
+		//	float y = m1 * x + n1;
+
+		//	//for depth, use projection on 
+		//}
+		
 	};
 };
 

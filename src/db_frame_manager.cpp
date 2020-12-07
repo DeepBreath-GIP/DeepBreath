@@ -67,7 +67,7 @@ int DeepBreathFrameManager::get_frames_array_size() {
 	return c;
 }
 
-void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame)
+void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, const rs2::points& points)
 {
 	DeepBreathLog& log = DeepBreathLog::getInstance();
 	assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
@@ -117,7 +117,7 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 
 	if (user_cfg.dimension == D3) {
 		//calculate Volumes if in 3D mode:
-		breathing_data->CalculateVolumes();
+		breathing_data->CalculateVolumes(points, depth_frame);
 	}
 
 	//update timestamps of the current frame:
@@ -434,19 +434,17 @@ void DeepBreathFrameManager::get_volumes(std::vector<cv::Point2d>* out) {
 
 	if (_frame_data_arr == NULL) return;
 
-	//TODO:
-	//if (user_cfg.volume_type == TETRAHEDRON) {
-
-	//}
-	//else {
-
-	//}
-
 	double current_time = (clock() - manager_start_time) / double(CLOCKS_PER_SEC);
 	for (unsigned int i = 0; i < _n_frames; i++) {
 		int idx = (_oldest_frame_index + i + _n_frames) % _n_frames; //this is right order GIVEN that get_volumes is run after add_frame_data (after _oldest_frame_idx++)
 		if (_frame_data_arr[idx] != NULL) {
-			double d_vol = _frame_data_arr[idx]->tetra_volume;
+			double d_vol = 0;
+			if (user_cfg.volume_type == TETRAHEDRON) {
+				d_vol = _frame_data_arr[idx]->tetra_volume;
+			}
+			else { // REIMANN
+				d_vol = _frame_data_arr[idx]->reimann_volume;
+			}
 			double t = _frame_data_arr[idx]->system_depth_timestamp;
 			out->push_back(cv::Point2d(t, d_vol));
 		}

@@ -29,8 +29,17 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			camera.fs = camera.color_align.process(camera.fs);
 			// with the aligned frameset we proceed as usual
 			auto depth = camera.fs.get_depth_frame();
+			auto pc_depth = camera.fs.get_depth_frame();
 			auto color = camera.fs.get_color_frame();
 			auto colorized_depth = camera.colorizer.colorize(depth);
+
+			//TODO: Change implementation of frame process to use pc
+
+			//calculate pointcloud:
+			auto points = camera.pointcloud.calculate(pc_depth);
+
+			// Tell pointcloud object to map to this color frame
+			camera.pointcloud.map_to(color);
 
 			//collect all frames:
 			//using a map as in rs-multicam to allow future changes in number of cameras displayed.
@@ -38,7 +47,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 
 			//process frame with the frame manager:
 			DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
-			frame_manager.process_frame(color, depth);
+			frame_manager.process_frame(color, depth, points);
 
 			// convert the newly-arrived frames to render-firendly format
 			//for (const auto& frame : fs) //iterate over all available frames. (commented out to ignore IR emitter frames.)
