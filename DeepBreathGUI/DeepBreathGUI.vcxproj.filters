@@ -163,11 +163,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="deepbreathgui.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\include\db_config.hpp">
       <Filter>Header Files\include</Filter>
     </ClInclude>

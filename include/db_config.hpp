@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <string>
 
 //file path should be relative to GUI's root folder
 #define CONFIG_FILEPATH "config.txt"
