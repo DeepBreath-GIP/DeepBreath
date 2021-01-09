@@ -67,7 +67,7 @@ int DeepBreathFrameManager::get_frames_array_size() {
 	return c;
 }
 
-void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, const rs2::points& points)
+void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame)
 {
 	DeepBreathLog& log = DeepBreathLog::getInstance();
 	assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
@@ -117,7 +117,7 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 
 	if (user_cfg.dimension == D3) {
 		//calculate Volumes if in 3D mode:
-		breathing_data->CalculateVolumes(points, depth_frame);
+		breathing_data->CalculateVolumes(depth_frame);
 	}
 
 	//update timestamps of the current frame:

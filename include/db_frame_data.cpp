@@ -239,7 +239,7 @@ void DeepBreathFrameData::CalculateDistances3D()
 	average_3d_dist = average_3d_dist / (1.0 * count);
 }
 
-void DeepBreathFrameData::CalculateVolumes(const rs2::points& points, const rs2::depth_frame& depth_frame)
+void DeepBreathFrameData::CalculateVolumes(const rs2::depth_frame& depth_frame)
 {
 	if (!left || !right || !mid3) return;
 
@@ -251,7 +251,7 @@ void DeepBreathFrameData::CalculateVolumes(const rs2::points& points, const rs2:
 		tetra_volume = tet.volume();
 	}
 	else { //REIMANN
-		Surface chest(points, depth_frame, *left, *right, *mid3);
+		Surface chest(depth_frame, *left, *right, *mid3);
 		reimann_volume = chest.volume();
 	}
 }
@@ -362,7 +362,7 @@ void DeepBreathFrameData::GetDescription()
 }
 
 
-DeepBreathFrameData::Surface::Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& mid3) {
+DeepBreathFrameData::Surface::Surface(const rs2::depth_frame& depth_frame, cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& mid3) {
 
 	float left_x = left[0];
 	float right_x = right[0];

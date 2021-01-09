@@ -74,7 +74,7 @@ public:
 	/* Calculates volumes based on markers' distances and depths.
 		Calculates both volumes, while taking consideration only of 3 markers (left, right, mid3).
 		NOTE: Call function AFTER 3D Distances calculation. */
-	void CalculateVolumes(const rs2::points& points, const rs2::depth_frame& depth_frame);
+	void CalculateVolumes(const rs2::depth_frame& depth_frame);
 
 	/* Gets the description of the frame in the following format:
 		TODO: update format */
@@ -157,7 +157,7 @@ private:
 		cv::Vec3f** mat;
 
 	public:
-		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& mid3);
+		Surface(const rs2::depth_frame& depth_frame, cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& mid3);
 		float volume();
 
 	private:

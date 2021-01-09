@@ -35,7 +35,7 @@ public:
 	 * @param frame - a video frame from the camera
 	 *
 	 */
-	void process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, const rs2::points& points);
+	void process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame);
 
 	/**
 	 * Calculate breath rate of the NUM_OF_LAST_FRAMES samples processed.
