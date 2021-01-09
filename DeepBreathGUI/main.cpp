@@ -13,6 +13,8 @@
 */ 
 void poll_frames_thread(QDeepBreath* db_ref) {
 
+	rs2::spatial_filter spat;
+	spat.set_option(RS2_OPTION_HOLES_FILL, 5);
 	while (DeepBreathSync::is_active) {
 		// Wait until main() sends data
 		std::unique_lock<std::mutex> lk(DeepBreathSync::m_poll_frame);
@@ -29,6 +31,8 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			camera.fs = camera.color_align.process(camera.fs);
 			// with the aligned frameset we proceed as usual
 			auto depth = camera.fs.get_depth_frame();
+			// Apply spatial filtering
+			depth = spat.process(depth);
 			auto pc_depth = camera.fs.get_depth_frame();
 			auto color = camera.fs.get_color_frame();
 			auto colorized_depth = camera.colorizer.colorize(depth);

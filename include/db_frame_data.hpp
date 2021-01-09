@@ -157,103 +157,11 @@ private:
 		cv::Vec3f** mat;
 
 	public:
-		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left_cm, cv::Vec3f& right_cm, cv::Vec3f& mid3_cm) {
-
-				this->h = depth_frame.get_height();
-				this->w = depth_frame.get_width();
-
-				this->mat = new cv::Vec3f*[h];
-
-				for (int i = 0; i < this->h; i++) {
-					this->mat[i] = new cv::Vec3f[w];
-					for (int j = 0; j < this->w; ++j) {
-						cv::Vec3f p(0, 0, 0);
-						get_3d_coordinates(depth_frame, i, j, p);
-						this->mat[i][j] = p;
-					}
-				}
-
-				float left_x = left_cm[0];
-				float right_x = right_cm[0];
-				//y axis is pointed DOWN:
-				float bottom_y = std::max({ left_cm[1], right_cm[1] });
-				float top_y = mid3_cm[1];
-
-				bbox = BoundingBox(left_x, right_x, top_y, bottom_y);
-
-		}
-
-		float volume() {
-
-			float total = 0;
-			float dij = 0;	// avg. depth of centroid of [i, i+1] x [j, j+1]
-			float Aij = 0;	//area of [i, i+1] x [j, j+1]
-
-			//calculate
-
-			for (int i = 0; i < this->h - 2; i++) {
-
-				for (int j = 0; j < this->w - 2; ++j) {
-
-					//current point i,j vals:
-					float p_x = (this->mat[i][j])[0];
-					float p_y = (this->mat[i][j])[1];
-					float p_z = (this->mat[i][j])[2];
-
-					//point to the right:
-					float r_x = (this->mat[i][j + 1])[0];
-					float r_y = (this->mat[i][j + 1])[1];
-					float r_z = (this->mat[i][j + 1])[2];
-
-					//point to the bottom:
-					float b_x = (this->mat[i + 1][j])[0];
-					float b_y = (this->mat[i + 1][j])[1];
-					float b_z = (this->mat[i + 1][j])[2];
-
-					//diagonal point:
-					float d_x = (this->mat[i + 1][j + 1])[0];
-					float d_y = (this->mat[i + 1][j + 1])[1];
-					float d_z = (this->mat[i + 1][j + 1])[2];
-
-					cv::Vec3f p(p_x, p_y, p_z);
-					cv::Vec3f r(r_x, r_y, r_z);
-					cv::Vec3f b(b_x, b_y, b_z);
-					cv::Vec3f d(d_x, d_y, d_z);
-
-					cv::Vec3f center(
-						(p_x + r_x + b_x + d_x) / 4,
-						(p_y + r_y + b_y + d_y) / 4,
-						(p_z + r_z + b_z + d_z) / 4
-						);
-
-					//if center is in bbox, include it in calculation:
-					if (bbox.in_bbox(center)) {
-						Aij = area(p, r, b, d);
-						dij = center[2];
-
-						total += dij * Aij;
-					}
-
-				}
-			}
-
-			return total;
-		}
+		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left_cm, cv::Vec3f& right_cm, cv::Vec3f& mid3_cm);
+		float volume();
 
 	private:
-
-		float area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d) {
-
-			//triangle abc:
-			float abc_space = triangle_area(a, b, c);
-
-			//triangle adc:
-			float adc_space = triangle_area(a, d, c);
-
-			return (abc_space + adc_space);
-
-		}
-		
+		static float area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d);
 	};
 };
 

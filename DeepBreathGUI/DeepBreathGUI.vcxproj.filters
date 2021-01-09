@@ -136,13 +136,13 @@
     <ClCompile Include="..\src\db_sync.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\include\db_frame_data.cpp">
-      <Filter>Header Files\include</Filter>
-    </ClCompile>
     <ClCompile Include="qcustomplot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\db_graph_plot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\db_frame_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
