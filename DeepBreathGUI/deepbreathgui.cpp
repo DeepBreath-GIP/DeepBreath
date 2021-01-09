@@ -582,6 +582,11 @@ void QDeepBreath::enableMenu(bool is_enabled) {
     ui->y_color_radio_button->setEnabled(is_enabled);
 }
 
+void QDeepBreath::clearStreamingWidgets() {
+	ui->depth_stream_widget->clear();
+	ui->color_stream_widget->clear();
+}
+
 /* ==================== *
     CLICK HANDLERS:
  * ==================== */
@@ -738,8 +743,6 @@ void QDeepBreath::on_start_camera_button_clicked()
 		camera.cfg.enable_stream(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
 		camera.pipe.start(camera.cfg);
 
-		//start_time = clock(); //TODO: put in class
-		//TODO:
 		frame_manager.reset(); // reset FrameManager for additional processing
 
 		//TODO:
@@ -853,9 +856,6 @@ void QDeepBreath::on_load_file_button_clicked()
 
 			frame_manager.reset(); // reset FrameManager for additional processing
 
-			//TODO:
-			//graph.reset(frame_manager.manager_start_time);
-
 			//create logging:
 			std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
 			DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
@@ -891,6 +891,9 @@ void QDeepBreath::on_load_file_button_clicked()
 		}
 		DeepBreathSync::is_end_poll_frame = false; // Reset boolean for the next time
 
+		frame_manager.reset(); // reset FrameManager for additional processing
+		DeepBreathGraphPlot::getInstance().reset();
+
 		//turn streaming off and change title
 		ui->load_file_button->setText("Load File...");
 
@@ -906,6 +909,9 @@ void QDeepBreath::on_load_file_button_clicked()
 		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
 		log.log_file.close();
 
+		//clear stream widgets
+		clearStreamingWidgets();
+
 		//show and enable pause button
 		ui->pause_button->setVisible(false);
 		ui->pause_button->setEnabled(false);
@@ -916,6 +922,7 @@ void QDeepBreath::on_load_file_button_clicked()
 		enableLocations(true);
 
 		is_run_from_file = false;
+
     }
 }
 

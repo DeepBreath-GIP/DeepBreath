@@ -79,8 +79,8 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 		}
 
 		// Notify the end of the polling
-		DeepBreathSync::cv_end_poll_frame.notify_one();
 		DeepBreathSync::is_end_poll_frame = true;
+		DeepBreathSync::cv_end_poll_frame.notify_one();
 	}
 }
 

@@ -118,5 +118,7 @@ private:
     void enableDistances(bool is_enabled);
     void enableLocations(bool is_enabled);
     void enableMenu(bool is_enabled);
+
+    void clearStreamingWidgets();
 };
 #endif // DEEPBREATH_H

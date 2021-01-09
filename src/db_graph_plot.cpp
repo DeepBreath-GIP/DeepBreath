@@ -40,10 +40,6 @@ DeepBreathGraphPlot::DeepBreathGraphPlot(QCustomPlot* graph_widget) :
 
 	this->reset();
 
-	_graph_widget->xAxis->setRange(_time_begin, 8, Qt::AlignLeft);
-
-	_graph_widget->yAxis->setRange(0, 200, Qt::AlignLeft);
-
 	_graph_widget->setInteraction(QCP::iRangeDrag, true);
 	_graph_widget->setInteraction(QCP::iRangeZoom, true);
 
@@ -83,6 +79,10 @@ void DeepBreathGraphPlot::reset() {
 	//clear graphs:
 	_graph_widget->clearGraphs();
 
+	//setRange
+	_graph_widget->xAxis->setRange(_time_begin, 8, Qt::AlignLeft);
+	_graph_widget->yAxis->setRange(0, 200, Qt::AlignLeft);
+
 	//and set new brushes for new graphs:
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
@@ -106,6 +106,8 @@ void DeepBreathGraphPlot::reset() {
 		_graph_widget->graph(0)->setPen(QPen(QColor(40, 110, 255)));
 		break;
 	}
+
+	_graph_widget->replot();
 
 	_is_first_plot = true;
 	_min_x = 0;
