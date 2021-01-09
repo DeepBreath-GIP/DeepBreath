@@ -35,4 +35,4 @@ pixel
 y
 
 #volume calculation type(for V mode only): T for tetrahedron volume, R for reimann sums
-T
+R
