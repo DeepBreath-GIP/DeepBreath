@@ -251,7 +251,7 @@ void DeepBreathFrameData::CalculateVolumes(const rs2::points& points, const rs2:
 		tetra_volume = tet.volume();
 	}
 	else { //REIMANN
-		Surface chest(points, depth_frame, left_cm, right_cm, mid3_cm);
+		Surface chest(points, depth_frame, *left, *right, *mid3);
 		reimann_volume = chest.volume();
 	}
 }
@@ -362,10 +362,19 @@ void DeepBreathFrameData::GetDescription()
 }
 
 
-DeepBreathFrameData::Surface::Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left_cm, cv::Vec3f& right_cm, cv::Vec3f& mid3_cm) {
+DeepBreathFrameData::Surface::Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& mid3) {
 
-	this->h = depth_frame.get_height();
-	this->w = depth_frame.get_width();
+	float left_x = left[0];
+	float right_x = right[0];
+	//y axis is pointed DOWN:
+	float bottom_y = std::min({ left[1], right[1] });
+	float top_y = mid3[1];
+
+	bbox = BoundingBox(left_x, right_x, top_y, bottom_y);
+
+
+	this->h = top_y - bottom_y;
+	this->w = right_x - left_x;
 
 	this->mat = new cv::Vec3f * [h];
 
@@ -375,7 +384,7 @@ DeepBreathFrameData::Surface::Surface(const rs2::points& points, const rs2::dept
 		// Empirically we see that the depth on the right edge is zero on some of the points. We will avoid these points in Reimann sum calculations
 		for (int j = 0; j < this->w; ++j) {
 			cv::Vec3f p(0, 0, 0);
-			get_3d_coordinates(depth_frame, j, i, p);
+			get_3d_coordinates(depth_frame, j + left_x, i + bottom_y, p);
 			this->mat[i][j] = p;
 			//if (p[0] == 0 &&
 			//	p[1] == 0 &&
@@ -394,14 +403,6 @@ DeepBreathFrameData::Surface::Surface(const rs2::points& points, const rs2::dept
 	//		}
 	//	}
 	//}
-
-	float left_x = left_cm[0];
-	float right_x = right_cm[0];
-	//y axis is pointed DOWN:
-	float bottom_y = std::min({ left_cm[1], right_cm[1] });
-	float top_y = mid3_cm[1];
-
-	bbox = BoundingBox(left_x, right_x, top_y, bottom_y);
 
 }
 
@@ -451,12 +452,12 @@ float DeepBreathFrameData::Surface::volume() {
 
 			//if center is in bbox, include it in calculation:
 			// TODO: Find implementation for area
-			if (bbox.in_bbox(center)) {
+			//if (bbox.in_bbox(center)) {
 				Aij = area(p, r, b, d);
 				dij = center[2];
 
 				total += dij * Aij;
-			}
+			//}
 
 		}
 	}

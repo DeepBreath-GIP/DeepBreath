@@ -157,7 +157,7 @@ private:
 		cv::Vec3f** mat;
 
 	public:
-		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left_cm, cv::Vec3f& right_cm, cv::Vec3f& mid3_cm);
+		Surface(const rs2::points& points, const rs2::depth_frame& depth_frame, cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& mid3);
 		float volume();
 
 	private:
