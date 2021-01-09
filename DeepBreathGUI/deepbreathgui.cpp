@@ -14,6 +14,8 @@
 #include <QPen>
 #include <QLine>
 #include <QMessageBox>
+#include <chrono>
+using namespace std::chrono_literals;
 
 /* DeepBreath Files */
 #include "db_camera.hpp"
@@ -100,6 +102,10 @@ void QDeepBreath::updateBPM(long double bpm) {
 	std::string bpm_str = std::string(ss.str());
 	const QString bpm_q = QString::fromStdString(bpm_str);
 	ui->bpm_value->setText(bpm_q);
+}
+
+void QDeepBreath::stop_file() {
+	ui->load_file_button->clicked();
 }
 
 /*	Initiates the UI to default selection as configured in the config file. */
@@ -878,9 +884,12 @@ void QDeepBreath::on_load_file_button_clicked()
     else {
 		//stop frame polling and wait for notify from polling thread:
 		DeepBreathSync::is_poll_frame = false;
-		std::unique_lock<std::mutex> lk(DeepBreathSync::m_end_poll_frame);
-		DeepBreathSync::cv_end_poll_frame.wait(lk);
-		lk.unlock();
+		while (!DeepBreathSync::is_end_poll_frame) {
+			std::unique_lock<std::mutex> lk(DeepBreathSync::m_end_poll_frame);
+			DeepBreathSync::cv_end_poll_frame.wait_for(lk, 100ms);
+			lk.unlock();
+		}
+		DeepBreathSync::is_end_poll_frame = false; // Reset boolean for the next time
 
 		//turn streaming off and change title
 		ui->load_file_button->setText("Load File...");

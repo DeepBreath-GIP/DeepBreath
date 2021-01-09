@@ -35,6 +35,7 @@ public:
 	*/
 	void updateBPM(long double bpm);
 
+    void stop_file();
 
 private slots:
     void on_left_mid1_checkbox_clicked();
@@ -84,7 +85,6 @@ private slots:
 	void on_dimension_3d_radio_button_clicked();
 
 	void on_num_markers_combo_box_currentIndexChanged(int index);
-
 
 private:
     Ui::DeepBreath *ui;

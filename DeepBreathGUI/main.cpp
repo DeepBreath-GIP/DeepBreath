@@ -21,53 +21,66 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 		DeepBreathSync::cv_poll_frame.wait(lk);
 		lk.unlock();
 
-		// Do polling
-		while (DeepBreathSync::is_poll_frame) {
-			//poll and process
-			DeepBreathCamera camera = DeepBreathCamera::getInstance();
-			camera.fs = camera.pipe.wait_for_frames();
+		try {
+			// Do polling
+			while (DeepBreathSync::is_poll_frame) {
+				//poll and process
+				DeepBreathCamera camera = DeepBreathCamera::getInstance();
+				camera.fs = camera.pipe.wait_for_frames(1000);
 
-			// align all frames to color viewport
-			camera.fs = camera.color_align.process(camera.fs);
-			// with the aligned frameset we proceed as usual
-			auto depth = camera.fs.get_depth_frame();
-			// Apply spatial filtering
-			depth = spat.process(depth);
-			auto pc_depth = camera.fs.get_depth_frame();
-			auto color = camera.fs.get_color_frame();
-			auto colorized_depth = camera.colorizer.colorize(depth);
+				// align all frames to color viewport
+				camera.fs = camera.color_align.process(camera.fs);
+				// with the aligned frameset we proceed as usual
+				auto depth = camera.fs.get_depth_frame();
+				// Apply spatial filtering
+				//depth = spat.process(depth);
 
-			//calculate pointcloud:
-			auto points = camera.pointcloud.calculate(pc_depth);
+				auto pc_depth = camera.fs.get_depth_frame();
+				auto color = camera.fs.get_color_frame();
+				auto colorized_depth = camera.colorizer.colorize(depth);
 
-			// Tell pointcloud object to map to this color frame
-			camera.pointcloud.map_to(color);
+				//calculate pointcloud:
+				auto points = camera.pointcloud.calculate(pc_depth);
 
-			//collect all frames:
-			//using a map as in rs-multicam to allow future changes in number of cameras displayed.
-			std::map<int, rs2::frame> render_frames;
+				// Tell pointcloud object to map to this color frame
+				camera.pointcloud.map_to(color);
 
-			//process frame with the frame manager:
-			DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
-			frame_manager.process_frame(color, depth, points);
+				//collect all frames:
+				//using a map as in rs-multicam to allow future changes in number of cameras displayed.
+				std::map<int, rs2::frame> render_frames;
 
-			// convert the newly-arrived frames to render-firendly format
-			//for (const auto& frame : fs) //iterate over all available frames. (commented out to ignore IR emitter frames.)
-			//{
-			render_frames[color.get_profile().unique_id()] = camera.colorizer.process(color);
-			render_frames[depth.get_profile().unique_id()] = camera.colorizer.process(depth);
-			//}
+				//process frame with the frame manager:
+				DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
+				frame_manager.process_frame(color, spat.process(depth), points);
 
-			//render frames to the gl objects:
-			db_ref->renderStreamWidgets(render_frames, color.get_width(), color.get_height());
+				// convert the newly-arrived frames to render-firendly format
+				//for (const auto& frame : fs) //iterate over all available frames. (commented out to ignore IR emitter frames.)
+				//{
+				render_frames[color.get_profile().unique_id()] = camera.colorizer.process(color);
+				render_frames[depth.get_profile().unique_id()] = camera.colorizer.process(depth);
+				//}
 
-			//get last frames data and calculate breath rate:
-			long double bpm = frame_manager.calculate_breath_rate();
-			db_ref->updateBPM(bpm);
+				//render frames to the gl objects:
+				db_ref->renderStreamWidgets(render_frames, color.get_width(), color.get_height());
+
+				//get last frames data and calculate breath rate:
+				long double bpm = frame_manager.calculate_breath_rate();
+				db_ref->updateBPM(bpm);
+			}
+		}
+		catch (rs2::error e) {
+			if (e.get_type() == RS2_EXCEPTION_TYPE_COUNT) {
+				// Trigger stop 
+				db_ref->stop_file();
+			}
+			else {
+				throw e;
+			}
 		}
 
 		// Notify the end of the polling
 		DeepBreathSync::cv_end_poll_frame.notify_one();
+		DeepBreathSync::is_end_poll_frame = true;
 	}
 }
 

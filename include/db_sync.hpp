@@ -20,4 +20,5 @@ public:
 	static std::mutex m_end_poll_frame;
 	static std::atomic<bool> is_poll_frame;
 	static std::atomic<bool> is_active;
+	static std::atomic<bool> is_end_poll_frame;
 };
