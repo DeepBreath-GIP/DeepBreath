@@ -65,3 +65,9 @@ Thumbs.db
 *.dll
 *.exe
 
+# log files
+*.csv
+
+# Project build directories
+debug/
+release/
