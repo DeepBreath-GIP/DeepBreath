@@ -10,7 +10,7 @@ private:
 
 public:
 
-	CustomOpenGLWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()) : QOpenGLWidget(parent) {}
+	CustomOpenGLWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()) : QOpenGLWidget(parent, f) {}
 
 	void display(const QImage& img)
 	{
@@ -18,10 +18,14 @@ public:
 		this->update();
 	}
 
-	void paintEvent(QPaintEvent*)
+	void paintEvent(QPaintEvent* e)
 	{
 		QPainter painter(this);
 		painter.drawImage(this->rect(), image);
+		
+		// According to QOpenGLWidget description we need to make sure that OpenGL framebuffer object bound in the context
+		// https://doc.qt.io/qt-5/qopenglwidget.html#:~:text=If%20you%20need%20to%20trigger,function%20to%20schedule%20an%20update.
+		this->makeCurrent();
 	}
 
 	void clear() {
