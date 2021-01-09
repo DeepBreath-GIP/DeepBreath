@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.902
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeepBreath", "DeepBreath.vcxproj", "{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeepBreathGUI", "DeepBreathGUI\DeepBreathGUI.vcxproj", "{56668371-96D3-3FC1-95ED-6638C6A9E574}"
 EndProject
 Global
@@ -15,14 +13,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}.Debug|x64.ActiveCfg = Debug|x64
-		{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}.Debug|x64.Build.0 = Debug|x64
-		{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}.Debug|x86.ActiveCfg = Debug|Win32
-		{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}.Debug|x86.Build.0 = Debug|Win32
-		{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}.Release|x64.ActiveCfg = Release|x64
-		{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}.Release|x64.Build.0 = Release|x64
-		{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}.Release|x86.ActiveCfg = Release|Win32
-		{DE34EE7C-688C-44B8-9B59-D5D4A97B6EBB}.Release|x86.Build.0 = Release|Win32
 		{56668371-96D3-3FC1-95ED-6638C6A9E574}.Debug|x64.ActiveCfg = Debug|x64
 		{56668371-96D3-3FC1-95ED-6638C6A9E574}.Debug|x64.Build.0 = Debug|x64
 		{56668371-96D3-3FC1-95ED-6638C6A9E574}.Debug|x86.ActiveCfg = Debug|x64
