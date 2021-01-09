@@ -82,7 +82,12 @@ void QDeepBreath::renderStreamWidgets(std::map<int, rs2::frame>& render_frames, 
 		if (i >= 2)	//render only color and depth from map
 			break;
 		const void * frame_data = frame.second.get_data();
-		QImage frame_data_img((uchar *)frame_data, width, height, QImage::Format_RGB888);
+
+		// Copy frame_data to avoid race condition on freeing the frame while rendering the widget.
+		uchar * copy_frame_data = new uchar[width * height * 3];
+		memcpy(copy_frame_data, frame_data, sizeof(uchar) * width * height * 3);
+
+		QImage frame_data_img(copy_frame_data, width, height, QImage::Format_RGB888);
 		streams_widgets[i]->display(frame_data_img);
 		i++;
 	}
@@ -849,31 +854,33 @@ void QDeepBreath::on_load_file_button_clicked()
 			std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
 			DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
 			DeepBreathGraphPlot::createInstance(ui->graph_widget);
+
+
+			//show and enable pause button
+			ui->pause_button->setVisible(true);
+			ui->pause_button->setEnabled(true);
+
+			//turn streaming off and change title
+			ui->load_file_button->setText("Stop");
+
+			//diable change of menu:
+			enableMenu(false);
+			enableDistances(false);
+			enableLocations(false);
+
+			//update condition variable to start polling:
+			DeepBreathSync::is_poll_frame = true;
+			DeepBreathSync::cv_poll_frame.notify_one();
+
+			is_run_from_file = true;
 		}
-
-		//show and enable pause button
-		ui->pause_button->setVisible(true);
-		ui->pause_button->setEnabled(true);
-
-		//turn streaming off and change title
-		ui->load_file_button->setText("Stop");
-
-		//diable change of menu:
-		enableMenu(false);
-		enableDistances(false);
-		enableLocations(false);
-
-		//update condition variable to start polling:
-		DeepBreathSync::is_poll_frame = true;
-		DeepBreathSync::cv_poll_frame.notify_one();
-
-		is_run_from_file = true;
-
-
     }
     else {
-		//stop frame polling:
+		//stop frame polling and wait for notify from polling thread:
 		DeepBreathSync::is_poll_frame = false;
+		std::unique_lock<std::mutex> lk(DeepBreathSync::m_end_poll_frame);
+		DeepBreathSync::cv_end_poll_frame.wait(lk);
+		lk.unlock();
 
 		//turn streaming off and change title
 		ui->load_file_button->setText("Load File...");

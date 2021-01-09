@@ -386,24 +386,8 @@ DeepBreathFrameData::Surface::Surface(const rs2::points& points, const rs2::dept
 			cv::Vec3f p(0, 0, 0);
 			get_3d_coordinates(depth_frame, j + left_x, i + bottom_y, p);
 			this->mat[i][j] = p;
-			//if (p[0] == 0 &&
-			//	p[1] == 0 &&
-			//	p[2] == 0) {
-			//	continue;
-			//}
 		}
 	}
-
-	//for (int i = 0; i < this->h; i++) {
-	//	for (int j = 0; j < this->w; ++j) {
-	//		if (this->mat[i][j][0] == 0 &&
-	//			this->mat[i][j][1] == 0 &&
-	//			this->mat[i][j][2] == 0) {
-	//			break;
-	//		}
-	//	}
-	//}
-
 }
 
 float DeepBreathFrameData::Surface::volume() {
@@ -449,16 +433,10 @@ float DeepBreathFrameData::Surface::volume() {
 				(p_y + r_y + b_y + d_y) / 4,
 				(p_z + r_z + b_z + d_z) / 4
 			);
+			Aij = area(p, r, b, d);
+			dij = center[2];
 
-			//if center is in bbox, include it in calculation:
-			// TODO: Find implementation for area
-			//if (bbox.in_bbox(center)) {
-				Aij = area(p, r, b, d);
-				dij = center[2];
-
-				total += dij * Aij;
-			//}
-
+			total += dij * Aij;
 		}
 	}
 

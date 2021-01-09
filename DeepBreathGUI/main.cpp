@@ -37,8 +37,6 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			auto color = camera.fs.get_color_frame();
 			auto colorized_depth = camera.colorizer.colorize(depth);
 
-			//TODO: Change implementation of frame process to use pc
-
 			//calculate pointcloud:
 			auto points = camera.pointcloud.calculate(pc_depth);
 
@@ -67,6 +65,9 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 			long double bpm = frame_manager.calculate_breath_rate();
 			db_ref->updateBPM(bpm);
 		}
+
+		// Notify the end of the polling
+		DeepBreathSync::cv_end_poll_frame.notify_one();
 	}
 }
 
