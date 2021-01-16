@@ -15,8 +15,5 @@ DeepBreathCamera & DeepBreathCamera::getInstance()
 DeepBreathCamera::DeepBreathCamera() :
 	depth_align(RS2_STREAM_DEPTH),
 	color_align(RS2_STREAM_COLOR),
-	filename(nullptr)
-{
-
-}
+	filename(nullptr) {}
 

@@ -4,7 +4,7 @@
 #include "db_frame_manager.hpp"
 #include "db_log.hpp"
 #include "db_graph_plot.hpp"
-#include <librealsense2/rsutil.h>
+//#include <librealsense2/rsutil.h>
 
 //#include "utilities.h"
 
@@ -13,7 +13,7 @@ static void normalize_distances(std::vector<cv::Point2d>* samples);
 static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies = NULL);
 static void FFT(short int dir, long m, double *x, double *y);
 static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_data);
-static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output);
+//static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output);
 /* ** */
 
 DeepBreathFrameManager* DeepBreathFrameManager::_frame_manager = nullptr;
@@ -115,6 +115,11 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 	//calculate 3D distances:
 	breathing_data->CalculateDistances3D();
 
+	if (user_cfg.dimension == D3) {
+		//calculate Volumes if in 3D mode:
+		breathing_data->CalculateVolumes(depth_frame);
+	}
+
 	//update timestamps of the current frame:
 	update_timestamps(color_frame, depth_frame, breathing_data);
 
@@ -122,13 +127,13 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 	bool is_dup = false;
 	int last_frame_index = (_n_frames + _oldest_frame_index - 1) % _n_frames;
 	if (_frame_data_arr[last_frame_index] != NULL) {
-		if (DeepBreathConfig::getInstance().dimension == dimension::D2) {
+		if (user_cfg.dimension == dimension::D2) {
 			if (_frame_data_arr[last_frame_index]->color_timestamp == breathing_data->color_timestamp
 				&& _frame_data_arr[last_frame_index]->average_2d_dist == breathing_data->average_2d_dist) {
 				is_dup = true;
 			}
 		}
-		if (DeepBreathConfig::getInstance().dimension == dimension::D3) {
+		if (user_cfg.dimension == dimension::D3) {
 			if (_frame_data_arr[last_frame_index]->color_timestamp == breathing_data->color_timestamp
 				&& _frame_data_arr[last_frame_index]->depth_timestamp == breathing_data->depth_timestamp
 				&& _frame_data_arr[last_frame_index]->average_3d_dist == breathing_data->average_3d_dist) {
@@ -162,7 +167,8 @@ long double DeepBreathFrameManager::calculate_breath_rate() {
 
 	switch (user_cfg.mode) {
 	case VOLUME:
-		//get_volumes(&points);
+		get_volumes(&points);
+		bpm = _calc_bpm_and_log_dists(points);
 		break;
 	default: //distances, fourier and no graph - all based on distances:
 		get_dists(&points);
@@ -370,9 +376,16 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 			}
 		}
 		break;
-		//case VOLUME:
-		//	_plotFourier(points);
-		//	break;
+	case VOLUME:
+		p.x = frame_data->system_depth_timestamp;
+		if (user_cfg.volume_type == TETRAHEDRON) {
+			p.y = frame_data->tetra_volume;
+		}
+		else {
+			p.y = frame_data->reimann_volume;
+		}
+		graph_plot.addData(p); //graph plot is responsible for the calculation of the difference (see addData)
+		break;
 	case NOGRAPH:
 		//Do nothing, nothing to plot.
 		break;
@@ -400,6 +413,45 @@ void DeepBreathFrameManager::get_locations(stickers s, std::vector<cv::Point2d> 
 			if ((current_time - _frame_data_arr[idx]->system_timestamp) <= 15.0) { //TODO: decide if needed
 				out->push_back(cv::Point2d(_frame_data_arr[idx]->system_timestamp, (*_frame_data_arr[idx]->stickers_map_cm[s])[2]));
 			}
+		}
+	}
+}
+
+void DeepBreathFrameManager::get_volumes(std::vector<cv::Point2d>* out) {
+
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	if (user_cfg.mode == LOCATION) {
+		DeepBreathLog& log = DeepBreathLog::getInstance();
+		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		//TODO: Log bpm info?
+		log.log_file << "Warning: get_volumes was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
+		return;
+	}
+	if (user_cfg.dimension != D3) {
+		DeepBreathLog& log = DeepBreathLog::getInstance();
+		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		log.log_file << "Warning: get_volumes was called in D2 mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
+		return;
+	}
+
+	if (_frame_data_arr == NULL) return;
+
+	double current_time = (clock() - manager_start_time) / double(CLOCKS_PER_SEC);
+	for (unsigned int i = 0; i < _n_frames; i++) {
+		int idx = (_oldest_frame_index + i + _n_frames) % _n_frames; //this is right order GIVEN that get_volumes is run after add_frame_data (after _oldest_frame_idx++)
+		if (_frame_data_arr[idx] != NULL) {
+			double d_vol = 0;
+			if (user_cfg.volume_type == TETRAHEDRON) {
+				d_vol = _frame_data_arr[idx]->tetra_volume;
+			}
+			else { // REIMANN
+				d_vol = _frame_data_arr[idx]->reimann_volume;
+			}
+			double t = _frame_data_arr[idx]->system_depth_timestamp;
+			out->push_back(cv::Point2d(t, d_vol));
 		}
 	}
 }
@@ -449,6 +501,20 @@ void DeepBreathFrameManager::activateInterval() {
 void DeepBreathFrameManager::deactivateInterval() {
 	this->interval_active = false;
 }
+
+//long double DeepBreathFrameManager::_calc_bpm_and_log_volumes(std::vector<cv::Point2d>& points) {
+//	long double f;
+//	//normalize_distances(&points);
+//	std::vector<cv::Point2d> frequency_points;
+//	f = calc_and_log_frequency_fft(&points, &frequency_points);
+//
+//	if (points.size() < NUM_OF_LAST_FRAMES * 0.5)
+//		f = 0;
+//
+//	long double bpm = f * 60;
+//	return bpm;
+//
+//}
 
 long double DeepBreathFrameManager::_calc_bpm_and_log_dists(std::vector<cv::Point2d>& points) {
 	long double f;
@@ -676,18 +742,18 @@ static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_da
 	return illegal_3d_coordinates;
 }
 
-static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
-	float pixel[2] = { x, y };
-	float point[3]; // From point (in 3D)
-	auto dist = depth_frame.get_distance(pixel[0], pixel[1]);
-
-	rs2_intrinsics depth_intr = depth_frame.get_profile().as<rs2::video_stream_profile>().get_intrinsics(); // Calibration data
-
-	rs2_deproject_pixel_to_point(point, &depth_intr, pixel, dist);
-
-	//convert to cm
-	output[0] = float(point[0]) * 100.0;
-	output[1] = float(point[1]) * 100.0;
-	output[2] = float(point[2]) * 100.0;
-
-}
+//static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
+//	float pixel[2] = { x, y };
+//	float point[3]; // From point (in 3D)
+//	auto dist = depth_frame.get_distance(pixel[0], pixel[1]);
+//
+//	rs2_intrinsics depth_intr = depth_frame.get_profile().as<rs2::video_stream_profile>().get_intrinsics(); // Calibration data
+//
+//	rs2_deproject_pixel_to_point(point, &depth_intr, pixel, dist);
+//
+//	//convert to cm
+//	output[0] = float(point[0]) * 100.0;
+//	output[1] = float(point[1]) * 100.0;
+//	output[2] = float(point[2]) * 100.0;
+//
+//}

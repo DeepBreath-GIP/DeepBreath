@@ -1,7 +1,9 @@
 
 #include <fstream>
+#include <librealsense2/rsutil.h>
 
 #include "db_frame_data.hpp"
+#include "db_camera.hpp"
 #include "db_log.hpp"
 
 #define CALC_2D_DIST(name1,name2) { distance2D((*(name1))[0], (*(name1))[1], (*(name2))[0], (*(name2))[1]) }
@@ -79,6 +81,7 @@ DeepBreathFrameData::DeepBreathFrameData() :
 						{distances::mid1_mid3, &dM1M3_depth},
 						{distances::mid2_mid3, &dM2M3_depth} }),
 	average_2d_dist(0.0), average_3d_dist(0.0),
+	tetra_volume(0.0), reimann_volume(0.0),
 	color_timestamp(0.0), depth_timestamp(0.0)
 {}
 
@@ -236,7 +239,22 @@ void DeepBreathFrameData::CalculateDistances3D()
 	average_3d_dist = average_3d_dist / (1.0 * count);
 }
 
+void DeepBreathFrameData::CalculateVolumes(const rs2::depth_frame& depth_frame)
+{
+	if (!left || !right || !mid3) return;
 
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	if (user_cfg.volume_type == TETRAHEDRON) {
+		//tetrahedron volume:
+		Tetrahedron tet(left_cm, right_cm, mid3_cm);
+		tetra_volume = tet.volume();
+	}
+	else { //REIMANN
+		Surface chest(depth_frame, *left, *right, *mid3);
+		reimann_volume = chest.volume();
+	}
+}
 
 void DeepBreathFrameData::GetDescription()
 {
@@ -341,4 +359,136 @@ void DeepBreathFrameData::GetDescription()
 	}
 	log.log_file << std::fixed << std::setprecision(6) << average_2d_dist << ","
 		<< std::fixed << std::setprecision(6) << average_3d_dist << ",";
+}
+
+
+DeepBreathFrameData::Surface::Surface(const rs2::depth_frame& depth_frame, cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& mid3) {
+
+	float left_x = left[0];
+	float right_x = right[0];
+	//y axis is pointed DOWN:
+	float bottom_y = std::min({ left[1], right[1] });
+	float top_y = mid3[1];
+
+	bbox = BoundingBox(left_x, right_x, top_y, bottom_y);
+
+
+	this->h = top_y - bottom_y;
+	this->w = right_x - left_x;
+
+	this->mat = new cv::Vec3f * [h];
+
+	for (int i = 0; i < this->h; i++) {
+		this->mat[i] = new cv::Vec3f[w];
+
+		// Empirically we see that the depth on the right edge is zero on some of the points. We will avoid these points in Reimann sum calculations
+		for (int j = 0; j < this->w; ++j) {
+			cv::Vec3f p(0, 0, 0);
+			get_3d_coordinates(depth_frame, j + left_x, i + bottom_y, p);
+			this->mat[i][j] = p;
+		}
+	}
+}
+
+float DeepBreathFrameData::Surface::volume() {
+
+	float total = 0;
+	float dij = 0;	// avg. depth of centroid of [i, i+1] x [j, j+1]
+	float Aij = 0;	//area of [i, i+1] x [j, j+1]
+
+	//calculate
+
+	for (int i = 0; i < this->h - 2; i++) {
+
+		for (int j = 0; j < this->w - 2; ++j) {
+
+			//current point i,j vals:
+			float p_x = (this->mat[i][j])[0];
+			float p_y = (this->mat[i][j])[1];
+			float p_z = (this->mat[i][j])[2];
+
+			//point to the right:
+			float r_x = (this->mat[i][j + 1])[0];
+			float r_y = (this->mat[i][j + 1])[1];
+			float r_z = (this->mat[i][j + 1])[2];
+
+			//point to the bottom:
+			float b_x = (this->mat[i + 1][j])[0];
+			float b_y = (this->mat[i + 1][j])[1];
+			float b_z = (this->mat[i + 1][j])[2];
+
+			//diagonal point:
+			float d_x = (this->mat[i + 1][j + 1])[0];
+			float d_y = (this->mat[i + 1][j + 1])[1];
+			float d_z = (this->mat[i + 1][j + 1])[2];
+
+			cv::Vec3f p(p_x, p_y, p_z);
+			cv::Vec3f r(r_x, r_y, r_z);
+			cv::Vec3f b(b_x, b_y, b_z);
+			cv::Vec3f d(d_x, d_y, d_z);
+
+			// TODO: Find implementation for centroid of quadrilateral
+			cv::Vec3f center(
+				(p_x + r_x + b_x + d_x) / 4,
+				(p_y + r_y + b_y + d_y) / 4,
+				(p_z + r_z + b_z + d_z) / 4
+			);
+			Aij = area(p, r, b, d);
+			dij = center[2];
+
+			total += dij * Aij;
+		}
+	}
+
+	return total;
+}
+
+float DeepBreathFrameData::Surface::area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d) {
+
+	//triangle abc:
+	float abc_space = triangle_area(a, b, c);
+
+	//triangle adc:
+	float adc_space = triangle_area(a, d, c);
+
+	return (abc_space + adc_space);
+
+}
+
+
+float triangle_area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c) {
+	//find angle between two edges (ab, ac)
+	if (a == b || a == c || b == c) {
+		return 0;
+	}
+	float area = 0;
+	cv::Vec3f u(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
+	cv::Vec3f v(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+	float dot_product = (u[0] * v[0]) + (u[1] * v[1]) + (u[2] * v[2]);
+	float u_size = sqrt(pow(u[0], 2) + pow(u[1], 2) + pow(u[2], 2));
+	float v_size = sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2));
+	//cos(x) = u * v / (|u||v|)
+	float cos_x = 0;
+	if (u_size * v_size != 0) {
+		cos_x = dot_product / (u_size * v_size);
+	}
+	float x = acos(cos_x);
+	area = (u_size * v_size * sin(x) / 2);
+	return area;
+}
+
+void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
+	float pixel[2] = { x, y };
+	float point[3]; // From point (in 3D)
+	auto dist = depth_frame.get_distance(pixel[0], pixel[1]);
+
+	rs2_intrinsics depth_intr = depth_frame.get_profile().as<rs2::video_stream_profile>().get_intrinsics(); // Calibration data
+
+	rs2_deproject_pixel_to_point(point, &depth_intr, pixel, dist);
+
+	//convert to cm
+	output[0] = float(point[0]) * 100.0;
+	output[1] = float(point[1]) * 100.0;
+	output[2] = float(point[2]) * 100.0;
+
 }

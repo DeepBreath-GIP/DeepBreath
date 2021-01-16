@@ -1,6 +1,6 @@
 #dimension: 2 for 2D or 3 for 3D. recommended: 2
 2
-#mode: D for distances, L for location, F for fourier, N for no graph
+#mode: D for distances, L for location, F for fourier, V for volume, N for no graph
 D
 
 #distances: set to y to include a certain distance. set to n otherwise. recommended: left-mid3, right-mid3, mid2-mid3
@@ -30,3 +30,9 @@ Y
 
 #2D measure units: cm or pixel. recommended: pixel
 pixel
+
+#use stickers:
+y
+
+#volume calculation type(for V mode only): T for tetrahedron volume, R for reimann sums
+R

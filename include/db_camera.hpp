@@ -30,6 +30,7 @@ public:
 	rs2::align depth_align;
 	rs2::align color_align;
 	rs2::frameset fs;
+	rs2::pointcloud pointcloud;
 
 	const char* filename;
 

@@ -33,15 +33,12 @@ DeepBreathGraphPlot::DeepBreathGraphPlot(QCustomPlot* graph_widget) :
 	_min_x(0),
 	_max_x(0),
 	_min_y(0),
-	_max_y(0) {
+	_max_y(0),
+	_min_vol(0) {
 
 	_graph_widget = graph_widget;
 
 	this->reset();
-
-	_graph_widget->xAxis->setRange(_time_begin, 8, Qt::AlignLeft);
-
-	_graph_widget->yAxis->setRange(0, 200, Qt::AlignLeft);
 
 	_graph_widget->setInteraction(QCP::iRangeDrag, true);
 	_graph_widget->setInteraction(QCP::iRangeZoom, true);
@@ -82,6 +79,10 @@ void DeepBreathGraphPlot::reset() {
 	//clear graphs:
 	_graph_widget->clearGraphs();
 
+	//setRange
+	_graph_widget->xAxis->setRange(_time_begin, 8, Qt::AlignLeft);
+	_graph_widget->yAxis->setRange(0, 200, Qt::AlignLeft);
+
 	//and set new brushes for new graphs:
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
@@ -106,30 +107,56 @@ void DeepBreathGraphPlot::reset() {
 		break;
 	}
 
+	_graph_widget->replot();
+
 	_is_first_plot = true;
 	_min_x = 0;
 	_max_x = 0;
 	_min_y = 0;
 	_max_y = 0;
+	_min_vol = 0;
 }
 
 void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+
+	if (user_cfg.mode == VOLUME) {
+		if (_min_vol == 0) {
+			//don't plot the first volume that arrives:
+			_min_vol = p.y;
+			return;
+		}
+
+		//set y ranges according to difference (and not p.y):
+		if (p.y - _min_vol > _max_y) {
+			_max_y = p.y - _min_vol;
+			_graph_widget->yAxis->setRange(_min_y, _max_y);
+		}
+		if (p.y - _min_vol < _min_y || _min_y == 0) {
+			_min_y = p.y - _min_vol;
+			_graph_widget->yAxis->setRange(_min_y, _max_y);
+		}
+
+	}
+	else {
+
+		if (p.y > _max_y) {
+			_max_y = p.y;
+			_graph_widget->yAxis->setRange(_min_y, _max_y);
+		}
+		if (p.y < _min_y || _min_y == 0) {
+			_min_y = p.y;
+			_graph_widget->yAxis->setRange(_min_y, _max_y);
+		}
+
+	}
+
 	if (p.x > _max_x) {
 		_max_x = p.x;
 	}
 	if (p.x < _min_x) {
 		_min_x = p.x;
-	}
-
-	if (p.y > _max_y) {
-		_max_y = p.y;
-		_graph_widget->yAxis->setRange(_min_y, _max_y);
-	}
-	if (p.y < _min_y || _min_y == 0) {
-		_min_y = p.y;
-		_graph_widget->yAxis->setRange(_min_y, _max_y);
 	}
 
 	//set graph running to right:
@@ -141,9 +168,12 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 	case LOCATION:
 		_graph_widget->graph(s)->addData(p.x, p.y);
 		break;
-		//case VOLUME:
-		//	_plotFourier(points);
-		//	break;
+	case VOLUME:
+		_graph_widget->graph(0)->addData(p.x, p.y - _min_vol);
+		if (p.y < _min_vol) {
+			_min_vol = p.y;
+		}
+		break;
 	case NOGRAPH:
 		//No data to add, do nothing.
 		break;
