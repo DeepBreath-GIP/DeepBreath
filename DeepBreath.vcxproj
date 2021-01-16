@@ -190,6 +190,7 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="db_csvformatter.cpp" />
     <ClCompile Include="dependencies\librealsense\common\os.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\glad\glad.c" />
     <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui.cpp" />
@@ -230,6 +231,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="db_csvformatter.hpp" />
     <ClInclude Include="dependencies\librealsense\common\os.h" />
     <ClInclude Include="dependencies\librealsense\include\librealsense2-gl\rs_processing_gl.h" />
     <ClInclude Include="dependencies\librealsense\include\librealsense2-gl\rs_processing_gl.hpp" />

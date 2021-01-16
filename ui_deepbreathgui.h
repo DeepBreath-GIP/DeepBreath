@@ -293,7 +293,7 @@ public:
         pause_button->setText(QCoreApplication::translate("DeepBreath", "Pause", nullptr));
         dimension_2d_radio_button->setText(QCoreApplication::translate("DeepBreath", "2D", nullptr));
         dimension_3d_radio_button->setText(QCoreApplication::translate("DeepBreath", "3D", nullptr));
-        dimension_text->setText(QCoreApplication::translate("DeepBreath", "Dimesion:", nullptr));
+        dimension_text->setText(QCoreApplication::translate("DeepBreath", "Dimension:", nullptr));
         mode_text->setText(QCoreApplication::translate("DeepBreath", "Mode:", nullptr));
         mode_combo_box->setItemText(0, QCoreApplication::translate("DeepBreath", "Distances", nullptr));
         mode_combo_box->setItemText(1, QCoreApplication::translate("DeepBreath", "Locations", nullptr));

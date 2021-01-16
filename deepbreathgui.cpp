@@ -605,7 +605,7 @@ void QDeepBreath::on_left_right_checkbox_clicked()
 {
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 	distances dist = distances::left_right;
-	user_cfg.dists_included[dist] = ui->left_mid1_checkbox->isChecked();
+	user_cfg.dists_included[dist] = ui->left_right_checkbox->isChecked();
 
 	this->update();
 }
@@ -712,9 +712,9 @@ void QDeepBreath::on_start_camera_button_clicked()
 				camera.filename = nullptr;
 
 				//Close log file
-				DeepBreathLog& log = DeepBreathLog::getInstance();
-				assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-				log.log_file.close();
+				//DeepBreathLog& log = DeepBreathLog::getInstance();
+				//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+				//log.log_file.close();
 
 				//turn streaming off and change title
 				ui->load_file_button->setText("Load File...");
@@ -749,8 +749,9 @@ void QDeepBreath::on_start_camera_button_clicked()
 		//graph.reset(frame_manager.manager_start_time);
 
 		//create logging:
-		std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
-		DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+		//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+		//DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+		DeepBreathLog::init(false);
 		DeepBreathGraphPlot::createInstance(ui->graph_widget);
 
 		//update condition variable to start polling:
@@ -777,9 +778,9 @@ void QDeepBreath::on_start_camera_button_clicked()
 		camera.filename = nullptr;
 
 		//Close log file
-		DeepBreathLog& log = DeepBreathLog::getInstance();
-		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		log.log_file.close();
+		//DeepBreathLog& log = DeepBreathLog::getInstance();
+		//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		//log.log_file.close();
 
         ui->start_camera_button->setText("Start Camera");
         ui->record_button->setEnabled(false);
@@ -857,8 +858,9 @@ void QDeepBreath::on_load_file_button_clicked()
 			frame_manager.reset(); // reset FrameManager for additional processing
 
 			//create logging:
-			std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
-			DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+			//std::string D2units = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+			//DeepBreathLog::createInstance(camera.filename, DeepBreathConfig::getInstance().num_of_stickers, D2units);
+			DeepBreathLog::init(true);
 			DeepBreathGraphPlot::createInstance(ui->graph_widget);
 
 
@@ -904,10 +906,8 @@ void QDeepBreath::on_load_file_button_clicked()
 		//reset filename argument:
 		camera.filename = nullptr;
 
-		//Close log file
-		DeepBreathLog& log = DeepBreathLog::getInstance();
-		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		log.log_file.close();
+		//Stop logging
+		DeepBreathLog::stop();
 
 		//clear stream widgets
 		clearStreamingWidgets();

@@ -7,6 +7,12 @@
 #include "db_sync.hpp"
 #include "db_frame_manager.hpp"
 
+#include <plog/Log.h>
+#include <plog/Init.h>
+#include <plog/Formatters/CsvFormatter.h>
+#include <plog/Appenders/RollingFileAppender.h>
+#include <db_csvformatter.hpp>
+
 /*
 	Frames polling thread function.
 	Activated in the main and runs in the backround, polling for frames only when the boolean is_poll_frame is true.

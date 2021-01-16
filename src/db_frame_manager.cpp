@@ -69,8 +69,8 @@ int DeepBreathFrameManager::get_frames_array_size() {
 
 void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame)
 {
-	DeepBreathLog& log = DeepBreathLog::getInstance();
-	assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+	//DeepBreathLog& log = DeepBreathLog::getInstance();
+	//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
 	DeepBreathFrameData * breathing_data = new DeepBreathFrameData();
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
@@ -98,9 +98,9 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 
 		if (check_illegal_3D_coordinates(breathing_data)) {
 			frames_dumped_in_row++;
-			log.log_file << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
+			//log.log_file << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
 			if (frames_dumped_in_row >= 3) {								//This is required for transition to next columns in the log file! 
-				log.log_file << '\n';
+				//log.log_file << '\n';
 				cleanup();
 			}
 			return;
@@ -151,7 +151,7 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 
 	}
 	else {
-		log.log_file << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		//log.log_file << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 	}
 }
@@ -319,9 +319,9 @@ void DeepBreathFrameManager::cleanup()
 		}
 	}
 
-	DeepBreathLog& log = DeepBreathLog::getInstance();
-	assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-	log.log_file << "frames array cleanup...\n,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+	//DeepBreathLog& log = DeepBreathLog::getInstance();
+	//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+	//log.log_file << "frames array cleanup...\n,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 	//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 	frames_dumped_in_row = 0;
 }
@@ -397,9 +397,9 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 
 void DeepBreathFrameManager::get_locations(stickers s, std::vector<cv::Point2d> *out) {
 	if (DeepBreathConfig::getInstance().mode != graph_mode::LOCATION) {
-		DeepBreathLog& log = DeepBreathLog::getInstance();
-		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		log.log_file << "Warning: get_locations was called in incompatible mode! (use L mode),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		//DeepBreathLog& log = DeepBreathLog::getInstance();
+		//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		//log.log_file << "Warning: get_locations was called in incompatible mode! (use L mode),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
 	}
@@ -422,17 +422,17 @@ void DeepBreathFrameManager::get_volumes(std::vector<cv::Point2d>* out) {
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
 	if (user_cfg.mode == LOCATION) {
-		DeepBreathLog& log = DeepBreathLog::getInstance();
-		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		//TODO: Log bpm info?
-		log.log_file << "Warning: get_volumes was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		//DeepBreathLog& log = DeepBreathLog::getInstance();
+		//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		////TODO: Log bpm info?
+		//log.log_file << "Warning: get_volumes was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
 	}
 	if (user_cfg.dimension != D3) {
-		DeepBreathLog& log = DeepBreathLog::getInstance();
-		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		log.log_file << "Warning: get_volumes was called in D2 mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		//DeepBreathLog& log = DeepBreathLog::getInstance();
+		//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		//log.log_file << "Warning: get_volumes was called in D2 mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
 	}
@@ -459,10 +459,10 @@ void DeepBreathFrameManager::get_volumes(std::vector<cv::Point2d>* out) {
 void DeepBreathFrameManager::get_dists(std::vector<cv::Point2d>* out) {
 
 	if (DeepBreathConfig::getInstance().mode == graph_mode::LOCATION) {
-		DeepBreathLog& log = DeepBreathLog::getInstance();
-		assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		//TODO: Log bpm info?
-		log.log_file << "Warning: get_dists was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
+		//DeepBreathLog& log = DeepBreathLog::getInstance();
+		//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+		////TODO: Log bpm info?
+		//log.log_file << "Warning: get_dists was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
 		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
 	}
@@ -571,11 +571,11 @@ static void normalize_distances(std::vector<cv::Point2d>* samples) {
 */
 static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies) {
 
-	DeepBreathLog& log = DeepBreathLog::getInstance();
-	assert(log);
+	//DeepBreathLog& log = DeepBreathLog::getInstance();
+	//assert(log);
 
 	if (samples->size() < 5) {
-		log.log_file << '\n';
+		//log.log_file << '\n';
 		return 0;
 	}
 	int realSamplesNum = samples->size();	// N - number of samples (frames)
@@ -649,11 +649,11 @@ static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples,
 	delete X;
 	delete Y;
 
-	log.log_file << fps << ',';
-	log.log_file << realSamplesNum << ',';
+	//log.log_file << fps << ',';
+	//log.log_file << realSamplesNum << ',';
 	long double f = fps / (paddedSamplesNum - 2.0) * max_idx;
-	log.log_file << std::fixed << std::setprecision(6) << f << ',';
-	log.log_file << std::fixed << std::setprecision(6) << f * 60.0 << '\n';
+	//log.log_file << std::fixed << std::setprecision(6) << f << ',';
+	//log.log_file << std::fixed << std::setprecision(6) << f * 60.0 << '\n';
 	return f;
 }
 
