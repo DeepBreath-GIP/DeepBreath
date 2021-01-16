@@ -52,6 +52,7 @@ Thumbs.db
 *.ncb
 *.sdf
 *.opensdf
+.vs/
 
 # MinGW generated files
 *.Debug
