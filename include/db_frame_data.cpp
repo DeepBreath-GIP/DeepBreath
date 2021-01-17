@@ -457,6 +457,7 @@ void DeepBreathFrameData::log() {
 	general_log();
 	locations_log(num_stickers, dimension == D2, is_cm);
 	distances_log(dimension == D2, is_cm);
+	volume_log();
 
 }
 

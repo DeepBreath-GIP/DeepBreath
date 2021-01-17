@@ -208,18 +208,16 @@ void DeepBreathLog::set_csv_headers() {
 	unsigned int num_all_headers = num_first_headers + num_location_headers + num_distance_headers;
 
 	if (mode == VOLUME) {
-		std::string volume_headers;
-
 		switch(volume_type) {
 		case TETRAHEDRON:
-			volume_headers = "Tetrahedron Volume";
+			all_headers = DeepBreathCSVFormatter::row_adder(all_headers, "Tetrahedron Volume");
+			num_all_headers++;
 			break;
 		case REIMANN:
-			volume_headers = "Reimann Volume";
+			all_headers = DeepBreathCSVFormatter::row_adder(all_headers, "Reimann Volume");
+			num_all_headers++;
 			break;
 		}
-		all_headers = DeepBreathCSVFormatter::row_adder(all_headers, volume_headers);
-		num_all_headers++;
 	}
 
 	switch (mode) {
