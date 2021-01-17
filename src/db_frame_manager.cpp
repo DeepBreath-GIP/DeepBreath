@@ -10,7 +10,6 @@
 
 /* Forward Decalrations: */
 static void normalize_distances(std::vector<cv::Point2d>* samples);
-static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies = NULL);
 static void FFT(short int dir, long m, double *x, double *y);
 static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_data);
 //static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output);
@@ -55,6 +54,11 @@ void DeepBreathFrameManager::reset() {
 	for (unsigned int i = 0; i < _n_frames; i++) {
 		_frame_data_arr[i] = NULL;
 	}
+
+	fps = 0;
+	real_num_samples = 0;
+	frequency = 0;
+	bpm = 0;
 }
 
 int DeepBreathFrameManager::get_frames_array_size() {
@@ -142,8 +146,6 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 		}
 	}
 	if (!is_dup) {
-		//for logging
-		breathing_data->GetDescription();
 		add_frame_data(breathing_data);
 
 		//update graph:
@@ -160,7 +162,7 @@ long double DeepBreathFrameManager::calculate_breath_rate() {
 
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
-	long double bpm = 0;
+	bpm = 0;
 
 	std::vector<cv::Point2d> points;
 	std::vector<cv::Point2d> loc_points[5];
@@ -168,14 +170,13 @@ long double DeepBreathFrameManager::calculate_breath_rate() {
 	switch (user_cfg.mode) {
 	case VOLUME:
 		get_volumes(&points);
-		bpm = _calc_bpm_and_log_dists(points);
+		bpm = _calc_bpm(points);
 		break;
 	default: //distances, fourier and no graph - all based on distances:
 		get_dists(&points);
-		bpm = _calc_bpm_and_log_dists(points);
+		bpm = _calc_bpm(points);
 		break;
 	}
-
 	return bpm;
 }
 
@@ -488,10 +489,9 @@ long double DeepBreathFrameManager::no_graph() {
 	std::vector<cv::Point2d> points;
 	get_dists(&points);
 
-	long double f;
 	normalize_distances(&points);
-	f = (calc_and_log_frequency_fft(&points));
-	return f;
+	calc_frequency_fft(&points);
+	return frequency;
 }
 
 void DeepBreathFrameManager::activateInterval() {
@@ -516,11 +516,10 @@ void DeepBreathFrameManager::deactivateInterval() {
 //
 //}
 
-long double DeepBreathFrameManager::_calc_bpm_and_log_dists(std::vector<cv::Point2d>& points) {
-	long double f;
+long double DeepBreathFrameManager::_calc_bpm(std::vector<cv::Point2d>& points) {
 	normalize_distances(&points);
 	std::vector<cv::Point2d> frequency_points;
-	f = calc_and_log_frequency_fft(&points, &frequency_points);
+	calc_frequency_fft(&points, &frequency_points);
 
 	if (DeepBreathConfig::getInstance().mode == FOURIER) {
 
@@ -536,10 +535,11 @@ long double DeepBreathFrameManager::_calc_bpm_and_log_dists(std::vector<cv::Poin
 		graph_plot.update();
 	}
 
-	if (points.size() < NUM_OF_LAST_FRAMES * 0.5)
-		f = 0;
+	if (points.size() < NUM_OF_LAST_FRAMES * 0.5) {
+		frequency = 0;
+	}
 
-	long double bpm = f * 60;
+	bpm = frequency * 60;
 	return bpm;
 
 }
@@ -569,38 +569,38 @@ static void normalize_distances(std::vector<cv::Point2d>* samples) {
 * the avg distance is calculated only for distances set to true in user_cfg.dists_included
 * Logs the result.
 */
-static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies) {
-
-	//DeepBreathLog& log = DeepBreathLog::getInstance();
-	//assert(log);
+void DeepBreathFrameManager::calc_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies) {
 
 	if (samples->size() < 5) {
-		//log.log_file << '\n';
-		return 0;
+		frequency = 0;
+		return;
 	}
-	int realSamplesNum = samples->size();	// N - number of samples (frames)
-	int realSamplesLog = log2(realSamplesNum);
+	real_num_samples = samples->size();	// N - number of samples (frames)
+	int realSamplesLog = log2(real_num_samples);
 	// fft requires that the number of samples is a power of 2. add padding if needed
-	const int paddedSamplesNum = (realSamplesNum == pow(2, realSamplesLog)) ? realSamplesNum : pow(2, realSamplesLog + 1);
+	const int paddedSamplesNum = (real_num_samples == pow(2, realSamplesLog)) ? real_num_samples : pow(2, realSamplesLog + 1);
 	int dir = 1;
 	long m = log2(paddedSamplesNum);
 	double* X = new double[paddedSamplesNum];
 	double* Y = new double[paddedSamplesNum];
 	// insert real samples in first #realSamplesNum slots
-	for (int s = 0; s < realSamplesNum; s++) {
+	for (int s = 0; s < real_num_samples; s++) {
 		X[s] = samples->at(s).y;
 		Y[s] = 0;	// no imaginary part in samples
 	}
 	// add padding after real samples
-	for (int s = realSamplesNum; s < paddedSamplesNum; s++) {
+	for (int s = real_num_samples; s < paddedSamplesNum; s++) {
 		X[s] = 0;
 		Y[s] = 0;
 	}
 
 	double t0 = samples->at(0).x;	// t0, t1 - start, end time(seconds)
-	double t1 = samples->at(realSamplesNum - 1).x;
-	if (t1 == t0) return 0;
-	double fps = realSamplesNum / (t1 - t0);	// FPS - frames per second
+	double t1 = samples->at(real_num_samples - 1).x;
+	if (t1 == t0) {
+		frequency = 0;
+		return;
+	}
+	fps = real_num_samples / (t1 - t0);	// FPS - frames per second
 
 	FFT(dir, m, X, Y);
 
@@ -633,7 +633,7 @@ static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples,
 	double max_val = 0;
 	double min_bpm = 5.0;	// TODO: decide minimal BPM
 	int mini = ceil((min_bpm / 60.0)*((paddedSamplesNum - 2.0) / fps));	// assume BPM >= min_bpm
-	for (int i = 0; i < realSamplesNum / 2; i++) { //frequency 0 always most dominant. ignore first coef.
+	for (int i = 0; i < real_num_samples / 2; i++) { //frequency 0 always most dominant. ignore first coef.
 		double val = abs(X[i])*abs(X[i]) + abs(Y[i])*abs(Y[i]);
 		if (out_frequencies != NULL) {
 			double frequency = fps / (paddedSamplesNum - 2.0) * i;
@@ -649,12 +649,7 @@ static long double calc_and_log_frequency_fft(std::vector<cv::Point2d>* samples,
 	delete X;
 	delete Y;
 
-	//log.log_file << fps << ',';
-	//log.log_file << realSamplesNum << ',';
-	long double f = fps / (paddedSamplesNum - 2.0) * max_idx;
-	//log.log_file << std::fixed << std::setprecision(6) << f << ',';
-	//log.log_file << std::fixed << std::setprecision(6) << f * 60.0 << '\n';
-	return f;
+	frequency = fps / (paddedSamplesNum - 2.0) * max_idx;
 }
 
 static void FFT(short int dir, long m, double *x, double *y) {
@@ -742,18 +737,26 @@ static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_da
 	return illegal_3d_coordinates;
 }
 
-//static void get_3d_coordinates(const rs2::depth_frame& depth_frame, float x, float y, cv::Vec3f& output) {
-//	float pixel[2] = { x, y };
-//	float point[3]; // From point (in 3D)
-//	auto dist = depth_frame.get_distance(pixel[0], pixel[1]);
-//
-//	rs2_intrinsics depth_intr = depth_frame.get_profile().as<rs2::video_stream_profile>().get_intrinsics(); // Calibration data
-//
-//	rs2_deproject_pixel_to_point(point, &depth_intr, pixel, dist);
-//
-//	//convert to cm
-//	output[0] = float(point[0]) * 100.0;
-//	output[1] = float(point[1]) * 100.0;
-//	output[2] = float(point[2]) * 100.0;
-//
-//}
+void DeepBreathFrameManager::log_last_frame_data() {
+	// Get last frame index
+	unsigned int last_frame_index = (_oldest_frame_index + _n_frames - 1) % _n_frames;
+	_frame_data_arr[last_frame_index]->log();
+}
+
+void DeepBreathFrameManager::log_breathing_data() {
+	auto user_cfg = DeepBreathConfig::getInstance();
+	auto mode = user_cfg.mode;
+
+	switch (mode) {
+	case FOURIER:
+	case NOGRAPH:
+	case DISTANCES:
+	case VOLUME:
+		DBLOG << FIXED_PRECISION << fps;
+		DBLOG << FIXED_PRECISION << real_num_samples;
+		DBLOG << FIXED_PRECISION << frequency;
+		DBLOG << FIXED_PRECISION << bpm;
+		break;
+	}
+
+}

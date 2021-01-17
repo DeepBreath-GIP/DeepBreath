@@ -46,6 +46,8 @@ public:
 	void activateInterval();
 	void deactivateInterval();
 
+	void log_last_frame_data();
+	void log_breathing_data();
 protected:
 
 	//ctor
@@ -55,9 +57,7 @@ protected:
 
 private:
 
-	//long double _calc_bpm_and_log_volumes(std::vector<cv::Point2d>& points);
-
-	long double _calc_bpm_and_log_dists(std::vector<cv::Point2d>& points);
+	long double _calc_bpm(std::vector<cv::Point2d>& points);
 
 	/**
 	 * Cleans all allocated resources
@@ -113,6 +113,7 @@ private:
 	*/
 	long double no_graph();
 
+	void calc_frequency_fft(std::vector<cv::Point2d>* samples, std::vector<cv::Point2d>* out_frequencies = NULL);
 
 	int frame_idx = 1;
 	double first_timestamp = NULL;
@@ -123,4 +124,9 @@ private:
 	bool interval_active;
 	int frames_dumped_in_row = 0; //reinitialized after cleanup
 
+	// breathing data
+	float fps;
+	float real_num_samples;
+	float frequency;
+	float bpm;
 };

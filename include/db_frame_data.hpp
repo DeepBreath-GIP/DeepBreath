@@ -76,12 +76,16 @@ public:
 		NOTE: Call function AFTER 3D Distances calculation. */
 	void CalculateVolumes(const rs2::depth_frame& depth_frame);
 
-	/* Gets the description of the frame in the following format:
-		TODO: update format */
-	void GetDescription();
+	/* Log all relevant frame data*/
+	void log();
 	/* for a log with precision 2*/
 
 private:
+
+	void general_log();
+	void locations_log(int num_stickers, bool is_2d, bool is_cm);
+	void distances_log(bool is_2d, bool is_cm);
+	void volume_log();
 
 	/* Tetrahedron for Volume calculations: */
 	class Tetrahedron {

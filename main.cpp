@@ -57,6 +57,9 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 				//get last frames data and calculate breath rate:
 				long double bpm = frame_manager.calculate_breath_rate();
 				db_ref->updateBPM(bpm);
+
+				frame_manager.log_last_frame_data();
+				frame_manager.log_breathing_data();
 			}
 		}
 		catch (rs2::error e) {

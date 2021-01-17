@@ -2,14 +2,11 @@
 
 #include <plog/Record.h>
 #include <plog/Util.h>
-#include <plog/Log.h>
 #include <iomanip>
 #include <sstream>
 #include <list>
 #include <map>
 #include <codecvt>
-
-#define DBLOG PLOG_INFO
 
 class DeepBreathCSVFormatter
 {

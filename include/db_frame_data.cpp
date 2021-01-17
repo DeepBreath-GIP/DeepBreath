@@ -256,109 +256,208 @@ void DeepBreathFrameData::CalculateVolumes(const rs2::depth_frame& depth_frame)
 	}
 }
 
-void DeepBreathFrameData::GetDescription()
-{
-	//DeepBreathLog& log = DeepBreathLog::getInstance();
-	//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
+void DeepBreathFrameData::locations_log(int num_stickers, bool is_2d, bool is_cm) {
 
-	//const std::string d2method = (DeepBreathConfig::getInstance().calc_2d_by_cm) ? "cm" : "pixels";
+	// log location data:
+	switch (num_stickers) {
+	case 3:
+		if (is_cm) {
+			DBLOG << FIXED_PRECISION << left_cm[0] << " " << FIXED_PRECISION << left_cm[1];
+			DBLOG << FIXED_PRECISION << right_cm[0] << " " << FIXED_PRECISION << right_cm[1];
+			DBLOG << FIXED_PRECISION << mid3_cm[0] << " " << FIXED_PRECISION << mid3_cm[1];
+		}
+		else {
+			DBLOG << FIXED_PRECISION << (*left)[0] << " " << FIXED_PRECISION << (*left)[1];
+			DBLOG << FIXED_PRECISION << (*right)[0] << " " << FIXED_PRECISION << (*right)[1];
+			DBLOG << FIXED_PRECISION << (*mid3)[0] << " " << FIXED_PRECISION << (*mid3)[1];
+		}
+		if (!is_2d) {
+			DBLOG << FIXED_PRECISION << left_cm[0] << " " << FIXED_PRECISION << left_cm[1] << FIXED_PRECISION << left_cm[2];
+			DBLOG << FIXED_PRECISION << right_cm[0] << " " << FIXED_PRECISION << right_cm[1] << FIXED_PRECISION << right_cm[2];
+			DBLOG << FIXED_PRECISION << mid3_cm[0] << " " << FIXED_PRECISION << mid3_cm[1] << FIXED_PRECISION << mid3_cm[2];
+		}
+		break;
+	case 4:
+		if (is_cm) {
+			DBLOG << FIXED_PRECISION << left_cm[0] << " " << FIXED_PRECISION << left_cm[1];
+			DBLOG << FIXED_PRECISION << right_cm[0] << " " << FIXED_PRECISION << right_cm[1];
+			DBLOG << FIXED_PRECISION << mid2_cm[0] << " " << FIXED_PRECISION << mid2_cm[1];
+			DBLOG << FIXED_PRECISION << mid3_cm[0] << " " << FIXED_PRECISION << mid3_cm[1];
+		}
+		else {
+			DBLOG << FIXED_PRECISION << (*left)[0] << " " << FIXED_PRECISION << (*left)[1];
+			DBLOG << FIXED_PRECISION << (*right)[0] << " " << FIXED_PRECISION << (*right)[1];
+			DBLOG << FIXED_PRECISION << (*mid2)[0] << " " << FIXED_PRECISION << (*mid2)[1];
+			DBLOG << FIXED_PRECISION << (*mid3)[0] << " " << FIXED_PRECISION << (*mid3)[1];
+		}
+		if (!is_2d) {
+			DBLOG << FIXED_PRECISION << left_cm[0] << " " << FIXED_PRECISION << left_cm[1] << FIXED_PRECISION << left_cm[2];
+			DBLOG << FIXED_PRECISION << right_cm[0] << " " << FIXED_PRECISION << right_cm[1] << FIXED_PRECISION << right_cm[2];
+			DBLOG << FIXED_PRECISION << mid2_cm[0] << " " << FIXED_PRECISION << mid2_cm[1] << FIXED_PRECISION << mid2_cm[2];
+			DBLOG << FIXED_PRECISION << mid3_cm[0] << " " << FIXED_PRECISION << mid3_cm[1] << FIXED_PRECISION << mid3_cm[2];
+		}
+		break;
+	case 5:
+		if (is_cm) {
+			DBLOG << FIXED_PRECISION << left_cm[0] << " " << FIXED_PRECISION << left_cm[1];
+			DBLOG << FIXED_PRECISION << right_cm[0] << " " << FIXED_PRECISION << right_cm[1];
+			DBLOG << FIXED_PRECISION << mid1_cm[0] << " " << FIXED_PRECISION << mid1_cm[1];
+			DBLOG << FIXED_PRECISION << mid2_cm[0] << " " << FIXED_PRECISION << mid2_cm[1];
+			DBLOG << FIXED_PRECISION << mid3_cm[0] << " " << FIXED_PRECISION << mid3_cm[1];
+		}
+		else {
+			DBLOG << FIXED_PRECISION << (*left)[0] << " " << FIXED_PRECISION << (*left)[1];
+			DBLOG << FIXED_PRECISION << (*right)[0] << " " << FIXED_PRECISION << (*right)[1];
+			DBLOG << FIXED_PRECISION << (*mid1)[0] << " " << FIXED_PRECISION << (*mid1)[1];
+			DBLOG << FIXED_PRECISION << (*mid2)[0] << " " << FIXED_PRECISION << (*mid2)[1];
+			DBLOG << FIXED_PRECISION << (*mid3)[0] << " " << FIXED_PRECISION << (*mid3)[1];
+		}
+		if (!is_2d) {
+			DBLOG << FIXED_PRECISION << left_cm[0] << " " << FIXED_PRECISION << left_cm[1] << FIXED_PRECISION << left_cm[2];
+			DBLOG << FIXED_PRECISION << right_cm[0] << " " << FIXED_PRECISION << right_cm[1] << FIXED_PRECISION << right_cm[2];
+			DBLOG << FIXED_PRECISION << mid1_cm[0] << " " << FIXED_PRECISION << mid1_cm[1] << FIXED_PRECISION << mid1_cm[2];
+			DBLOG << FIXED_PRECISION << mid2_cm[0] << " " << FIXED_PRECISION << mid2_cm[1] << FIXED_PRECISION << mid2_cm[2];
+			DBLOG << FIXED_PRECISION << mid3_cm[0] << " " << FIXED_PRECISION << mid3_cm[1] << FIXED_PRECISION << mid3_cm[2];
+		}
+		break;
+	}
+}
 
-	//log.log_file << std::to_string(frame_idx) << ","
-	//	<< std::to_string(color_idx) << "," << std::to_string(depth_idx)
-	//	<< "," << std::to_string(color_timestamp) << "," << std::to_string(depth_timestamp) << ","
-	//	<< std::to_string(system_color_timestamp) << "," << std::to_string(system_depth_timestamp) << ","
-	//	<< std::to_string(system_timestamp) << ","
-	//	<< std::fixed << std::setprecision(2) << left_cm[0] << " "
-	//	<< std::fixed << std::setprecision(2) << left_cm[1] << " "
-	//	<< std::fixed << std::setprecision(2) << left_cm[2] << ","
-	//	<< std::fixed << std::setprecision(2) << right_cm[0] << " "
-	//	<< std::fixed << std::setprecision(2) << right_cm[1] << " "
-	//	<< std::fixed << std::setprecision(2) << right_cm[2] << ",";
+void DeepBreathFrameData::distances_log(bool is_2d, bool is_cm) {
 
-	//int num_of_markers = DeepBreathConfig::getInstance().num_of_stickers;
+	auto user_cfg = DeepBreathConfig::getInstance();
 
-	//if (num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << mid1_cm[0] << " "
-	//		<< std::fixed << std::setprecision(2) << mid1_cm[1] << " "
-	//		<< std::fixed << std::setprecision(2) << mid1_cm[2] << ",";
-	//}
-	//if (num_of_markers == 4 || num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << mid2_cm[0] << " "
-	//		<< std::fixed << std::setprecision(2) << mid2_cm[1] << " "
-	//		<< std::fixed << std::setprecision(2) << mid2_cm[2] << ",";
-	//}
-	////any case, log mid 3:
-	//log.log_file << std::fixed << std::setprecision(2) << mid3_cm[0] << " "
-	//	<< std::fixed << std::setprecision(2) << mid3_cm[1] << " "
-	//	<< std::fixed << std::setprecision(2) << mid3_cm[2] << ","
-	//	<< std::fixed << std::setprecision(2) << (*left)[0] << " "
-	//	<< std::fixed << std::setprecision(2) << (*left)[1] << ","
-	//	<< std::setprecision(2) << (*right)[0] << " " << std::setprecision(2) << (*right)[1] << ",";
+	std::list<float> dists_2d;
+	std::list<float> dists_3d;
+	for (auto dist_type : user_cfg.dists_included) {
+		if (dist_type.second) {
+			switch (dist_type.first) {
+			case left_mid1:
+				dists_2d.push_back(dLM1);
+				if (!is_2d) {
+					dists_3d.push_back(dLM1_depth);
+				}
+				break;
+			case left_mid2:
+				dists_2d.push_back(dLM2);
+				if (!is_2d) {
+					dists_3d.push_back(dLM2_depth);
+				}
+				break;
+			case left_mid3:
+				dists_2d.push_back(dLM3);
+				if (!is_2d) {
+					dists_3d.push_back(dLM3_depth);
+				}
+				break;
+			case left_right:
+				dists_2d.push_back(dLR);
+				if (!is_2d) {
+					dists_3d.push_back(dLR_depth);
+				}
+				break;
+			case right_mid1:
+				dists_2d.push_back(dRM1);
+				if (!is_2d) {
+					dists_3d.push_back(dRM1_depth);
+				}
+				break;
+			case right_mid2:
+				dists_2d.push_back(dRM2);
+				if (!is_2d) {
+					dists_3d.push_back(dRM2_depth);
+				}
+				break;
+			case right_mid3:
+				dists_2d.push_back(dRM3);
+				if (!is_2d) {
+					dists_3d.push_back(dRM3_depth);
+				}
+				break;
+			case mid1_mid2:
+				dists_2d.push_back(dM1M2);
+				if (!is_2d) {
+					dists_3d.push_back(dM1M2_depth);
+				}
+				break;
+			case mid1_mid3:
+				dists_2d.push_back(dM1M3);
+				if (!is_2d) {
+					dists_3d.push_back(dM1M3_depth);
+				}
+				break;
+			case mid2_mid3:
+				dists_2d.push_back(dM2M3);
+				if (!is_2d) {
+					dists_3d.push_back(dM2M3_depth);
+				}
+				break;
+			}
+		}
+	}
 
-	//if (num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << (*mid1)[0] << " "
-	//		<< std::fixed << std::setprecision(2) << (*mid1)[1] << ",";
-	//}
-	//if (num_of_markers == 4 || num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << (*mid2)[0] << " "
-	//		<< std::fixed << std::setprecision(2) << (*mid2)[1] << ",";
-	//}
-	//log.log_file << std::fixed << std::setprecision(2) << (*mid3)[0] << " "
-	//	<< std::fixed << std::setprecision(2) << (*mid3)[1] << ",";
+	for (auto dist : dists_2d) {
+		DBLOG << FIXED_PRECISION << dist;
+	}
+	if (!is_2d) {
+		for (auto dist : dists_3d) {
+			DBLOG << FIXED_PRECISION << dist;
+		}
+	}
+	DBLOG << FIXED_PRECISION << average_2d_dist;
+	if (!is_2d) {
+		DBLOG << FIXED_PRECISION << average_3d_dist;
+	}
+}
 
-	//if (num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dLM1 << ",";
-	//}
-	//if (num_of_markers == 4 || num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dLM2 << ",";
-	//}
-	//log.log_file << std::fixed << std::setprecision(2) << dLM3 << ","
-	//	<< std::fixed << std::setprecision(2) << dLR << ",";
+void DeepBreathFrameData::general_log() {
+	// log all general data:
+	// 1. "Frame idx"
+	// 2. "Color idx"
+	// 3. "Depth idx"
+	// 4. "Color timestamp"
+	// 5. "Depth timestamp"
+	// 6. "System color timestamp"
+	// 7. "System depth timestamp"
+	// 8. "System timestamp"
+	DBLOG << std::to_string(frame_idx);
+	DBLOG << std::to_string(color_idx);
+	DBLOG << std::to_string(depth_idx);
+	DBLOG << std::to_string(color_timestamp);
+	DBLOG << std::to_string(depth_timestamp);
+	DBLOG << std::to_string(system_color_timestamp);
+	DBLOG << std::to_string(system_depth_timestamp);
+	DBLOG << std::to_string(system_timestamp);
+}
 
-	//if (num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dRM1 << ",";
-	//}
-	//if (num_of_markers == 4 || num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dRM2 << ",";
-	//}
-	//log.log_file << std::fixed << std::setprecision(2) << dRM3 << ",";
+void DeepBreathFrameData::volume_log() {
+	auto user_cfg = DeepBreathConfig::getInstance();
+	auto mode = user_cfg.mode;
+	auto volume_type = user_cfg.volume_type;
 
-	//if (num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dM1M2 << ","
-	//		<< std::fixed << std::setprecision(2) << dM1M3 << ",";
-	//}
-	//if (num_of_markers == 4 || num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dM2M3 << ",";
-	//}
+	if (mode == VOLUME) {
+		switch (volume_type) {
+		case TETRAHEDRON:
+			DBLOG << FIXED_PRECISION << tetra_volume;
+			break;
+		case REIMANN:
+			DBLOG << FIXED_PRECISION << reimann_volume;
+			break;
+		}
+	}
+}
 
-	//if (num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dLM1_depth << ",";
-	//}
-	//if (num_of_markers == 4 || num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dLM2_depth << ",";
-	//}
-	//log.log_file << std::fixed << std::setprecision(2) << dLM3_depth << ",";
+void DeepBreathFrameData::log() {
 
+	auto user_cfg = DeepBreathConfig::getInstance();
+	auto num_stickers = user_cfg.num_of_stickers;
+	auto dimension = user_cfg.dimension;
+	auto is_cm = user_cfg.calc_2d_by_cm;
 
-	//log.log_file << std::fixed << std::setprecision(2) << dLR_depth << ",";
+	general_log();
+	locations_log(num_stickers, dimension == D2, is_cm);
+	distances_log(dimension == D2, is_cm);
 
-	//if (num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dRM1_depth << ",";
-	//}
-	//if (num_of_markers == 4 || num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dRM2_depth << ",";
-	//}
-	//log.log_file << std::setprecision(2) << dRM3_depth << ",";
-
-	//if (num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dM1M2_depth << ","
-	//		<< std::fixed << std::setprecision(2) << dM1M3_depth << ",";
-	//}
-	//if (num_of_markers == 4 || num_of_markers == 5) {
-	//	log.log_file << std::fixed << std::setprecision(2) << dM2M3_depth << ",";
-	//}
-	//log.log_file << std::fixed << std::setprecision(6) << average_2d_dist << ","
-	//	<< std::fixed << std::setprecision(6) << average_3d_dist << ",";
 }
 
 
