@@ -2,6 +2,7 @@
 
 #include <plog/Record.h>
 #include <plog/Util.h>
+#include <plog/Log.h>
 #include <iomanip>
 #include <sstream>
 #include <list>
@@ -24,47 +25,14 @@ public:
         return row_value + "," + row_adder(row_values...);
     }
 
-    static plog::util::nstring header()
-    {
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        return converter.from_bytes(headers);
-    }
+    static plog::util::nstring header();
 
-    static plog::util::nstring format(const plog::Record& record)
-    {
- /*       tm t;
-        useUtcTime ? util::gmtime_s(&t, &record.getTime().time) : util::localtime_s(&t, &record.getTime().time);*/
-
-        plog::util::nostringstream ss;
-        //ss << t.tm_year + 1900 << PLOG_NSTR("/") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_mon + 1 << PLOG_NSTR("/") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_mday << PLOG_NSTR(";");
-        //ss << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_hour << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_min << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_sec << PLOG_NSTR(".") << std::setfill(PLOG_NSTR('0')) << std::setw(3) << static_cast<int> (record.getTime().millitm) << PLOG_NSTR(";");
-        //ss << severityToString(record.getSeverity()) << PLOG_NSTR(";");
-        //ss << record.getTid() << PLOG_NSTR(";");
-        //ss << record.getObject() << PLOG_NSTR(";");
-        //ss << record.getFunc() << PLOG_NSTR("@") << record.getLine() << PLOG_NSTR(";");
-
-        plog::util::nstring message = record.getMessage();
-        ss << message;
-        ss << PLOG_NSTR("\n");
-
-        return ss.str();
-    }
-
-    static void set_headers(std::string headers) {
-        DeepBreathCSVFormatter::headers = headers;
-    }
+    static plog::util::nstring format(const plog::Record& record);
+    static void set_headers(std::string headers);
+    static void set_num_row_items(unsigned int num_row_items);
 
 private:
     static std::string headers;
-};
-
-
-class DeepBreathCSVRecord1 {
-public:
-    std::string row_value1;
-    std::string row_value2;
-    std::string row_value3;
-    std::string to_string() {
-        return DeepBreathCSVFormatter::row_adder(row_value1, row_value2, row_value3);
-    }
+    static unsigned int num_row_items;
+    static unsigned int cur_item_index;
 };

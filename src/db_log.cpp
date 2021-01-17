@@ -2,10 +2,11 @@
 #include "db_log.hpp"
 #include "db_config.hpp"
 #include <list>
+#include <plog/Init.h>
 
 plog::RollingFileAppender<DeepBreathCSVFormatter> DeepBreathLog::csv_logger("");
 
-static std::string build_distance_headers(bool is_2d) {
+static std::string build_distance_headers(bool is_2d, unsigned int * num_headers) {
 
 	auto user_cfg = DeepBreathConfig::getInstance();
 
@@ -107,21 +108,27 @@ static std::string build_distance_headers(bool is_2d) {
 
 	std::string dist_headers;
 	bool is_first = true;
+	*num_headers = 0;
 	for (auto header : dist_headers_2d_included) {
 		if (is_first) {
 			dist_headers = header;
 			is_first = false;
+			(*num_headers)++;
 		}
 		else {
 			dist_headers += "," + header;
+			(*num_headers)++;
 		}
 	}
 	for (auto header : dist_headers_3d_included) {
 			dist_headers += "," + header;
+			(*num_headers)++;
 	}
 
 	dist_headers += "," + average_2d_dist;
+	(*num_headers)++;
 	dist_headers += "," + average_3d_dist;
+	(*num_headers)++;
 
 	return dist_headers;
 }
@@ -139,6 +146,7 @@ void DeepBreathLog::set_csv_headers() {
 	std::string system_timestamp = "System timestamp";
 	std::string first_headers = DeepBreathCSVFormatter::row_adder(frame_idx, color_idx, depth_idx,
 		color_timestamp, depth_timestamp, system_color_timestamp, system_depth_timestamp, system_timestamp);
+	unsigned int num_first_headers = 8;
 
 	// According to configuration, set headers
 	auto user_cfg = DeepBreathConfig::getInstance();
@@ -162,7 +170,9 @@ void DeepBreathLog::set_csv_headers() {
 	std::string mid3_xyz = "mid3(x y) cm";
 
 	std::string location_headers;
-	std::string distance_headers = build_distance_headers(dimension == D2);;
+	unsigned int num_distance_headers;
+	unsigned int num_location_headers = num_stickers;
+	std::string distance_headers = build_distance_headers(dimension == D2, &num_distance_headers);
 
 	switch (num_stickers) {
 	case 3:
@@ -198,7 +208,7 @@ void DeepBreathLog::set_csv_headers() {
 	}
 
 	std::string all_headers = DeepBreathCSVFormatter::row_adder(first_headers, location_headers, distance_headers);
-	std::string breath_rate_headers = DeepBreathCSVFormatter::row_adder(std::string("FPS"), std::string("Real #samples"), std::string("Frequency"), std::string("BPM"));
+	unsigned int num_all_headers = num_first_headers + num_location_headers + num_distance_headers;
 
 	if (mode == VOLUME) {
 		std::string volume_headers;
@@ -212,6 +222,7 @@ void DeepBreathLog::set_csv_headers() {
 			break;
 		}
 		all_headers = DeepBreathCSVFormatter::row_adder(all_headers, volume_headers);
+		num_all_headers++;
 	}
 
 	switch (mode) {
@@ -219,11 +230,14 @@ void DeepBreathLog::set_csv_headers() {
 	case NOGRAPH:
 	case DISTANCES:
 	case VOLUME:
+		std::string breath_rate_headers = DeepBreathCSVFormatter::row_adder(std::string("FPS"), std::string("Real #samples"), std::string("Frequency"), std::string("BPM"));
 		all_headers = DeepBreathCSVFormatter::row_adder(all_headers, breath_rate_headers);
+		num_all_headers += 4;
 		break;
 	}
 
 	DeepBreathCSVFormatter::set_headers(all_headers);
+	DeepBreathCSVFormatter::set_num_row_items(num_all_headers);
 }
 
 void DeepBreathLog::init(bool file_mode) {
@@ -243,8 +257,9 @@ void DeepBreathLog::init(bool file_mode) {
 	csv_logger.setFileName(log_name.c_str());
 
 	DeepBreathLog::set_csv_headers();
-
 	csv_logger.rollLogFiles();
+
+	plog::init(plog::info, &csv_logger);
 }
 
 void DeepBreathLog::stop() {
