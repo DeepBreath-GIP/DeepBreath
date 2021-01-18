@@ -54,7 +54,6 @@ QDeepBreath::QDeepBreath(QWidget *parent)
     , is_pause(false)
 {
     ui->setupUi(this);
-
     ui->record_button->setVisible(false);
     ui->pause_button->setVisible(false);
 

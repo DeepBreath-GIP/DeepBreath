@@ -24,6 +24,10 @@
 #include "CustomOpenGLWidget.hpp"
 #include "qcustomplot.h"
 
+#include <QtDataVisualization/q3dscatter.h>
+using namespace QtDataVisualization;
+
+
 QT_BEGIN_NAMESPACE
 
 class Ui_DeepBreath
@@ -70,7 +74,11 @@ public:
     QCheckBox *right_mid3_checkbox;
     CustomOpenGLWidget *color_stream_widget;
     CustomOpenGLWidget *depth_stream_widget;
-    CustomOpenGLWidget *volume_stream_widget;
+    Q3DScatter* graph;
+    QWidget *volume_stream_widget;
+    QWidget* volume_widget_container;
+    QHBoxLayout* volume_hLayout;
+    QVBoxLayout* volume_vLayout;
 	QCustomPlot *graph_widget;
 	QLabel *bpm_text;
 	QLabel *bpm_value;
@@ -258,9 +266,16 @@ public:
         depth_stream_widget = new CustomOpenGLWidget(centralwidget);
         depth_stream_widget->setObjectName(QString::fromUtf8("depth_stream_widget"));
         depth_stream_widget->setGeometry(QRect(850, 20, 401, 301));
-        volume_stream_widget = new CustomOpenGLWidget(centralwidget);
+        volume_stream_widget = new QWidget(centralwidget);
         volume_stream_widget->setObjectName(QString::fromUtf8("volume_stream_widget"));
         volume_stream_widget->setGeometry(QRect(420, 350, 401, 301));
+        graph = new Q3DScatter();
+        volume_widget_container = QWidget::createWindowContainer(graph);
+        volume_hLayout = new QHBoxLayout(volume_stream_widget);
+        volume_vLayout = new QVBoxLayout();
+        volume_hLayout->addWidget(volume_widget_container, 1);
+        volume_hLayout->addLayout(volume_vLayout);
+
         graph_widget = new QCustomPlot(centralwidget);
         graph_widget->setObjectName(QString::fromUtf8("graph_widget"));
         graph_widget->setGeometry(QRect(850, 350, 401, 301));
