@@ -104,6 +104,15 @@ void QDeepBreath::updateBPM(long double bpm) {
 	ui->bpm_value->setText(bpm_q);
 }
 
+void QDeepBreath::updateFPS(long double fps) {
+
+	std::stringstream ss;
+	ss << std::fixed << std::setprecision(2) << fps;
+	std::string fps_str = std::string(ss.str());
+	const QString fps_q = QString::fromStdString(fps_str);
+	ui->fps_value->setText(fps_q);
+}
+
 void QDeepBreath::stop_file() {
 	ui->load_file_button->clicked();
 }
@@ -136,22 +145,38 @@ void QDeepBreath::initDefaultSelection() {
 	case DISTANCES:
 		mode_index = ui->mode_combo_box->findText("Distances");
 		setConfigDistances();
+		ui->volume_type_combo_box->setVisible(false);
 		break;
 	case LOCATION:
 		mode_index = ui->mode_combo_box->findText("Locations");
 		setConfigLocations();
+		ui->volume_type_combo_box->setVisible(false);
 		break;
 	case FOURIER:
 		mode_index = ui->mode_combo_box->findText("Fourier");
+		ui->volume_type_combo_box->setVisible(false);
 		break;
 	case VOLUME:
 		mode_index = ui->mode_combo_box->findText("Volume");
+		ui->volume_type_combo_box->setVisible(true);
 		break;
 	case NOGRAPH:
 		mode_index = ui->mode_combo_box->findText("No Graph");
+		ui->volume_type_combo_box->setVisible(false);
 		break;
 	}
 	ui->mode_combo_box->setCurrentIndex(mode_index);
+
+	int volume_type_index = -1; //initialize to invalid index by default
+	switch (user_cfg.volume_type) {
+	case TETRAHEDRON:
+		volume_type_index = ui->volume_type_combo_box->findText("Tetrahedron");
+		break;
+	case REIMANN:
+		volume_type_index = ui->volume_type_combo_box->findText("Reimann Sums");
+		break;
+	}
+	ui->volume_type_combo_box->setCurrentIndex(volume_type_index);
 
 	//set number of markers:
 	int num_markers_index = -1; //initialize to invalid index by default
@@ -981,6 +1006,7 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
             enableLocations(false);
 			ui->dimension_2d_radio_button->setEnabled(true);
 			ui->dimension_3d_radio_button->setEnabled(true);
+			ui->volume_type_combo_box->setVisible(false);
 			setConfigDimension();
 			user_cfg.mode = DISTANCES;
             break;
@@ -991,6 +1017,7 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
 			ui->dimension_3d_radio_button->click();
 			ui->dimension_2d_radio_button->setEnabled(false); //locations are only relevant in 3d
 			ui->dimension_3d_radio_button->setEnabled(false);
+			ui->volume_type_combo_box->setVisible(false);
 			user_cfg.mode = LOCATION;
             break;
         case 2: //Fourier
@@ -999,11 +1026,13 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
             enableLocations(false);
 			ui->dimension_2d_radio_button->setEnabled(true);
 			ui->dimension_3d_radio_button->setEnabled(true);
+			ui->volume_type_combo_box->setVisible(false);
 			user_cfg.mode = FOURIER;
             break;
         case 3: //Volume
             enableDistances(false);
             enableLocations(false);
+			ui->volume_type_combo_box->setVisible(true);
 			ui->left_loc_checkbox->setEnabled(true);
 			ui->right_loc_checkbox->setEnabled(true);
 			ui->mid3_loc_checkbox->setEnabled(true);
@@ -1117,12 +1146,49 @@ void QDeepBreath::on_num_markers_combo_box_currentIndexChanged(int index)
 	switch (index) {
 	case 0: //3
 		user_cfg.num_of_stickers = 3;
+		if (user_cfg.mode == LOCATION) {
+			//uncheck irrelevant locations and clear selection from config:
+			if (ui->mid1_loc_checkbox->isChecked()) {
+				ui->mid1_loc_checkbox->click();
+			}
+			if (ui->mid2_loc_checkbox->isChecked()) {
+				ui->mid2_loc_checkbox->click();
+			}
+			ui->mid1_loc_checkbox->setEnabled(false);
+			ui->mid2_loc_checkbox->setEnabled(false);
+		}
 		break;
 	case 1: //4
 		user_cfg.num_of_stickers = 4;
+		if (user_cfg.mode == LOCATION) {
+			if (ui->mid1_loc_checkbox->isChecked()) {
+				ui->mid1_loc_checkbox->click();
+			}
+			ui->mid1_loc_checkbox->setEnabled(false);
+			ui->mid2_loc_checkbox->setEnabled(true);
+		}
 		break;
 	case 2: //5
 		user_cfg.num_of_stickers = 5;
+		if (user_cfg.mode == LOCATION) {
+			ui->mid1_loc_checkbox->setEnabled(true);
+			ui->mid2_loc_checkbox->setEnabled(true);
+		}
+		break;
+	}
+}
+
+void QDeepBreath::on_volume_type_combo_box_currentIndexChanged(int index)
+{
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	switch (index) {
+	case 0: //Tetrahedron
+		user_cfg.volume_type = TETRAHEDRON;
+		break;
+	case 1: //Reimann
+		user_cfg.volume_type = REIMANN;
 		break;
 	}
 }

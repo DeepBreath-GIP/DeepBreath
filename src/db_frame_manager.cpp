@@ -180,6 +180,10 @@ long double DeepBreathFrameManager::calculate_breath_rate() {
 	return bpm;
 }
 
+float DeepBreathFrameManager::get_fps() {
+	return this->fps;
+}
+
 void DeepBreathFrameManager::identify_markers(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data)
 {
 

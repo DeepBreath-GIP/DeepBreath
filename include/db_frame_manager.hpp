@@ -42,6 +42,11 @@ public:
 	 */
 	long double calculate_breath_rate();
 
+	/**
+	 * Get FPS:
+	 */
+	float get_fps();
+
 	/* Turn interval activity on/off: */
 	void activateInterval();
 	void deactivateInterval();
