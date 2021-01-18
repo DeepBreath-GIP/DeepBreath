@@ -147,10 +147,6 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 	}
 	if (!is_dup) {
 		add_frame_data(breathing_data);
-
-		//update graph:
-		add_data_to_graph(breathing_data);
-
 	}
 	else {
 		//log.log_file << ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
@@ -182,6 +178,12 @@ long double DeepBreathFrameManager::calculate_breath_rate() {
 
 float DeepBreathFrameManager::get_fps() {
 	return this->fps;
+}
+
+void DeepBreathFrameManager::add_last_data_to_graph() {
+	// Get last frame index
+	unsigned int last_frame_index = (_oldest_frame_index + _n_frames - 1) % _n_frames;
+	add_data_to_graph(_frame_data_arr[last_frame_index]);
 }
 
 void DeepBreathFrameManager::identify_markers(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame, DeepBreathFrameData* breathing_data)
@@ -351,11 +353,12 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 	DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
 
 	cv::Point2d p(0, 0);
-	std::vector<cv::Point2d> points;
-	std::vector<cv::Point2d> frequency_points;
 	long double f;
 
 	switch (user_cfg.mode) {
+	case NOGRAPH:
+		//Do nothing, nothing to plot.
+		return;
 	case DISTANCES:
 		if (user_cfg.dimension == D2) {
 			p.x = frame_data->system_color_timestamp;
@@ -368,8 +371,10 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 		graph_plot.addData(p);
 		break;
 	case FOURIER:
-		//DO NOTHING! cannot calculate fft based on single point.
-		//Implementation of graph data setting is in: _calc_bpm_and_log_dists for this case. 
+		graph_plot.clear();
+		for (auto fp : frequency_points) {
+			graph_plot.addData(fp);
+		}
 		break;
 	case LOCATION:
 		for (int stInt = stickers::left; stInt != stickers::sdummy; stInt++) {
@@ -390,9 +395,6 @@ void DeepBreathFrameManager::add_data_to_graph(DeepBreathFrameData * frame_data)
 			p.y = frame_data->reimann_volume;
 		}
 		graph_plot.addData(p); //graph plot is responsible for the calculation of the difference (see addData)
-		break;
-	case NOGRAPH:
-		//Do nothing, nothing to plot.
 		break;
 	}
 
@@ -522,22 +524,8 @@ void DeepBreathFrameManager::deactivateInterval() {
 
 long double DeepBreathFrameManager::_calc_bpm(std::vector<cv::Point2d>& points) {
 	normalize_distances(&points);
-	std::vector<cv::Point2d> frequency_points;
+	frequency_points.clear();
 	calc_frequency_fft(&points, &frequency_points);
-
-	if (DeepBreathConfig::getInstance().mode == FOURIER) {
-
-		DeepBreathGraphPlot& graph_plot = DeepBreathGraphPlot::getInstance();
-		assert(graph_plot);
-
-		graph_plot.reset();
-
-		for (auto fp : frequency_points) {
-			graph_plot.addData(fp);
-		}
-
-		graph_plot.update();
-	}
 
 	if (points.size() < NUM_OF_LAST_FRAMES * 0.5) {
 		frequency = 0;

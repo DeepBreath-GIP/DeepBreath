@@ -47,6 +47,8 @@ public:
 	 */
 	float get_fps();
 
+	void add_last_data_to_graph();
+
 	/* Turn interval activity on/off: */
 	void activateInterval();
 	void deactivateInterval();
@@ -130,6 +132,7 @@ private:
 	int frames_dumped_in_row = 0; //reinitialized after cleanup
 
 	// breathing data
+	std::vector<cv::Point2d> frequency_points;
 	float fps;
 	float real_num_samples;
 	float frequency;

@@ -187,3 +187,9 @@ void DeepBreathGraphPlot::addData(cv::Point2d& p, int s) {
 void DeepBreathGraphPlot::update() {
 	_graph_widget->replot(QCustomPlot::rpQueuedReplot);
 }
+
+void DeepBreathGraphPlot::clear() {
+	for (int i = 0; i < _graph_widget->graphCount(); i++) {
+		_graph_widget->graph(i)->data()->clear();
+	}
+}

@@ -18,6 +18,8 @@ public:
 
 	void update();
 
+	void clear();
+
 protected:
 
 	//ctor:
