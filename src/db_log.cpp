@@ -1,8 +1,11 @@
+#include <filesystem> 
 #include <string>
 #include "db_log.hpp"
 #include "db_config.hpp"
 #include <list>
 #include <plog/Init.h>
+
+namespace fs = std::filesystem;
 
 plog::RollingFileAppender<DeepBreathCSVFormatter> DeepBreathLog::csv_logger("");
 bool DeepBreathLog::first_init = true;
@@ -237,12 +240,19 @@ void DeepBreathLog::set_csv_headers() {
 
 void DeepBreathLog::init(bool file_mode) {
 
+	if (!fs::is_directory("logs") || !fs::exists("logs")) { // Check if log folder exists
+		fs::create_directory("logs"); // create log folder
+	}
+
+	auto user_cfg = DeepBreathConfig::getInstance();
+	auto mode = user_cfg.mode;
+
 	std::string name_prefix;
 	if (file_mode) {
-		name_prefix = "file_log";
+		name_prefix = "logs\\" + DeepBreathConfig::graph_mode_to_string(mode) + "_file_log";
 	}
 	else {
-		name_prefix = "live_camera_log";
+		name_prefix = "logs\\" + DeepBreathConfig::graph_mode_to_string(mode) + "_live_camera_log";
 	}
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);

@@ -98,6 +98,7 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>shell32.lib;dependencies\realsense2-gl.lib;dependencies\uvc_fw.lib;dependencies\realsense2.lib;dependencies\uvc_fw.res;dependencies\glfw3.lib;dependencies\plog.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(OPEN_CV)\build\install\x64\vc16\lib\opencv_world451.lib;%(AdditionalDependencies)</AdditionalDependencies>

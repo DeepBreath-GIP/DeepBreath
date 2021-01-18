@@ -82,6 +82,16 @@ public:
 	bool is_stickers;
 	volume_type volume_type;
 
+	static inline std::string graph_mode_to_string(graph_mode mode) {
+		switch (mode) {
+		case DISTANCES: return "distances";
+		case LOCATION: return "location";
+		case FOURIER: return "fourier";
+		case VOLUME: return "volume";
+		case NOGRAPH: return "no_graph";
+		}
+		
+	}
 
 	// set configuration to default. used in case of en illegal config file.
 	void set_default();
