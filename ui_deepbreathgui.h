@@ -25,6 +25,8 @@
 #include "qcustomplot.h"
 
 #include <QtDataVisualization/q3dscatter.h>
+#include "scatterdatamodifier.hpp"
+
 using namespace QtDataVisualization;
 
 
@@ -275,6 +277,7 @@ public:
         volume_vLayout = new QVBoxLayout();
         volume_hLayout->addWidget(volume_widget_container, 1);
         volume_hLayout->addLayout(volume_vLayout);
+        ScatterDataModifier* modifier = new ScatterDataModifier(graph);
 
         graph_widget = new QCustomPlot(centralwidget);
         graph_widget->setObjectName(QString::fromUtf8("graph_widget"));

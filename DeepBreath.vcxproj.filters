@@ -148,6 +148,9 @@
     <ClCompile Include="db_csvformatter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scatterdatamodifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="deepbreathgui.h">
@@ -155,6 +158,9 @@
     </QtMoc>
     <QtMoc Include="qcustomplot.h">
       <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="include\scatterdatamodifier.hpp">
+      <Filter>Header Files\include</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

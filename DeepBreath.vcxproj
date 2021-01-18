@@ -208,6 +208,7 @@
     <ClCompile Include="deepbreathgui.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="qcustomplot.cpp" />
+    <ClCompile Include="src\scatterdatamodifier.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="deepbreathgui.h">
@@ -277,6 +278,7 @@
     <ClInclude Include="include\db_graph_plot.hpp" />
     <ClInclude Include="include\db_log.hpp" />
     <ClInclude Include="include\db_sync.hpp" />
+    <QtMoc Include="include\scatterdatamodifier.hpp" />
     <ClInclude Include="include\utilities.h" />
     <ClInclude Include="CustomOpenGLWidget.hpp" />
     <QtMoc Include="qcustomplot.h" />
