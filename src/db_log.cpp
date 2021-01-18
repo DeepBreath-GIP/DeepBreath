@@ -249,10 +249,10 @@ void DeepBreathLog::init(bool file_mode) {
 
 	std::string name_prefix;
 	if (file_mode) {
-		name_prefix = "logs\\" + DeepBreathConfig::graph_mode_to_string(mode) + "_file_log";
+		name_prefix = "logs\\file_log_" + DeepBreathConfig::graph_mode_to_string(mode);
 	}
 	else {
-		name_prefix = "logs\\" + DeepBreathConfig::graph_mode_to_string(mode) + "_live_camera_log";
+		name_prefix = "logs\\live_camera_log_" + DeepBreathConfig::graph_mode_to_string(mode);
 	}
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
