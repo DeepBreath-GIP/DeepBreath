@@ -61,10 +61,11 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 				long double fps = frame_manager.get_fps();
 				db_ref->updateFPS(fps);
 
-				frame_manager.add_last_data_to_graph();
-
-				frame_manager.log_last_frame_data();
-				frame_manager.log_breathing_data();
+				if (!frame_manager.get_is_last_frame_dumped()) {
+					frame_manager.add_last_data_to_graph();
+					frame_manager.log_last_frame_data();
+					frame_manager.log_breathing_data();
+				}
 			}
 		}
 		catch (rs2::error e) {

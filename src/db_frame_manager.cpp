@@ -27,7 +27,7 @@ DeepBreathFrameManager & DeepBreathFrameManager::getInstance()
 }
 
 DeepBreathFrameManager::DeepBreathFrameManager(unsigned int n_frames, const char * frame_disk_path) :
-	_n_frames(n_frames), _frame_disk_path(frame_disk_path), _oldest_frame_index(0), interval_active(false)
+	_n_frames(n_frames), _frame_disk_path(frame_disk_path), _oldest_frame_index(0), interval_active(false), is_last_frame_dumped(false)
 {
 	manager_start_time = clock();
 	_frame_data_arr = new DeepBreathFrameData*[_n_frames];
@@ -73,12 +73,14 @@ int DeepBreathFrameManager::get_frames_array_size() {
 
 void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, const rs2::depth_frame& depth_frame)
 {
-	//DeepBreathLog& log = DeepBreathLog::getInstance();
-	//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
 	DeepBreathFrameData * breathing_data = new DeepBreathFrameData();
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
-
+	
+	is_last_frame_dumped = false;
 	identify_markers(color_frame, depth_frame, breathing_data);
+	if (is_last_frame_dumped) {
+		return;
+	}
 
 	//if user config dimension is 3D, check for 0,-0,0 3d coordinates. dump such frames
 	if (user_cfg.dimension == dimension::D3) {
@@ -101,10 +103,9 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 		}
 
 		if (check_illegal_3D_coordinates(breathing_data)) {
+			is_last_frame_dumped = true;
 			frames_dumped_in_row++;
-			//log.log_file << "Warning: illegal 3D coordinates! frame was dumped.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"; //NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS!
-			if (frames_dumped_in_row >= 3) {								//This is required for transition to next columns in the log file! 
-				//log.log_file << '\n';
+			if (frames_dumped_in_row >= 3) {
 				cleanup();
 			}
 			return;
@@ -178,6 +179,11 @@ long double DeepBreathFrameManager::calculate_breath_rate() {
 
 float DeepBreathFrameManager::get_fps() {
 	return this->fps;
+}
+
+bool DeepBreathFrameManager::get_is_last_frame_dumped()
+{
+	return is_last_frame_dumped;
 }
 
 void DeepBreathFrameManager::add_last_data_to_graph() {
@@ -272,6 +278,7 @@ void DeepBreathFrameManager::identify_markers(const rs2::video_frame& color_fram
 
 		//distinguish between stickers:
 		if (breathing_data->circles.size() < DeepBreathConfig::getInstance().num_of_stickers) {//not all circles were found
+			is_last_frame_dumped = true;
 			cleanup();
 			interval_active = false; //missed frame so calculation has to start all over.
 			return;
@@ -326,10 +333,6 @@ void DeepBreathFrameManager::cleanup()
 		}
 	}
 
-	//DeepBreathLog& log = DeepBreathLog::getInstance();
-	//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-	//log.log_file << "frames array cleanup...\n,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
-	//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 	frames_dumped_in_row = 0;
 }
 

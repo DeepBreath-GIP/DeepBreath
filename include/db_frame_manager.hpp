@@ -47,6 +47,8 @@ public:
 	 */
 	float get_fps();
 
+	bool get_is_last_frame_dumped();
+
 	void add_last_data_to_graph();
 
 	/* Turn interval activity on/off: */
@@ -55,6 +57,7 @@ public:
 
 	void log_last_frame_data();
 	void log_breathing_data();
+
 protected:
 
 	//ctor
@@ -130,7 +133,7 @@ private:
 	const char* _frame_disk_path;
 	bool interval_active;
 	int frames_dumped_in_row = 0; //reinitialized after cleanup
-
+	bool is_last_frame_dumped;
 	// breathing data
 	std::vector<cv::Point2d> frequency_points;
 	float fps;
