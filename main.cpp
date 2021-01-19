@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <iostream>
 #include <thread>
+#include <vector>
 
 #include "deepbreathgui.h"
 #include "db_camera.hpp"
@@ -38,7 +39,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 
 				//collect all frames:
 				//using a map as in rs-multicam to allow future changes in number of cameras displayed.
-				std::map<int, rs2::frame> render_frames;
+				std::vector<rs2::frame> render_frames(2);
 
 				//process frame with the frame manager:
 				DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
@@ -47,8 +48,8 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 				// convert the newly-arrived frames to render-firendly format
 				//for (const auto& frame : fs) //iterate over all available frames. (commented out to ignore IR emitter frames.)
 				//{
-				render_frames[color.get_profile().unique_id()] = camera.colorizer.process(color);
-				render_frames[depth.get_profile().unique_id()] = camera.colorizer.process(depth);
+				render_frames[0] = camera.colorizer.process(color);
+				render_frames[1] = camera.colorizer.process(depth);
 				//}
 
 				//render frames to the gl objects:
@@ -69,6 +70,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 					frame_manager.log_last_frame_data();
 					frame_manager.log_breathing_data();
 				}
+
 			}
 		}
 		catch (rs2::error e) {

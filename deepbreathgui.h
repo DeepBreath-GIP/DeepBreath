@@ -29,7 +29,7 @@ public:
 		@height - height of the rendered frame.
 		It is recommended to use width & height of the color frame (bigger) to upscale other frames.
 	*/
-	void renderStreamWidgets(std::map<int, rs2::frame>& render_frames, const int width, const int height);
+	void renderStreamWidgets(std::vector<rs2::frame>& render_frames, const int width, const int height);
 
     void renderScatterWidget();
 

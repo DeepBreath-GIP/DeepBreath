@@ -69,12 +69,11 @@ void QDeepBreath::paintEvent(QPaintEvent* event) {
     drawDistancesLines();
 }
 
-void QDeepBreath::renderStreamWidgets(std::map<int, rs2::frame>& render_frames, int width, int height) {
+void QDeepBreath::renderStreamWidgets(std::vector<rs2::frame>& render_frames, int width, int height) {
 
-	CustomOpenGLWidget** streams_widgets = new CustomOpenGLWidget*[3];
+	CustomOpenGLWidget** streams_widgets = new CustomOpenGLWidget*[2];
 	streams_widgets[0] = (CustomOpenGLWidget*)(ui->color_stream_widget);
 	streams_widgets[1] = (CustomOpenGLWidget*)(ui->depth_stream_widget);
-	streams_widgets[2] = (CustomOpenGLWidget*)(ui->volume_stream_widget);
 
 	int i = 0;
 
@@ -82,13 +81,10 @@ void QDeepBreath::renderStreamWidgets(std::map<int, rs2::frame>& render_frames, 
 	{
 		if (i >= 2)	//render only color and depth from map
 			break;
-		const void * frame_data = frame.second.get_data();
-
+		const void * frame_data = frame.get_data();
+		QImage frame_data_img(width, height, QImage::Format_RGB888);
 		// Copy frame_data to avoid race condition on freeing the frame while rendering the widget.
-		uchar * copy_frame_data = new uchar[width * height * 3];
-		memcpy(copy_frame_data, frame_data, sizeof(uchar) * width * height * 3);
-
-		QImage frame_data_img(copy_frame_data, width, height, QImage::Format_RGB888);
+		memcpy(frame_data_img.bits(), frame_data, sizeof(uchar) * width * height * 3);
 		streams_widgets[i]->display(frame_data_img);
 		i++;
 	}
@@ -99,8 +95,10 @@ void QDeepBreath::renderScatterWidget()
 	DeepBreathConfig& config = DeepBreathConfig::getInstance();
 	if (config.mode == VOLUME) {
 		DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
-		DeepBreathFrameData& frame_data = frame_manager.get_last_frame();
-		ui->volume_scatter_modifier->addData(frame_data.scatter, frame_data.scatter_width, frame_data.scatter_height);
+		if (!frame_manager.get_is_last_frame_dumped()) {
+			DeepBreathFrameData& frame_data = frame_manager.get_last_frame();
+			ui->volume_scatter_modifier->addData(frame_data.scatter, frame_data.scatter_width, frame_data.scatter_height);
+		}
 	}
 }
 
@@ -975,26 +973,20 @@ void QDeepBreath::on_pause_button_clicked()
 	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
 
     if(!is_pause) {
+		//stop frame polling and wait for notify from polling thread:
 		DeepBreathSync::is_poll_frame = false;
+		while (!DeepBreathSync::is_end_poll_frame) {
+			std::unique_lock<std::mutex> lk(DeepBreathSync::m_end_poll_frame);
+			DeepBreathSync::cv_end_poll_frame.wait_for(lk, 100ms);
+			lk.unlock();
+		}
+		DeepBreathSync::is_end_poll_frame = false; // Reset boolean for the next time
 
         ui->pause_button->setText("Continue");
 
 		rs2::device device = camera.pipe.get_active_profile().get_device();
 		rs2::playback playback = device.as<rs2::playback>();
 		playback.pause();
-
-		//freez the last frame while pausing:
-		if (camera.fs.size() > 0) {
-
-			auto d = camera.fs.get_depth_frame();
-			auto c = camera.fs.get_color_frame();
-
-			std::map<int, rs2::frame> freeze_frames;
-			freeze_frames[0] = camera.colorizer.process(c);
-			freeze_frames[1] = camera.colorizer.process(d);
-
-		}
-
         is_pause = true;
     }
     else { //currently paused, text is "Continue"
