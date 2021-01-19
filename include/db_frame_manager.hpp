@@ -51,6 +51,8 @@ public:
 
 	void add_last_data_to_graph();
 
+	DeepBreathFrameData& get_last_frame();
+
 	/* Turn interval activity on/off: */
 	void activateInterval();
 	void deactivateInterval();

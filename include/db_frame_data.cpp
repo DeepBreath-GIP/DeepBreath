@@ -248,10 +248,16 @@ void DeepBreathFrameData::CalculateVolumes(const rs2::depth_frame& depth_frame)
 	if (user_cfg.volume_type == TETRAHEDRON) {
 		//tetrahedron volume:
 		Tetrahedron tet(left_cm, right_cm, mid3_cm);
+		scatter = tet.get_scatter();
+		scatter_height = tet.get_scatter_height();
+		scatter_width = tet.get_scatter_width();
 		tetra_volume = tet.volume();
 	}
 	else { //REIMANN
 		Surface chest(depth_frame, *left, *right, *mid3);
+		scatter = chest.get_scatter();
+		scatter_height = chest.get_scatter_height();
+		scatter_width = chest.get_scatter_width();
 		reimann_volume = chest.volume();
 	}
 }
@@ -541,6 +547,21 @@ float DeepBreathFrameData::Surface::volume() {
 	}
 
 	return total;
+}
+
+cv::Vec3f** DeepBreathFrameData::Surface::get_scatter()
+{
+	return mat;
+}
+
+int DeepBreathFrameData::Surface::get_scatter_height()
+{
+	return h;
+}
+
+int DeepBreathFrameData::Surface::get_scatter_width()
+{
+	return w;
 }
 
 float DeepBreathFrameData::Surface::area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d) {

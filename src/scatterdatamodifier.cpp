@@ -15,16 +15,13 @@ using namespace QtDataVisualization;
 
 const int numberOfItems = 3600;
 const float curveDivider = 3.0f;
-const int lowerNumberOfItems = 900;
 const float lowerCurveDivider = 0.75f;
 
 ScatterDataModifier::ScatterDataModifier(Q3DScatter* scatter)
     : m_graph(scatter),
     m_fontSize(40.0f),
     m_style(QAbstract3DSeries::MeshSphere),
-    m_smooth(true),
-    m_itemCount(lowerNumberOfItems),
-    m_curveDivider(lowerCurveDivider)
+    m_smooth(true)
 {
     m_graph->activeTheme()->setType(Q3DTheme::ThemeEbony);
     QFont font = m_graph->activeTheme()->font();
@@ -39,7 +36,6 @@ ScatterDataModifier::ScatterDataModifier(Q3DScatter* scatter)
     series->setMeshSmooth(m_smooth);
     m_graph->addSeries(series);
 
-    addData();
 }
 
 ScatterDataModifier::~ScatterDataModifier()
@@ -47,7 +43,7 @@ ScatterDataModifier::~ScatterDataModifier()
     delete m_graph;
 }
 
-void ScatterDataModifier::addData()
+void ScatterDataModifier::addData(cv::Vec3f** points, int w, int h)
 {
     // Configure the axes according to the data
     m_graph->axisX()->setTitle("X");
@@ -55,25 +51,16 @@ void ScatterDataModifier::addData()
     m_graph->axisZ()->setTitle("Z");
 
     QScatterDataArray* dataArray = new QScatterDataArray;
-    dataArray->resize(m_itemCount);
+    dataArray->resize(w * h);
     QScatterDataItem* ptrToDataArray = &dataArray->first();
 
-#ifdef RANDOM_SCATTER
-    for (int i = 0; i < m_itemCount; i++) {
-        ptrToDataArray->setPosition(randVector());
-        ptrToDataArray++;
-    }
-#else
-    float limit = qSqrt(m_itemCount) / 2.0f;
-    for (float i = -limit; i < limit; i++) {
-        for (float j = -limit; j < limit; j++) {
-            ptrToDataArray->setPosition(QVector3D(i + 0.5f,
-                qCos(qDegreesToRadians((i * j) / m_curveDivider)),
-                j + 0.5f));
+
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            ptrToDataArray->setPosition(QVector3D(points[i][j][0], points[i][j][1], points[i][j][2]));
             ptrToDataArray++;
         }
     }
-#endif
 
     m_graph->seriesList().at(0)->dataProxy()->resetArray(dataArray);
 }
@@ -148,27 +135,8 @@ void ScatterDataModifier::setGridEnabled(int enabled)
     m_graph->activeTheme()->setGridEnabled((bool)enabled);
 }
 
-void ScatterDataModifier::toggleItemCount()
+void ScatterDataModifier::clear()
 {
-    if (m_itemCount == numberOfItems) {
-        m_itemCount = lowerNumberOfItems;
-        m_curveDivider = lowerCurveDivider;
-    }
-    else {
-        m_itemCount = numberOfItems;
-        m_curveDivider = curveDivider;
-    }
     m_graph->seriesList().at(0)->dataProxy()->resetArray(0);
-    addData();
 }
 
-QVector3D ScatterDataModifier::randVector()
-{
-    return QVector3D(
-        (float)(QRandomGenerator::global()->bounded(100)) / 2.0f -
-        (float)(QRandomGenerator::global()->bounded(100)) / 2.0f,
-        (float)(QRandomGenerator::global()->bounded(100)) / 100.0f -
-        (float)(QRandomGenerator::global()->bounded(100)) / 100.0f,
-        (float)(QRandomGenerator::global()->bounded(100)) / 2.0f -
-        (float)(QRandomGenerator::global()->bounded(100)) / 2.0f);
-}

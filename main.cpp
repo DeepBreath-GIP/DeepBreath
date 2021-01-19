@@ -54,6 +54,9 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 				//render frames to the gl objects:
 				db_ref->renderStreamWidgets(render_frames, color.get_width(), color.get_height());
 
+				//render scatter points
+				db_ref->renderScatterWidget();
+
 				//get last frames data and calculate breath rate:
 				long double bpm = frame_manager.calculate_breath_rate();
 				db_ref->updateBPM(bpm);

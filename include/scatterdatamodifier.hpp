@@ -3,6 +3,7 @@
 #include <QtDataVisualization/q3dscatter.h>
 #include <QtDataVisualization/qabstract3dseries.h>
 #include <QtGui/QFont>
+#include <opencv2/opencv.hpp>
 
 using namespace QtDataVisualization;
 
@@ -13,7 +14,7 @@ public:
     explicit ScatterDataModifier(Q3DScatter* scatter);
     ~ScatterDataModifier();
 
-    void addData();
+    void addData(cv::Vec3f** points, int w, int h);
     void changeStyle();
     void changePresetCamera();
     void changeLabelStyle();
@@ -22,7 +23,7 @@ public:
     void setBackgroundEnabled(int enabled);
     void setGridEnabled(int enabled);
     void setSmoothDots(int smooth);
-    void toggleItemCount();
+    void clear();
     void start();
 
 public Q_SLOTS:
@@ -38,11 +39,8 @@ Q_SIGNALS:
     void fontChanged(QFont font);
 
 private:
-    QVector3D randVector();
     Q3DScatter* m_graph;
     int m_fontSize;
     QAbstract3DSeries::Mesh m_style;
     bool m_smooth;
-    int m_itemCount;
-    float m_curveDivider;
 };

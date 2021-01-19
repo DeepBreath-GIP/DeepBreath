@@ -94,6 +94,16 @@ void QDeepBreath::renderStreamWidgets(std::map<int, rs2::frame>& render_frames, 
 	}
 }
 
+void QDeepBreath::renderScatterWidget()
+{
+	DeepBreathConfig& config = DeepBreathConfig::getInstance();
+	if (config.mode == VOLUME) {
+		DeepBreathFrameManager& frame_manager = DeepBreathFrameManager::getInstance();
+		DeepBreathFrameData& frame_data = frame_manager.get_last_frame();
+		ui->volume_scatter_modifier->addData(frame_data.scatter, frame_data.scatter_width, frame_data.scatter_height);
+	}
+}
+
 void QDeepBreath::updateBPM(long double bpm) {
 
 	std::stringstream ss;
@@ -611,6 +621,11 @@ void QDeepBreath::clearStreamingWidgets() {
 	ui->color_stream_widget->clear();
 }
 
+void QDeepBreath::clearScatterWidget()
+{
+	ui->volume_scatter_modifier->clear();
+}
+
 /* ==================== *
     CLICK HANDLERS:
  * ==================== */
@@ -798,6 +813,8 @@ void QDeepBreath::on_start_camera_button_clicked()
 		DeepBreathGraphPlot::getInstance().reset();
 		//clear stream widgets
 		clearStreamingWidgets();
+		//clear scatter widget
+		clearScatterWidget();
 		//Stop logging
 		DeepBreathLog::stop();
 
@@ -926,6 +943,8 @@ void QDeepBreath::on_load_file_button_clicked()
 
 		//clear stream widgets
 		clearStreamingWidgets();
+		//clear scatter widget
+		clearScatterWidget();
 
 		//turn streaming off and change title
 		ui->load_file_button->setText("Load File...");

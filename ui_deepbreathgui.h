@@ -76,7 +76,8 @@ public:
     QCheckBox *right_mid3_checkbox;
     CustomOpenGLWidget *color_stream_widget;
     CustomOpenGLWidget *depth_stream_widget;
-    Q3DScatter* graph;
+    Q3DScatter* volume_scatter;
+    ScatterDataModifier* volume_scatter_modifier;
     QWidget *volume_stream_widget;
     QWidget* volume_widget_container;
     QHBoxLayout* volume_hLayout;
@@ -271,13 +272,13 @@ public:
         volume_stream_widget = new QWidget(centralwidget);
         volume_stream_widget->setObjectName(QString::fromUtf8("volume_stream_widget"));
         volume_stream_widget->setGeometry(QRect(420, 350, 401, 301));
-        graph = new Q3DScatter();
-        volume_widget_container = QWidget::createWindowContainer(graph);
+        volume_scatter = new Q3DScatter();
+        volume_widget_container = QWidget::createWindowContainer(volume_scatter);
         volume_hLayout = new QHBoxLayout(volume_stream_widget);
         volume_vLayout = new QVBoxLayout();
         volume_hLayout->addWidget(volume_widget_container, 1);
         volume_hLayout->addLayout(volume_vLayout);
-        ScatterDataModifier* modifier = new ScatterDataModifier(graph);
+        volume_scatter_modifier = new ScatterDataModifier(volume_scatter);
 
         graph_widget = new QCustomPlot(centralwidget);
         graph_widget->setObjectName(QString::fromUtf8("graph_widget"));

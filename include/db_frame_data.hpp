@@ -46,6 +46,9 @@ public:
 	float average_3d_dist;
 
 	//Volume related:
+	cv::Vec3f** scatter;
+	int scatter_width;
+	int scatter_height;
 	float tetra_volume;
 	float reimann_volume;
 
@@ -130,6 +133,24 @@ private:
 
 			return base_space * height / 3;
 		}
+
+		cv::Vec3f** get_scatter() {
+			cv::Vec3f** scatter = new cv::Vec3f*[1];
+			scatter[0] = new cv::Vec3f[4];
+			scatter[0][0] = left;
+			scatter[0][1] = right;
+			scatter[0][2] = bottom;
+			scatter[0][3] = head;
+			return scatter;
+		}
+
+		int get_scatter_height() {
+			return 1;
+		}
+
+		int get_scatter_width() {
+			return 4;
+		}
 	};
 
 	/* Bounding Box for Volume (Reimann Sums in particular) calculations: */
@@ -163,6 +184,10 @@ private:
 	public:
 		Surface(const rs2::depth_frame& depth_frame, cv::Vec3f& left, cv::Vec3f& right, cv::Vec3f& mid3);
 		float volume();
+
+		cv::Vec3f** get_scatter();
+		int get_scatter_height();
+		int get_scatter_width();
 
 	private:
 		static float area(cv::Vec3f& a, cv::Vec3f& b, cv::Vec3f& c, cv::Vec3f& d);

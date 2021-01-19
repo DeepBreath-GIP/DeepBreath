@@ -336,6 +336,13 @@ void DeepBreathFrameManager::cleanup()
 	frames_dumped_in_row = 0;
 }
 
+DeepBreathFrameData& DeepBreathFrameManager::get_last_frame()
+{
+	// TODO: insert return statement here
+	unsigned int last_frame_index = (_oldest_frame_index + _n_frames - 1) % _n_frames;
+	return *(_frame_data_arr[last_frame_index]);
+}
+
 void DeepBreathFrameManager::add_frame_data(DeepBreathFrameData * frame_data)
 {
 	// delete last frame
@@ -735,7 +742,7 @@ static bool check_illegal_3D_coordinates(const DeepBreathFrameData* breathing_da
 void DeepBreathFrameManager::log_last_frame_data() {
 	// Get last frame index
 	unsigned int last_frame_index = (_oldest_frame_index + _n_frames - 1) % _n_frames;
-	_frame_data_arr[last_frame_index]->log();
+	get_last_frame().log();
 }
 
 void DeepBreathFrameManager::log_breathing_data() {

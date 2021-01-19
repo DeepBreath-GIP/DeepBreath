@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <map>
+#include <opencv2/opencv.hpp>
 #include "CustomOpenGLWidget.hpp"
 #include "db_config.hpp"
 #include "db_camera.hpp"
@@ -29,6 +30,8 @@ public:
 		It is recommended to use width & height of the color frame (bigger) to upscale other frames.
 	*/
 	void renderStreamWidgets(std::map<int, rs2::frame>& render_frames, const int width, const int height);
+
+    void renderScatterWidget();
 
 	/*
 		Update BPM in ui:
@@ -127,5 +130,6 @@ private:
     void enableMenu(bool is_enabled);
 
     void clearStreamingWidgets();
+    void clearScatterWidget();
 };
 #endif // DEEPBREATH_H
