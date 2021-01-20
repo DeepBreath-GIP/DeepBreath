@@ -82,7 +82,10 @@ DeepBreathFrameData::DeepBreathFrameData() :
 						{distances::mid2_mid3, &dM2M3_depth} }),
 	average_2d_dist(0.0), average_3d_dist(0.0),
 	tetra_volume(0.0), reimann_volume(0.0),
-	color_timestamp(0.0), depth_timestamp(0.0)
+	color_timestamp(0.0), depth_timestamp(0.0),
+	scatter(nullptr),
+	scatter_height(0),
+	scatter_width(0)
 {}
 
 DeepBreathFrameData::~DeepBreathFrameData() {

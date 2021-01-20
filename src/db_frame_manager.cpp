@@ -47,12 +47,15 @@ DeepBreathFrameManager::~DeepBreathFrameManager()
 
 void DeepBreathFrameManager::reset() {
 	frame_idx = 1;
-	first_timestamp = NULL;
+	first_timestamp = 0;
 	_oldest_frame_index = 0;
 	interval_active = false;
 	manager_start_time = clock();
 	for (unsigned int i = 0; i < _n_frames; i++) {
-		_frame_data_arr[i] = NULL;
+		if (_frame_data_arr[i] != nullptr) {
+			delete _frame_data_arr[i];
+			_frame_data_arr[i] = nullptr;
+		}
 	}
 
 	fps = 0;
@@ -349,7 +352,7 @@ void DeepBreathFrameManager::add_frame_data(DeepBreathFrameData * frame_data)
 {
 	// delete last frame
 	if (_frame_data_arr[_oldest_frame_index] != NULL) {
-		free(_frame_data_arr[_oldest_frame_index]);
+		delete _frame_data_arr[_oldest_frame_index];
 		_frame_data_arr[_oldest_frame_index] = NULL;
 	}
 
@@ -440,22 +443,6 @@ void DeepBreathFrameManager::get_volumes(std::vector<cv::Point2d>* out) {
 
 	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
 
-	if (user_cfg.mode == LOCATION) {
-		//DeepBreathLog& log = DeepBreathLog::getInstance();
-		//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		////TODO: Log bpm info?
-		//log.log_file << "Warning: get_volumes was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
-		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
-		return;
-	}
-	if (user_cfg.dimension != D3) {
-		//DeepBreathLog& log = DeepBreathLog::getInstance();
-		//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		//log.log_file << "Warning: get_volumes was called in D2 mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
-		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
-		return;
-	}
-
 	if (_frame_data_arr == NULL) return;
 
 	double current_time = (clock() - manager_start_time) / double(CLOCKS_PER_SEC);
@@ -478,11 +465,6 @@ void DeepBreathFrameManager::get_volumes(std::vector<cv::Point2d>* out) {
 void DeepBreathFrameManager::get_dists(std::vector<cv::Point2d>* out) {
 
 	if (DeepBreathConfig::getInstance().mode == graph_mode::LOCATION) {
-		//DeepBreathLog& log = DeepBreathLog::getInstance();
-		//assert(log); //log instance must be initiated before frame processing (i.e. "start camera" or "load file" before cv notify)
-		////TODO: Log bpm info?
-		//log.log_file << "Warning: get_dists was called in LOCATION mode!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,";
-		//NOTE: NUMBER OF ',' CHARACTERS MUST REMAIN AS IS! This is required for transition to next columns in the log file!
 		return;
 	}
 
