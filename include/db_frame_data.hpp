@@ -61,7 +61,8 @@ public:
 
 	//ctor:
 	DeepBreathFrameData();
-
+	//dtor:
+	~DeepBreathFrameData();
 	//METHODS://
 
 	/* Updates the locations of the stickers and validates the pointers to them. */

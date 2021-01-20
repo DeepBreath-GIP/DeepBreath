@@ -79,6 +79,7 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 	is_last_frame_dumped = false;
 	identify_markers(color_frame, depth_frame, breathing_data);
 	if (is_last_frame_dumped) {
+		delete breathing_data;
 		return;
 	}
 
@@ -108,6 +109,7 @@ void DeepBreathFrameManager::process_frame(const rs2::video_frame& color_frame, 
 			if (frames_dumped_in_row >= 3) {
 				cleanup();
 			}
+			delete breathing_data;
 			return;
 		}
 		else {
@@ -327,7 +329,7 @@ void DeepBreathFrameManager::cleanup()
 
 		for (unsigned int i = 0; i < _n_frames; i++) {
 			if (_frame_data_arr[i] != nullptr) {
-				free(_frame_data_arr[i]);
+				delete _frame_data_arr[i];
 			}
 			_frame_data_arr[i] = nullptr;
 		}
@@ -600,6 +602,8 @@ void DeepBreathFrameManager::calc_frequency_fft(std::vector<cv::Point2d>* sample
 	double t1 = samples->at(real_num_samples - 1).x;
 	if (t1 == t0) {
 		frequency = 0;
+		delete X;
+		delete Y;
 		return;
 	}
 	fps = real_num_samples / (t1 - t0);	// FPS - frames per second

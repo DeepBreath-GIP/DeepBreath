@@ -191,16 +191,16 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="db_csvformatter.cpp" />
     <ClCompile Include="dependencies\librealsense\common\os.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\glad\glad.c" />
     <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui_draw.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c" />
-    <ClCompile Include="include\db_frame_data.cpp" />
     <ClCompile Include="src\db_camera.cpp" />
     <ClCompile Include="src\db_config.cpp" />
+    <ClCompile Include="src\db_csvformatter.cpp" />
+    <ClCompile Include="src\db_frame_data.cpp" />
     <ClCompile Include="src\db_frame_manager.cpp" />
     <ClCompile Include="src\db_graph_plot.cpp" />
     <ClCompile Include="src\db_log.cpp" />
@@ -233,7 +233,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="db_csvformatter.hpp" />
     <ClInclude Include="dependencies\librealsense\common\os.h" />
     <ClInclude Include="dependencies\librealsense\include\librealsense2-gl\rs_processing_gl.h" />
     <ClInclude Include="dependencies\librealsense\include\librealsense2-gl\rs_processing_gl.hpp" />
@@ -273,6 +272,7 @@
     <ClInclude Include="dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="include\db_camera.hpp" />
     <ClInclude Include="include\db_config.hpp" />
+    <ClInclude Include="include\db_csvformatter.hpp" />
     <ClInclude Include="include\db_frame_data.hpp" />
     <ClInclude Include="include\db_frame_manager.hpp" />
     <ClInclude Include="include\db_graph_plot.hpp" />

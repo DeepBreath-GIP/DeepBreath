@@ -85,6 +85,15 @@ DeepBreathFrameData::DeepBreathFrameData() :
 	color_timestamp(0.0), depth_timestamp(0.0)
 {}
 
+DeepBreathFrameData::~DeepBreathFrameData() {
+	if (scatter != nullptr) {
+		for (int i = 0; i < scatter_height; i++) {
+			delete scatter[i];
+		}
+		delete scatter;
+	}
+}
+
 void DeepBreathFrameData::UpdateStickersLoactions()
 {
 	if (circles.size() < DeepBreathConfig::getInstance().num_of_stickers)
@@ -487,11 +496,8 @@ DeepBreathFrameData::Surface::Surface(const rs2::depth_frame& depth_frame, cv::V
 	for (int i = 0; i < this->h; i++) {
 		this->mat[i] = new cv::Vec3f[w];
 
-		// Empirically we see that the depth on the right edge is zero on some of the points. We will avoid these points in Reimann sum calculations
 		for (int j = 0; j < this->w; ++j) {
-			cv::Vec3f p(0, 0, 0);
-			get_3d_coordinates(depth_frame, j + left_x, i + bottom_y, p);
-			this->mat[i][j] = p;
+			get_3d_coordinates(depth_frame, j + left_x, i + bottom_y, this->mat[i][j]);
 		}
 	}
 }
