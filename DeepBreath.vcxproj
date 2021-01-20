@@ -205,14 +205,10 @@
     <ClCompile Include="src\db_graph_plot.cpp" />
     <ClCompile Include="src\db_log.cpp" />
     <ClCompile Include="src\db_sync.cpp" />
-    <ClCompile Include="deepbreathgui.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="qcustomplot.cpp" />
+    <ClCompile Include="src\deepbreathgui.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\qcustomplot.cpp" />
     <ClCompile Include="src\scatterdatamodifier.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="deepbreathgui.h">
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -279,9 +275,10 @@
     <ClInclude Include="include\db_log.hpp" />
     <ClInclude Include="include\db_sync.hpp" />
     <QtMoc Include="include\scatterdatamodifier.hpp" />
+    <QtMoc Include="include\deepbreathgui.hpp" />
+    <QtMoc Include="include\qcustomplot.hpp" />
     <ClInclude Include="include\utilities.h" />
     <ClInclude Include="CustomOpenGLWidget.hpp" />
-    <QtMoc Include="qcustomplot.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

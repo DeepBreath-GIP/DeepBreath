@@ -7,7 +7,7 @@
 
 #include <sstream>
 
-#include "deepbreathgui.h"
+#include "deepbreathgui.hpp"
 #include "ui_deepbreathgui.h"
 #include <Qt>
 #include <QPainter>

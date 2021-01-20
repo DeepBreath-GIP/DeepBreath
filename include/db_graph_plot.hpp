@@ -2,7 +2,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "qcustomplot.h"
+#include "qcustomplot.hpp"
 
 class DeepBreathGraphPlot {
 

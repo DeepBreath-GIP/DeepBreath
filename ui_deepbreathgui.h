@@ -22,7 +22,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 #include "CustomOpenGLWidget.hpp"
-#include "qcustomplot.h"
+#include "qcustomplot.hpp"
 
 #include <QtDataVisualization/q3dscatter.h>
 #include "scatterdatamodifier.hpp"
