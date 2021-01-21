@@ -197,6 +197,7 @@
     <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui_draw.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c" />
+    <ClCompile Include="src\custom_opengl_widget.cpp" />
     <ClCompile Include="src\db_camera.cpp" />
     <ClCompile Include="src\db_config.cpp" />
     <ClCompile Include="src\db_csvformatter.cpp" />

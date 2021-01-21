@@ -154,6 +154,9 @@
     <ClCompile Include="src\synchronized_q3dscatter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\custom_opengl_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\scatterdatamodifier.hpp">
