@@ -262,7 +262,7 @@ void QDeepBreath::setConfigDistances() {
 		ui->mid1_mid2_checkbox->setEnabled(false);
 		ui->mid1_mid3_checkbox->setEnabled(false);
 	}
-
+	// 5 stickers do not disable anything
 }
 
 void QDeepBreath::setConfigLocations() {
@@ -600,6 +600,7 @@ void QDeepBreath::enableMenu(bool is_enabled) {
 
     ui->mode_text->setEnabled(is_enabled);
     ui->mode_combo_box->setEnabled(is_enabled);
+	ui->volume_type_combo_box->setEnabled(is_enabled);
 
     ui->num_markers_text->setEnabled(is_enabled);
     ui->num_markers_combo_box->setEnabled(is_enabled);
@@ -793,6 +794,17 @@ void QDeepBreath::on_start_camera_button_clicked()
         enableMenu(false);
 		enableDistances(false);
 		enableLocations(false);
+		switch (DeepBreathConfig::getInstance().mode) {
+		case FOURIER:
+		case NOGRAPH:
+		case VOLUME:
+		case DISTANCES:
+			setConfigDistances();
+			break;
+		case LOCATION:
+			setConfigLocations();
+			break;
+		}	
 
 		//start stream:
 		camera.cfg.enable_stream(RS2_STREAM_DEPTH);
@@ -841,10 +853,18 @@ void QDeepBreath::on_start_camera_button_clicked()
         ui->record_button->setEnabled(false);
         ui->record_button->setVisible(false);
 
+		enableMenu(true);
         //enable change of menu:
-        enableMenu(true);
-		enableDistances(true);
-		enableLocations(true);
+		switch (DeepBreathConfig::getInstance().mode) {
+		case FOURIER:
+		case NOGRAPH:
+		case DISTANCES:
+			enableDistances(true);
+			break;
+		case LOCATION:
+			enableLocations(true);
+			break;
+		}
     }
 }
 
@@ -1065,6 +1085,15 @@ void QDeepBreath::on_mode_combo_box_currentIndexChanged(int index)
             break;
         case 3: //Volume
             enableDistances(false);
+			ui->left_right_checkbox->setEnabled(true);
+			ui->right_mid3_checkbox->setEnabled(true);
+			ui->left_mid3_checkbox->setEnabled(true);
+			ui->left_right_checkbox->click();
+			ui->right_mid3_checkbox->click();
+			ui->left_mid3_checkbox->click();
+			ui->left_right_checkbox->setEnabled(false);
+			ui->right_mid3_checkbox->setEnabled(false);
+			ui->left_mid3_checkbox->setEnabled(false);
             enableLocations(false);
 			ui->volume_type_combo_box->setVisible(true);
 			ui->left_loc_checkbox->setEnabled(true);
@@ -1192,6 +1221,8 @@ void QDeepBreath::on_num_markers_combo_box_currentIndexChanged(int index)
 			ui->mid1_loc_checkbox->setEnabled(false);
 			ui->mid2_loc_checkbox->setEnabled(false);
 			break;
+		case FOURIER:
+		case NOGRAPH:
 		case DISTANCES:
 			if (ui->left_mid1_checkbox->isChecked()) {
 				ui->left_mid1_checkbox->click();
@@ -1234,6 +1265,8 @@ void QDeepBreath::on_num_markers_combo_box_currentIndexChanged(int index)
 			ui->mid1_loc_checkbox->setEnabled(false);
 			ui->mid2_loc_checkbox->setEnabled(true);
 			break;
+		case FOURIER:
+		case NOGRAPH:
 		case DISTANCES:
 			if (ui->left_mid1_checkbox->isChecked()) {
 				ui->left_mid1_checkbox->click();
@@ -1264,6 +1297,8 @@ void QDeepBreath::on_num_markers_combo_box_currentIndexChanged(int index)
 			ui->mid1_loc_checkbox->setEnabled(true);
 			ui->mid2_loc_checkbox->setEnabled(true);
 			break;
+		case FOURIER:
+		case NOGRAPH:
 		case DISTANCES:
 			ui->left_mid1_checkbox->setEnabled(true);
 			ui->left_mid2_checkbox->setEnabled(true);
