@@ -848,6 +848,12 @@ void QDeepBreath::on_start_camera_button_clicked()
     }
 }
 
+static inline bool ends_with(std::string const& value, std::string const& ending)
+{
+	if (ending.size() > value.size()) return false;
+	return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
 void QDeepBreath::on_record_button_clicked()
 {
 	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
@@ -861,7 +867,17 @@ void QDeepBreath::on_record_button_clicked()
 		const char* out_filename = rs2::file_dialog_open(rs2::file_dialog_mode::save_file, "ROS-bag\0*.bag\0", NULL, NULL);
 
 		if (out_filename) {
-			camera.cfg.enable_record_to_file(std::string(out_filename) + ".bag");
+
+			std::string out_filename_str;
+
+			if (!ends_with(out_filename, ".bag")) {
+				out_filename_str = std::string(out_filename) + ".bag";
+			}
+			else {
+				out_filename_str = std::string(out_filename);
+			}
+
+			camera.cfg.enable_record_to_file(out_filename_str);
 
 			ui->record_button->setText("Stop Recording");
 			is_recording = true;
