@@ -124,10 +124,11 @@ private:
 	/* Helper for the distances line drawing: */
     void setXYPosOfDistance(int& x1_pos, int& y1_pos, int& x2_pos, int& y2_pos, distances dist);
 
-	/* Enablers/Diablers of ui objects: */
+	/* Enablers/Diasblers of ui objects: */
     void enableDistances(bool is_enabled);
     void enableLocations(bool is_enabled);
     void enableMenu(bool is_enabled);
+    void toggleMenuOnStream(bool is_enabled);
 
     void clearStreamingWidgets();
     void clearScatterWidget();

@@ -611,6 +611,41 @@ void QDeepBreath::enableMenu(bool is_enabled) {
     ui->y_color_radio_button->setEnabled(is_enabled);
 }
 
+void QDeepBreath::toggleMenuOnStream(bool is_enabled)
+{
+	if (!is_enabled) {
+		//disable change of menu:
+		enableMenu(false);
+		enableDistances(false);
+		enableLocations(false);
+		switch (DeepBreathConfig::getInstance().mode) {
+		case FOURIER:
+		case NOGRAPH:
+		case VOLUME:
+		case DISTANCES:
+			setConfigDistances();
+			break;
+		case LOCATION:
+			setConfigLocations();
+			break;
+		}
+	}
+	else {
+		enableMenu(true);
+		//enable change of menu:
+		switch (DeepBreathConfig::getInstance().mode) {
+		case FOURIER:
+		case NOGRAPH:
+		case DISTANCES:
+			enableDistances(true);
+			break;
+		case LOCATION:
+			enableLocations(true);
+			break;
+		}
+	}
+}
+
 void QDeepBreath::clearStreamingWidgets() {
 	ui->depth_stream_widget->clear();
 	ui->color_stream_widget->clear();
@@ -790,21 +825,7 @@ void QDeepBreath::on_start_camera_button_clicked()
         ui->record_button->setVisible(true);
         ui->record_button->setEnabled(true);
 
-        //diable change of menu:
-        enableMenu(false);
-		enableDistances(false);
-		enableLocations(false);
-		switch (DeepBreathConfig::getInstance().mode) {
-		case FOURIER:
-		case NOGRAPH:
-		case VOLUME:
-		case DISTANCES:
-			setConfigDistances();
-			break;
-		case LOCATION:
-			setConfigLocations();
-			break;
-		}	
+		toggleMenuOnStream(false);
 
 		//start stream:
 		camera.cfg.enable_stream(RS2_STREAM_DEPTH);
@@ -853,18 +874,7 @@ void QDeepBreath::on_start_camera_button_clicked()
         ui->record_button->setEnabled(false);
         ui->record_button->setVisible(false);
 
-		enableMenu(true);
-        //enable change of menu:
-		switch (DeepBreathConfig::getInstance().mode) {
-		case FOURIER:
-		case NOGRAPH:
-		case DISTANCES:
-			enableDistances(true);
-			break;
-		case LOCATION:
-			enableLocations(true);
-			break;
-		}
+		toggleMenuOnStream(true);
     }
 }
 
@@ -973,10 +983,7 @@ void QDeepBreath::on_load_file_button_clicked()
 			//turn streaming off and change title
 			ui->load_file_button->setText("Stop");
 
-			//diable change of menu:
-			enableMenu(false);
-			enableDistances(false);
-			enableLocations(false);
+			toggleMenuOnStream(false);
 
 			start_frame_polling();
 
@@ -1010,10 +1017,7 @@ void QDeepBreath::on_load_file_button_clicked()
 		ui->pause_button->setVisible(false);
 		ui->pause_button->setEnabled(false);
 
-		//enable change of menu:
-		enableMenu(true);
-		enableDistances(true);
-		enableLocations(true);
+		toggleMenuOnStream(true);
 
 		is_run_from_file = false;
 
