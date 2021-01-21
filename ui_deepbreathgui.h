@@ -24,7 +24,7 @@
 #include "CustomOpenGLWidget.hpp"
 #include "qcustomplot.hpp"
 
-#include <QtDataVisualization/q3dscatter.h>
+#include "synchronized_q3dscatter.hpp"
 #include "scatterdatamodifier.hpp"
 
 using namespace QtDataVisualization;
@@ -76,7 +76,7 @@ public:
     QCheckBox *right_mid3_checkbox;
     CustomOpenGLWidget *color_stream_widget;
     CustomOpenGLWidget *depth_stream_widget;
-    Q3DScatter* volume_scatter;
+    SynchronizedQ3DScatter* volume_scatter;
     ScatterDataModifier* volume_scatter_modifier;
     QWidget *volume_stream_widget;
     QWidget* volume_widget_container;
@@ -272,7 +272,7 @@ public:
         volume_stream_widget = new QWidget(centralwidget);
         volume_stream_widget->setObjectName(QString::fromUtf8("volume_stream_widget"));
         volume_stream_widget->setGeometry(QRect(420, 350, 401, 301));
-        volume_scatter = new Q3DScatter();
+        volume_scatter = new SynchronizedQ3DScatter();
         volume_widget_container = QWidget::createWindowContainer(volume_scatter);
         volume_hLayout = new QHBoxLayout(volume_stream_widget);
         volume_vLayout = new QVBoxLayout();

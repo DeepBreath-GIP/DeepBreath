@@ -151,6 +151,9 @@
     <ClCompile Include="src\qcustomplot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\synchronized_q3dscatter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\scatterdatamodifier.hpp">
@@ -312,6 +315,9 @@
     </ClInclude>
     <ClInclude Include="include\db_csvformatter.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\synchronized_q3dscatter.hpp">
+      <Filter>Header Files\include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

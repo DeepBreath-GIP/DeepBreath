@@ -1,9 +1,10 @@
 #pragma once
 
-#include <QtDataVisualization/q3dscatter.h>
 #include <QtDataVisualization/qabstract3dseries.h>
 #include <QtGui/QFont>
 #include <opencv2/opencv.hpp>
+#include "synchronized_q3dscatter.hpp"
+
 
 using namespace QtDataVisualization;
 
@@ -11,7 +12,7 @@ class ScatterDataModifier : public QObject
 {
     Q_OBJECT
 public:
-    explicit ScatterDataModifier(Q3DScatter* scatter);
+    explicit ScatterDataModifier(SynchronizedQ3DScatter* scatter);
     ~ScatterDataModifier();
 
     void addData(cv::Vec3f** points, int w, int h);

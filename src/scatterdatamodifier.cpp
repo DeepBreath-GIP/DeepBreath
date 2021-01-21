@@ -11,13 +11,7 @@
 
 using namespace QtDataVisualization;
 
-//#define RANDOM_SCATTER // Uncomment this to switch to random scatter
-
-const int numberOfItems = 3600;
-const float curveDivider = 3.0f;
-const float lowerCurveDivider = 0.75f;
-
-ScatterDataModifier::ScatterDataModifier(Q3DScatter* scatter)
+ScatterDataModifier::ScatterDataModifier(SynchronizedQ3DScatter* scatter)
     : m_graph(scatter),
     m_fontSize(40.0f),
     m_style(QAbstract3DSeries::MeshSphere),
@@ -36,6 +30,10 @@ ScatterDataModifier::ScatterDataModifier(Q3DScatter* scatter)
     series->setMeshSmooth(m_smooth);
     m_graph->addSeries(series);
 
+    // Configure the axes according to the data
+    m_graph->axisX()->setTitle("X");
+    m_graph->axisY()->setTitle("Y");
+    m_graph->axisZ()->setTitle("Z");
 }
 
 ScatterDataModifier::~ScatterDataModifier()
@@ -45,13 +43,7 @@ ScatterDataModifier::~ScatterDataModifier()
 
 void ScatterDataModifier::addData(cv::Vec3f** points, int w, int h)
 {
-    // Configure the axes according to the data
-    m_graph->axisX()->setTitle("X");
-    m_graph->axisY()->setTitle("Y");
-    m_graph->axisZ()->setTitle("Z");
-
-    QScatterDataArray* dataArray = new QScatterDataArray;
-    dataArray->resize(w * h);
+    QScatterDataArray* dataArray = new QScatterDataArray(h * w);
     QScatterDataItem* ptrToDataArray = &dataArray->first();
 
 
@@ -62,6 +54,7 @@ void ScatterDataModifier::addData(cv::Vec3f** points, int w, int h)
         }
     }
 
+    std::unique_lock<std::mutex> lk(SynchronizedQ3DScatter::sync_event_mutex);
     m_graph->seriesList().at(0)->dataProxy()->resetArray(dataArray);
 }
 
@@ -137,6 +130,7 @@ void ScatterDataModifier::setGridEnabled(int enabled)
 
 void ScatterDataModifier::clear()
 {
-    m_graph->seriesList().at(0)->dataProxy()->resetArray(0);
+    std::unique_lock<std::mutex> lk(SynchronizedQ3DScatter::sync_event_mutex);
+    m_graph->seriesList().at(0)->dataProxy()->resetArray(nullptr);
 }
 

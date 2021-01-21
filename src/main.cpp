@@ -3,7 +3,7 @@
 #include <thread>
 #include <vector>
 
-#include "deepbreathgui.h"
+#include "deepbreathgui.hpp"
 #include "db_camera.hpp"
 #include "db_sync.hpp"
 #include "db_frame_manager.hpp"

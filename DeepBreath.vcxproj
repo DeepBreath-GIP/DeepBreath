@@ -209,6 +209,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\qcustomplot.cpp" />
     <ClCompile Include="src\scatterdatamodifier.cpp" />
+    <ClCompile Include="src\synchronized_q3dscatter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -277,6 +278,7 @@
     <QtMoc Include="include\scatterdatamodifier.hpp" />
     <QtMoc Include="include\deepbreathgui.hpp" />
     <QtMoc Include="include\qcustomplot.hpp" />
+    <ClInclude Include="include\synchronized_q3dscatter.hpp" />
     <ClInclude Include="include\utilities.h" />
     <ClInclude Include="CustomOpenGLWidget.hpp" />
   </ItemGroup>
