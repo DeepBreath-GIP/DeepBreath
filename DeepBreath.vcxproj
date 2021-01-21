@@ -192,10 +192,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dependencies\librealsense\common\os.cpp" />
-    <ClCompile Include="dependencies\librealsense\third-party\glad\glad.c" />
-    <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui.cpp" />
-    <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui_draw.cpp" />
-    <ClCompile Include="dependencies\librealsense\third-party\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="src\custom_opengl_widget.cpp" />
     <ClCompile Include="src\db_camera.cpp" />
@@ -281,7 +277,6 @@
     <QtMoc Include="include\qcustomplot.hpp" />
     <QtMoc Include="include\deepbreathgui.hpp" />
     <ClInclude Include="include\synchronized_q3dscatter.hpp" />
-    <ClInclude Include="include\utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
