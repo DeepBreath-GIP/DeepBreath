@@ -24,6 +24,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 
 		try {
 			// Do polling
+			unsigned int render_counter = 0;
 			while (DeepBreathSync::is_poll_frame) {
 				//poll and process
 				DeepBreathCamera camera = DeepBreathCamera::getInstance();
@@ -56,7 +57,9 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 				db_ref->renderStreamWidgets(render_frames, color.get_width(), color.get_height());
 
 				//render scatter points
-				db_ref->renderScatterWidget();
+				if (render_counter % 2 == 0) {
+					db_ref->renderScatterWidget();
+				}
 
 				//get last frames data and calculate breath rate:
 				long double bpm = frame_manager.calculate_breath_rate();
@@ -70,7 +73,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 					frame_manager.log_last_frame_data();
 					frame_manager.log_breathing_data();
 				}
-
+				render_counter++;
 			}
 		}
 		catch (rs2::error e) {
