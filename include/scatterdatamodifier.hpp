@@ -40,7 +40,7 @@ Q_SIGNALS:
     void fontChanged(QFont font);
 
 private:
-    Q3DScatter* m_graph;
+    SynchronizedQ3DScatter* m_graph;
     int m_fontSize;
     QAbstract3DSeries::Mesh m_style;
     bool m_smooth;

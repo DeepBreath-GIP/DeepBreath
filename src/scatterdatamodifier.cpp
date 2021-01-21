@@ -54,7 +54,7 @@ void ScatterDataModifier::addData(cv::Vec3f** points, int w, int h)
         }
     }
 
-    std::unique_lock<std::mutex> lk(SynchronizedQ3DScatter::sync_event_mutex);
+    std::unique_lock<std::mutex> lk(m_graph->get_sync_event_mutex());
     m_graph->seriesList().at(0)->dataProxy()->resetArray(dataArray);
 }
 
@@ -130,7 +130,7 @@ void ScatterDataModifier::setGridEnabled(int enabled)
 
 void ScatterDataModifier::clear()
 {
-    std::unique_lock<std::mutex> lk(SynchronizedQ3DScatter::sync_event_mutex);
+    std::unique_lock<std::mutex> lk(m_graph->get_sync_event_mutex());
     m_graph->seriesList().at(0)->dataProxy()->resetArray(nullptr);
 }
 
