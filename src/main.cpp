@@ -57,7 +57,7 @@ void poll_frames_thread(QDeepBreath* db_ref) {
 				db_ref->renderStreamWidgets(render_frames, color.get_width(), color.get_height());
 
 				//render scatter points
-				if (render_counter % 2 == 0) {
+				if (render_counter % 2 == 0 && !frame_manager.get_is_last_frame_dumped()) {
 					db_ref->renderScatterWidget();
 				}
 

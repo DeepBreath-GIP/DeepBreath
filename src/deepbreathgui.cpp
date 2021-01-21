@@ -73,19 +73,16 @@ void QDeepBreath::paintEvent(QPaintEvent* event) {
 void QDeepBreath::renderStreamWidgets(std::vector<rs2::frame>& render_frames, int width, int height) {
 
 	CustomOpenGLWidget* streams_widgets[2] = {ui->color_stream_widget, ui->depth_stream_widget};
-
 	int i = 0;
 
-	for (auto& frame : render_frames)
+	for (int i = 0; i < 2; i++)
 	{
-		if (i >= 2)	//render only color and depth from map
-			break;
+		auto frame = render_frames[i];
 		const void* frame_data = frame.get_data();
 		QImage frame_data_img(width, height, QImage::Format_RGB888);
 		// Copy frame_data to avoid race condition on freeing the frame while rendering the widget.
 		memcpy(frame_data_img.bits(), frame_data, sizeof(uchar) * width * height * 3);
 		streams_widgets[i]->display(frame_data_img);
-		i++;
 	}
 }
 
