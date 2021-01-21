@@ -22,7 +22,7 @@ ScatterDataModifier::ScatterDataModifier(SynchronizedQ3DScatter* scatter)
     font.setPointSize(m_fontSize);
     m_graph->activeTheme()->setFont(font);
     m_graph->setShadowQuality(QAbstract3DGraph::ShadowQualitySoftLow);
-    m_graph->scene()->activeCamera()->setCameraPreset(Q3DCamera::CameraPresetFront);
+    m_graph->scene()->activeCamera()->setCameraPreset(Q3DCamera::CameraPresetIsometricLeft);
 
     QScatterDataProxy* proxy = new QScatterDataProxy;
     QScatter3DSeries* series = new QScatter3DSeries(proxy);
@@ -33,6 +33,7 @@ ScatterDataModifier::ScatterDataModifier(SynchronizedQ3DScatter* scatter)
     // Configure the axes according to the data
     m_graph->axisX()->setTitle("X");
     m_graph->axisY()->setTitle("Y");
+    m_graph->axisY()->setReversed(true);
     m_graph->axisZ()->setTitle("Z");
 }
 
