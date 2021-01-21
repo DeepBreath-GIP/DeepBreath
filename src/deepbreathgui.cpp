@@ -632,6 +632,13 @@ void QDeepBreath::stop_frame_polling()
 	DeepBreathSync::is_end_poll_frame = false; // Reset boolean for the next time
 }
 
+void QDeepBreath::start_frame_polling()
+{
+	//update condition variable to start polling:
+	DeepBreathSync::is_poll_frame = true;
+	DeepBreathSync::cv_poll_frame.notify_one();
+}
+
 /* ==================== *
     CLICK HANDLERS:
  * ==================== */
@@ -795,9 +802,7 @@ void QDeepBreath::on_start_camera_button_clicked()
 		DeepBreathLog::init(false);
 		DeepBreathGraphPlot::createInstance(ui->graph_widget);
 
-		//update condition variable to start polling:
-		DeepBreathSync::is_poll_frame = true;
-		DeepBreathSync::cv_poll_frame.notify_one();
+		start_frame_polling();
 
         is_camera_on = true;
     }
@@ -842,21 +847,31 @@ void QDeepBreath::on_record_button_clicked()
 	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
 
     if(!is_recording) {
+
+		stop_frame_polling();
+
         //turn recording on and change title
 		camera.pipe.stop(); // Stop the pipeline with the default configuration
 		const char* out_filename = rs2::file_dialog_open(rs2::file_dialog_mode::save_file, "ROS-bag\0*.bag\0", NULL, NULL);
 		camera.cfg.enable_record_to_file(out_filename);
 		camera.pipe.start(camera.cfg); //File will be opened at this point
 
+		start_frame_polling();
+
         ui->record_button->setText("Stop Recording");
         is_recording = true;
     }
     else {
+
+		stop_frame_polling();
+
         //turn recording off and change title
 		camera.cfg.disable_all_streams();
 		camera.cfg = rs2::config();
 		camera.pipe.stop(); // Stop the pipeline that holds the file and the recorder
 		camera.pipe.start(camera.cfg);
+
+		start_frame_polling();
 
         ui->record_button->setText("Record");
         is_recording = false;
@@ -917,9 +932,7 @@ void QDeepBreath::on_load_file_button_clicked()
 			enableDistances(false);
 			enableLocations(false);
 
-			//update condition variable to start polling:
-			DeepBreathSync::is_poll_frame = true;
-			DeepBreathSync::cv_poll_frame.notify_one();
+			start_frame_polling();
 
 			is_run_from_file = true;
 		}
@@ -982,9 +995,7 @@ void QDeepBreath::on_pause_button_clicked()
 		rs2::playback playback = device.as<rs2::playback>();
 		playback.resume();
 
-		//update condition variable to start polling:
-		DeepBreathSync::is_poll_frame = true;
-		DeepBreathSync::cv_poll_frame.notify_one();
+		start_frame_polling();
 
         is_pause = false;
     }

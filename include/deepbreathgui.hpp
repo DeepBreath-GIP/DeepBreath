@@ -133,5 +133,6 @@ private:
     void clearScatterWidget();
 
     void stop_frame_polling();
+    void start_frame_polling();
 };
 #endif // DEEPBREATH_H
