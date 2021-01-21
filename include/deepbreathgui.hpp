@@ -131,5 +131,7 @@ private:
 
     void clearStreamingWidgets();
     void clearScatterWidget();
+
+    void stop_frame_polling();
 };
 #endif // DEEPBREATH_H

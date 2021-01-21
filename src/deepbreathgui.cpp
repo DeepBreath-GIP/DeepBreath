@@ -69,11 +69,10 @@ void QDeepBreath::paintEvent(QPaintEvent* event) {
     drawDistancesLines();
 }
 
+
 void QDeepBreath::renderStreamWidgets(std::vector<rs2::frame>& render_frames, int width, int height) {
 
-	CustomOpenGLWidget** streams_widgets = new CustomOpenGLWidget*[2];
-	streams_widgets[0] = (CustomOpenGLWidget*)(ui->color_stream_widget);
-	streams_widgets[1] = (CustomOpenGLWidget*)(ui->depth_stream_widget);
+	CustomOpenGLWidget* streams_widgets[2] = {ui->color_stream_widget, ui->depth_stream_widget};
 
 	int i = 0;
 
@@ -81,7 +80,7 @@ void QDeepBreath::renderStreamWidgets(std::vector<rs2::frame>& render_frames, in
 	{
 		if (i >= 2)	//render only color and depth from map
 			break;
-		const void * frame_data = frame.get_data();
+		const void* frame_data = frame.get_data();
 		QImage frame_data_img(width, height, QImage::Format_RGB888);
 		// Copy frame_data to avoid race condition on freeing the frame while rendering the widget.
 		memcpy(frame_data_img.bits(), frame_data, sizeof(uchar) * width * height * 3);
@@ -624,6 +623,18 @@ void QDeepBreath::clearScatterWidget()
 	ui->volume_scatter_modifier->clear();
 }
 
+void QDeepBreath::stop_frame_polling()
+{
+	//stop frame polling and wait for notify from polling thread:
+	DeepBreathSync::is_poll_frame = false;
+	while (!DeepBreathSync::is_end_poll_frame) {
+		std::unique_lock<std::mutex> lk(DeepBreathSync::m_end_poll_frame);
+		DeepBreathSync::cv_end_poll_frame.wait_for(lk, 100ms);
+		lk.unlock();
+	}
+	DeepBreathSync::is_end_poll_frame = false; // Reset boolean for the next time
+}
+
 /* ==================== *
     CLICK HANDLERS:
  * ==================== */
@@ -740,6 +751,10 @@ void QDeepBreath::on_start_camera_button_clicked()
 				QMessageBox::Ok | QMessageBox::Cancel);
 
 			if (reply == QMessageBox::Ok) {
+
+				stop_frame_polling();
+				DeepBreathGraphPlot::getInstance().reset();
+
 				//Close file stream (currently set in cfg)
 				camera.cfg.disable_all_streams();
 				camera.cfg = rs2::config();
@@ -779,9 +794,6 @@ void QDeepBreath::on_start_camera_button_clicked()
 
 		frame_manager.reset(); // reset FrameManager for additional processing
 
-		//TODO:
-		//graph.reset(frame_manager.manager_start_time);
-
 		//create logging:
 		DeepBreathLog::init(false);
 		DeepBreathGraphPlot::createInstance(ui->graph_widget);
@@ -798,15 +810,7 @@ void QDeepBreath::on_start_camera_button_clicked()
         // - change button's title
         // - hide and disable recording
 
-		//stop frame polling and wait for notify from polling thread:
-		DeepBreathSync::is_poll_frame = false;
-		while (!DeepBreathSync::is_end_poll_frame) {
-			std::unique_lock<std::mutex> lk(DeepBreathSync::m_end_poll_frame);
-			DeepBreathSync::cv_end_poll_frame.wait_for(lk, 100ms);
-			lk.unlock();
-		}
-		DeepBreathSync::is_end_poll_frame = false; // Reset boolean for the next time
-
+		stop_frame_polling();
 		frame_manager.reset(); // reset FrameManager for additional processing
 		DeepBreathGraphPlot::getInstance().reset();
 		//clear stream widgets
@@ -924,15 +928,7 @@ void QDeepBreath::on_load_file_button_clicked()
 		}
     }
     else {
-		//stop frame polling and wait for notify from polling thread:
-		DeepBreathSync::is_poll_frame = false;
-		while (!DeepBreathSync::is_end_poll_frame) {
-			std::unique_lock<std::mutex> lk(DeepBreathSync::m_end_poll_frame);
-			DeepBreathSync::cv_end_poll_frame.wait_for(lk, 100ms);
-			lk.unlock();
-		}
-		DeepBreathSync::is_end_poll_frame = false; // Reset boolean for the next time
-
+		stop_frame_polling();
 		frame_manager.reset(); // reset FrameManager for additional processing
 		DeepBreathGraphPlot::getInstance().reset();
 
@@ -973,14 +969,7 @@ void QDeepBreath::on_pause_button_clicked()
 	DeepBreathCamera& camera = DeepBreathCamera::getInstance();
 
     if(!is_pause) {
-		//stop frame polling and wait for notify from polling thread:
-		DeepBreathSync::is_poll_frame = false;
-		while (!DeepBreathSync::is_end_poll_frame) {
-			std::unique_lock<std::mutex> lk(DeepBreathSync::m_end_poll_frame);
-			DeepBreathSync::cv_end_poll_frame.wait_for(lk, 100ms);
-			lk.unlock();
-		}
-		DeepBreathSync::is_end_poll_frame = false; // Reset boolean for the next time
+		stop_frame_polling();
 
         ui->pause_button->setText("Continue");
 
