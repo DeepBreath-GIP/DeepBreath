@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <map>
 #include <opencv2/opencv.hpp>
-#include "CustomOpenGLWidget.hpp"
+#include "custom_opengl_widget.hpp"
 #include "db_config.hpp"
 #include "db_camera.hpp"
 

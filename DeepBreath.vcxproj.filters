@@ -159,11 +159,11 @@
     <QtMoc Include="include\scatterdatamodifier.hpp">
       <Filter>Header Files\include</Filter>
     </QtMoc>
-    <QtMoc Include="include\deepbreathgui.hpp">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="include\qcustomplot.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\include</Filter>
+    </QtMoc>
+    <QtMoc Include="include\deepbreathgui.hpp">
+      <Filter>Header Files\include</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -292,9 +292,6 @@
     <ClInclude Include="include\utilities.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
-    <ClInclude Include="CustomOpenGLWidget.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\db_camera.hpp">
       <Filter>Header Files\include</Filter>
     </ClInclude>
@@ -313,10 +310,13 @@
     <ClInclude Include="include\db_graph_plot.hpp">
       <Filter>Header Files\include</Filter>
     </ClInclude>
-    <ClInclude Include="include\db_csvformatter.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\synchronized_q3dscatter.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\db_csvformatter.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\custom_opengl_widget.hpp">
       <Filter>Header Files\include</Filter>
     </ClInclude>
   </ItemGroup>

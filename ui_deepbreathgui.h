@@ -21,7 +21,7 @@
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
-#include "CustomOpenGLWidget.hpp"
+#include "custom_opengl_widget.hpp"
 #include "qcustomplot.hpp"
 
 #include "synchronized_q3dscatter.hpp"

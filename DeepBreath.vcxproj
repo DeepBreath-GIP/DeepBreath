@@ -267,6 +267,7 @@
     <ClInclude Include="dependencies\librealsense\third-party\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="dependencies\librealsense\third-party\stb_image_write.h" />
     <ClInclude Include="dependencies\librealsense\third-party\tinyfiledialogs\tinyfiledialogs.h" />
+    <ClInclude Include="include\custom_opengl_widget.hpp" />
     <ClInclude Include="include\db_camera.hpp" />
     <ClInclude Include="include\db_config.hpp" />
     <ClInclude Include="include\db_csvformatter.hpp" />
@@ -276,11 +277,10 @@
     <ClInclude Include="include\db_log.hpp" />
     <ClInclude Include="include\db_sync.hpp" />
     <QtMoc Include="include\scatterdatamodifier.hpp" />
-    <QtMoc Include="include\deepbreathgui.hpp" />
     <QtMoc Include="include\qcustomplot.hpp" />
+    <QtMoc Include="include\deepbreathgui.hpp" />
     <ClInclude Include="include\synchronized_q3dscatter.hpp" />
     <ClInclude Include="include\utilities.h" />
-    <ClInclude Include="CustomOpenGLWidget.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
