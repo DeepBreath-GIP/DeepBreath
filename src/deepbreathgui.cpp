@@ -1180,7 +1180,8 @@ void QDeepBreath::on_num_markers_combo_box_currentIndexChanged(int index)
 	switch (index) {
 	case 0: //3
 		user_cfg.num_of_stickers = 3;
-		if (user_cfg.mode == LOCATION) {
+		switch (user_cfg.mode) {
+		case LOCATION:
 			//uncheck irrelevant locations and clear selection from config:
 			if (ui->mid1_loc_checkbox->isChecked()) {
 				ui->mid1_loc_checkbox->click();
@@ -1190,23 +1191,87 @@ void QDeepBreath::on_num_markers_combo_box_currentIndexChanged(int index)
 			}
 			ui->mid1_loc_checkbox->setEnabled(false);
 			ui->mid2_loc_checkbox->setEnabled(false);
+			break;
+		case DISTANCES:
+			if (ui->left_mid1_checkbox->isChecked()) {
+				ui->left_mid1_checkbox->click();
+			}
+			if (ui->left_mid2_checkbox->isChecked()) {
+				ui->left_mid2_checkbox->click();
+			}
+			if (ui->right_mid1_checkbox->isChecked()) {
+				ui->right_mid1_checkbox->click();
+			}		
+			if (ui->right_mid2_checkbox->isChecked()) {
+				ui->right_mid2_checkbox->click();
+			}
+			if (ui->mid1_mid2_checkbox->isChecked()) {
+				ui->mid1_mid2_checkbox->click();
+			}
+			if (ui->mid1_mid3_checkbox->isChecked()) {
+				ui->mid1_mid3_checkbox->click();
+			}
+			if (ui->mid2_mid3_checkbox->isChecked()) {
+				ui->mid2_mid3_checkbox->click();
+			}
+			ui->left_mid1_checkbox->setEnabled(false);
+			ui->left_mid2_checkbox->setEnabled(false);
+			ui->right_mid1_checkbox->setEnabled(false);
+			ui->right_mid2_checkbox->setEnabled(false);
+			ui->mid1_mid2_checkbox->setEnabled(false);
+			ui->mid1_mid3_checkbox->setEnabled(false);
+			ui->mid2_mid3_checkbox->setEnabled(false);
+			break;
 		}
 		break;
 	case 1: //4
 		user_cfg.num_of_stickers = 4;
-		if (user_cfg.mode == LOCATION) {
+		switch (user_cfg.mode) {
+		case LOCATION:
 			if (ui->mid1_loc_checkbox->isChecked()) {
 				ui->mid1_loc_checkbox->click();
 			}
 			ui->mid1_loc_checkbox->setEnabled(false);
 			ui->mid2_loc_checkbox->setEnabled(true);
+			break;
+		case DISTANCES:
+			if (ui->left_mid1_checkbox->isChecked()) {
+				ui->left_mid1_checkbox->click();
+			}
+			if (ui->right_mid1_checkbox->isChecked()) {
+				ui->right_mid1_checkbox->click();
+			}
+			if (ui->mid1_mid2_checkbox->isChecked()) {
+				ui->mid1_mid2_checkbox->click();
+			}
+			if (ui->mid1_mid3_checkbox->isChecked()) {
+				ui->mid1_mid3_checkbox->click();
+			}
+			ui->left_mid1_checkbox->setEnabled(false);
+			ui->left_mid2_checkbox->setEnabled(true);
+			ui->right_mid1_checkbox->setEnabled(false);
+			ui->right_mid2_checkbox->setEnabled(true);
+			ui->mid1_mid2_checkbox->setEnabled(false);
+			ui->mid1_mid3_checkbox->setEnabled(false);
+			ui->mid2_mid3_checkbox->setEnabled(true);
+			break;
 		}
 		break;
 	case 2: //5
 		user_cfg.num_of_stickers = 5;
-		if (user_cfg.mode == LOCATION) {
+		switch (user_cfg.mode) {
+		case LOCATION:
 			ui->mid1_loc_checkbox->setEnabled(true);
 			ui->mid2_loc_checkbox->setEnabled(true);
+			break;
+		case DISTANCES:
+			ui->left_mid1_checkbox->setEnabled(true);
+			ui->left_mid2_checkbox->setEnabled(true);
+			ui->right_mid1_checkbox->setEnabled(true);
+			ui->right_mid2_checkbox->setEnabled(true);
+			ui->mid1_mid2_checkbox->setEnabled(true);
+			ui->mid1_mid3_checkbox->setEnabled(true);
+			ui->mid2_mid3_checkbox->setEnabled(true);
 		}
 		break;
 	}
