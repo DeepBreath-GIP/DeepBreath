@@ -782,6 +782,9 @@ void QDeepBreath::on_start_camera_button_clicked()
 				return;
 			}
         }
+
+		is_camera_on = true;
+
         ui->start_camera_button->setText("Stop Camera");
         ui->record_button->setVisible(true);
         ui->record_button->setEnabled(true);
@@ -803,16 +806,25 @@ void QDeepBreath::on_start_camera_button_clicked()
 		DeepBreathGraphPlot::createInstance(ui->graph_widget);
 
 		start_frame_polling();
-
-        is_camera_on = true;
     }
     else {
         //if camera is on:
         // - turn camera off
         // - change button's title
         // - hide and disable recording
+		is_camera_on = false;
 
-		stop_frame_polling();
+		if (is_recording) {
+			// The record button event handler will trigger camera stop
+			ui->record_button->click();
+		}
+		else {
+			//Turn camera off:
+			stop_frame_polling();
+			camera.cfg.disable_all_streams();
+			camera.pipe.stop();
+		}
+
 		frame_manager.reset(); // reset FrameManager for additional processing
 		DeepBreathGraphPlot::getInstance().reset();
 		//clear stream widgets
@@ -821,11 +833,6 @@ void QDeepBreath::on_start_camera_button_clicked()
 		clearScatterWidget();
 		//Stop logging
 		DeepBreathLog::stop();
-
-        //Turn camera off:
-		camera.cfg.disable_stream(RS2_STREAM_DEPTH);
-		camera.cfg.disable_stream(RS2_STREAM_COLOR);
-		camera.pipe.stop();
 
 		//reset filename, so that if "load file" is clicked again, a new explorer window will appear
 		camera.filename = nullptr;
@@ -838,7 +845,6 @@ void QDeepBreath::on_start_camera_button_clicked()
         enableMenu(true);
 		enableDistances(true);
 		enableLocations(true);
-        is_camera_on = false;
     }
 }
 
@@ -853,13 +859,15 @@ void QDeepBreath::on_record_button_clicked()
         //turn recording on and change title
 		camera.pipe.stop(); // Stop the pipeline with the default configuration
 		const char* out_filename = rs2::file_dialog_open(rs2::file_dialog_mode::save_file, "ROS-bag\0*.bag\0", NULL, NULL);
-		camera.cfg.enable_record_to_file(out_filename);
+
+		if (out_filename) {
+			camera.cfg.enable_record_to_file(std::string(out_filename) + ".bag");
+
+			ui->record_button->setText("Stop Recording");
+			is_recording = true;
+		}
 		camera.pipe.start(camera.cfg); //File will be opened at this point
-
 		start_frame_polling();
-
-        ui->record_button->setText("Stop Recording");
-        is_recording = true;
     }
     else {
 
@@ -869,9 +877,11 @@ void QDeepBreath::on_record_button_clicked()
 		camera.cfg.disable_all_streams();
 		camera.cfg = rs2::config();
 		camera.pipe.stop(); // Stop the pipeline that holds the file and the recorder
-		camera.pipe.start(camera.cfg);
-
-		start_frame_polling();
+		
+		if (is_camera_on) {
+			camera.pipe.start(camera.cfg);
+			start_frame_polling();
+		}
 
         ui->record_button->setText("Record");
         is_recording = false;
