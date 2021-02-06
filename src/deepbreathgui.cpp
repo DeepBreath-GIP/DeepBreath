@@ -6,6 +6,7 @@
    For the use of Ichilov hospital in Israel. */
 
 #include <sstream>
+#include <Windows.h>
 
 #include "deepbreathgui.hpp"
 #include "ui_deepbreathgui.h"
@@ -834,6 +835,8 @@ void QDeepBreath::on_start_camera_button_clicked()
 
 		frame_manager.reset(); // reset FrameManager for additional processing
 
+		Sleep(3000);
+
 		//create logging:
 		DeepBreathLog::init(false);
 		DeepBreathGraphPlot::createInstance(ui->graph_widget);
@@ -913,6 +916,8 @@ void QDeepBreath::on_record_button_clicked()
 			is_recording = true;
 		}
 		camera.pipe.start(camera.cfg); //File will be opened at this point
+
+		Sleep(3000);
 		start_frame_polling();
     }
     else {
@@ -1331,4 +1336,23 @@ void QDeepBreath::on_volume_type_combo_box_currentIndexChanged(int index)
 	}
 }
 
+void QDeepBreath::on_y_color_radio_button_clicked() {
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
 
+	user_cfg.color = YELLOW;
+}
+
+void QDeepBreath::on_g_color_radio_button_clicked() {
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	user_cfg.color = GREEN;
+}
+
+void QDeepBreath::on_b_color_radio_button_clicked() {
+	DeepBreathConfig& user_cfg = DeepBreathConfig::getInstance();
+	assert(user_cfg);
+
+	user_cfg.color = BLUE;
+}

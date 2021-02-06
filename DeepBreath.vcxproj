@@ -74,6 +74,11 @@
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>msvc2019_64</QtInstall>
     <QtModules>core;datavisualization;gui;printsupport;widgets</QtModules>
+    <QMakeExtraArgs>
+    </QMakeExtraArgs>
+    <QMakeCodeLines>
+    </QMakeCodeLines>
+    <QtDeploy>false</QtDeploy>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />

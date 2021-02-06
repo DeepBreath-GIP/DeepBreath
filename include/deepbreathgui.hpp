@@ -96,6 +96,12 @@ private slots:
 
 	void on_volume_type_combo_box_currentIndexChanged(int index);
 
+    void on_y_color_radio_button_clicked();
+
+    void on_g_color_radio_button_clicked();
+
+    void on_b_color_radio_button_clicked();
+
 private:
     Ui::DeepBreath *ui;
 
